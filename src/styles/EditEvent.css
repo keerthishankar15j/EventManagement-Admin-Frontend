@@ -1,0 +1,532 @@
+/* =========================================================
+   EDIT EVENT PAGE
+========================================================= */
+
+.edit-event-page {
+  min-height: 100vh;
+  width: 100%;
+
+  background: #f7f5f0;
+
+  padding: 50px;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  font-family: "Inter", "Poppins", Arial, sans-serif;
+
+  color: #111827;
+}
+
+
+/* =========================================================
+   EDIT EVENT CONTAINER
+========================================================= */
+
+.edit-event-container {
+  width: 100%;
+  max-width: 850px;
+
+  background: #ffffff;
+
+  border: 1px solid #e7e5e1;
+
+  border-radius: 24px;
+
+  padding: 40px;
+
+  box-shadow:
+    0 10px 35px rgba(17, 24, 39, 0.06),
+    0 2px 8px rgba(17, 24, 39, 0.03);
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.edit-event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 30px;
+  padding-bottom: 25px;
+
+  border-bottom: 1px solid #ece9e5;
+}
+
+
+.edit-event-header > div {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.edit-event-header h2 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 30px;
+  font-weight: 700;
+
+  letter-spacing: -0.5px;
+}
+
+
+.edit-event-header p {
+  margin: 8px 0 0;
+
+  color: #c45c2b;
+
+  font-size: 15px;
+  font-weight: 400;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+.edit-event-header button {
+  height: 44px;
+
+  padding: 0 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #dcd7f6;
+
+  border-radius: 10px;
+
+  color: #673cff;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+
+.edit-event-header button:hover {
+  background: #f5f1ff;
+
+  border-color: #7042ff;
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.edit-event-container form {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 21px;
+}
+
+
+/* =========================================================
+   FORM GROUP
+========================================================= */
+
+.form-group {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+.form-group label {
+  color: #26344d;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   INPUTS + SELECT
+========================================================= */
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  height: 52px;
+
+  padding: 0 16px;
+
+  background: #ffffff;
+
+  border: 1px solid #d9dce5;
+
+  border-radius: 11px;
+
+  outline: none;
+
+  color: #26344d;
+
+  font-family: inherit;
+
+  font-size: 15px;
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
+}
+
+
+/* =========================================================
+   PLACEHOLDER
+========================================================= */
+
+.form-group input::placeholder {
+  color: #9aa2b2;
+}
+
+
+/* =========================================================
+   INPUT HOVER
+========================================================= */
+
+.form-group input:hover,
+.form-group select:hover {
+  border-color: #b9b3d5;
+}
+
+
+/* =========================================================
+   INPUT FOCUS
+========================================================= */
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #7042ff;
+
+  box-shadow:
+    0 0 0 3px rgba(112, 66, 255, 0.10);
+
+  background: #ffffff;
+}
+
+
+/* =========================================================
+   DATE INPUT
+========================================================= */
+
+.form-group input[type="date"] {
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   NUMBER INPUT
+========================================================= */
+
+.form-group input[type="number"] {
+  appearance: textfield;
+}
+
+
+/* Chrome / Edge */
+
+.form-group input[type="number"]::-webkit-inner-spin-button,
+.form-group input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   SELECT
+========================================================= */
+
+.form-group select {
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   BUTTON AREA
+========================================================= */
+
+.form-buttons {
+  width: 100%;
+
+  display: flex;
+
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 14px;
+
+  margin-top: 10px;
+
+  padding-top: 28px;
+
+  border-top: 1px solid #ece9e5;
+}
+
+
+/* =========================================================
+   CANCEL BUTTON
+========================================================= */
+
+.form-buttons button[type="button"] {
+  min-width: 120px;
+
+  height: 48px;
+
+  padding: 0 22px;
+
+  background: #ffffff;
+
+  border: 1px solid #d9dce5;
+
+  border-radius: 10px;
+
+  color: #4b5563;
+
+  font-family: inherit;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+
+.form-buttons button[type="button"]:hover {
+  background: #f7f7f8;
+
+  border-color: #bfc3cc;
+
+  color: #111827;
+}
+
+
+/* =========================================================
+   UPDATE EVENT BUTTON
+========================================================= */
+
+.form-buttons button[type="submit"] {
+  min-width: 155px;
+
+  height: 48px;
+
+  padding: 0 24px;
+
+  background: linear-gradient(
+    135deg,
+    #7b43ff,
+    #6834ed
+  );
+
+  border: none;
+
+  border-radius: 10px;
+
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 18px rgba(103, 52, 238, 0.22);
+
+  transition: all 0.25s ease;
+}
+
+
+.form-buttons button[type="submit"]:hover {
+  background: linear-gradient(
+    135deg,
+    #6c35ed,
+    #5825d5
+  );
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 11px 25px rgba(103, 52, 238, 0.28);
+}
+
+
+.form-buttons button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+.edit-event-container h2 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 24px;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 993px) {
+
+  .edit-event-page {
+    padding: 40px 30px;
+  }
+
+  .edit-event-container {
+    max-width: 760px;
+
+    padding: 35px;
+  }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 700px) {
+
+  .edit-event-page {
+    padding: 25px 15px;
+  }
+
+
+  .edit-event-container {
+    padding: 28px 22px;
+
+    border-radius: 18px;
+  }
+
+
+  /* Header */
+
+  .edit-event-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 18px;
+  }
+
+
+  .edit-event-header h2 {
+    font-size: 26px;
+  }
+
+
+  .edit-event-header p {
+    font-size: 14px;
+  }
+
+
+  .edit-event-header button {
+    width: 100%;
+  }
+
+
+  /* Inputs */
+
+  .form-group input,
+  .form-group select {
+    height: 50px;
+
+    font-size: 14px;
+  }
+
+
+  /* Buttons */
+
+  .form-buttons {
+    flex-direction: column-reverse;
+
+    gap: 10px;
+  }
+
+
+  .form-buttons button[type="button"],
+  .form-buttons button[type="submit"] {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 450px) {
+
+  .edit-event-page {
+    padding: 15px 10px;
+  }
+
+
+  .edit-event-container {
+    padding: 22px 16px;
+
+    border-radius: 16px;
+  }
+
+
+  .edit-event-header h2 {
+    font-size: 23px;
+  }
+
+
+  .edit-event-header p {
+    font-size: 13px;
+  }
+
+
+  .form-group label {
+    font-size: 13px;
+  }
+
+
+  .form-group input,
+  .form-group select {
+    height: 48px;
+
+    padding: 0 13px;
+
+    font-size: 14px;
+  }
+
+
+  .form-buttons {
+    padding-top: 22px;
+  }
+
+}
