@@ -9,9 +9,6 @@ import AdminNavbar from "../components/Admin_navbar";
 // API URL
 // =====================================================
 
-// Vercel Environment Variable:
-// VITE_API_URL=https://api-admin-rouge.vercel.app
-
 const API_URL = (
   import.meta.env.VITE_API_URL ||
   "https://api-admin-rouge.vercel.app"
@@ -368,7 +365,24 @@ function Events() {
       return "";
     }
 
-    // Backend already returned a full URL
+    // ===================================================
+    // BASE64 IMAGE FROM MONGODB
+    // ===================================================
+
+    if (
+      trimmedImage.startsWith("data:image/")
+    ) {
+      console.log(
+        "BASE64 IMAGE FOUND"
+      );
+
+      return trimmedImage;
+    }
+
+    // ===================================================
+    // FULL IMAGE URL
+    // ===================================================
+
     if (
       trimmedImage.startsWith("http://") ||
       trimmedImage.startsWith("https://")
@@ -376,7 +390,10 @@ function Events() {
       return trimmedImage;
     }
 
-    // Remove leading slash
+    // ===================================================
+    // OLD UPLOAD PATH
+    // ===================================================
+
     const cleanImage =
       trimmedImage.replace(/^\/+/, "");
 
@@ -403,7 +420,8 @@ function Events() {
 
     e.target.style.display = "none";
 
-    const parent = e.target.parentElement;
+    const parent =
+      e.target.parentElement;
 
     if (parent) {
       parent.classList.add("image-error");
@@ -455,9 +473,7 @@ function Events() {
 
       <main className="main-content">
 
-        {/* =====================================================
-            PAGE HEADER
-        ===================================================== */}
+        {/* PAGE HEADER */}
 
         <div className="page-header">
 
@@ -495,9 +511,7 @@ function Events() {
 
         </div>
 
-        {/* =====================================================
-            EVENTS CARD
-        ===================================================== */}
+        {/* EVENTS CARD */}
 
         <section className="events-card">
 
@@ -568,9 +582,7 @@ function Events() {
 
           </div>
 
-          {/* =====================================================
-              EVENTS GRID
-          ===================================================== */}
+          {/* EVENTS GRID */}
 
           <div className="events-card-grid">
 
@@ -601,9 +613,7 @@ function Events() {
                   key={item._id}
                 >
 
-                  {/* =====================================================
-                      EVENT IMAGE
-                  ===================================================== */}
+                  {/* EVENT IMAGE */}
 
                   <div className="event-card-image">
 
@@ -653,9 +663,7 @@ function Events() {
 
                   </div>
 
-                  {/* =====================================================
-                      EVENT CONTENT
-                  ===================================================== */}
+                  {/* EVENT CONTENT */}
 
                   <div className="event-card-content">
 
@@ -681,9 +689,7 @@ function Events() {
 
                     </p>
 
-                    {/* =====================================================
-                        EVENT DETAILS
-                    ===================================================== */}
+                    {/* EVENT DETAILS */}
 
                     <div className="event-details">
 
@@ -773,9 +779,7 @@ function Events() {
 
                     </div>
 
-                    {/* =====================================================
-                        ACTIONS
-                    ===================================================== */}
+                    {/* ACTIONS */}
 
                     <div className="event-card-actions">
 
@@ -817,9 +821,7 @@ function Events() {
 
         </section>
 
-        {/* =====================================================
-            ADD EVENT FORM
-        ===================================================== */}
+        {/* ADD EVENT FORM */}
 
         {showForm && (
 
@@ -827,9 +829,7 @@ function Events() {
 
             <div className="event-form-card">
 
-              {/* =====================================================
-                  FORM HEADER
-              ===================================================== */}
+              {/* FORM HEADER */}
 
               <div className="event-form-header">
 
@@ -858,9 +858,7 @@ function Events() {
 
               </div>
 
-              {/* =====================================================
-                  FORM
-              ===================================================== */}
+              {/* FORM */}
 
               <form onSubmit={handleSubmit}>
 
