@@ -5,6 +5,13 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Admin_Events.css";
 import AdminNavbar from "../components/Admin_navbar";
 
+// =====================================================
+// API URL
+// =====================================================
+
+const API_URL =
+  import.meta.env.VITE_API_URL?.replace(/\/+$/, "");
+
 function Events() {
   const navigate = useNavigate();
 
@@ -18,9 +25,11 @@ function Events() {
 
   const [search, setSearch] = useState("");
 
-  const [statusFilter, setStatusFilter] = useState("All Status");
+  const [statusFilter, setStatusFilter] =
+    useState("All Status");
 
-  const [imagePreview, setImagePreview] = useState("");
+  const [imagePreview, setImagePreview] =
+    useState("");
 
   const [event, setEvent] = useState({
     name: "",
@@ -41,14 +50,16 @@ function Events() {
   const getEvents = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:9000/events/getevents"
+        `${API_URL}/events/getevents`
       );
 
       console.log("GET EVENTS:", response.data);
 
       if (Array.isArray(response.data?.data)) {
         setEvents(response.data.data);
-      } else if (Array.isArray(response.data?.events)) {
+      } else if (
+        Array.isArray(response.data?.events)
+      ) {
         setEvents(response.data.events);
       } else if (Array.isArray(response.data)) {
         setEvents(response.data);
@@ -73,8 +84,6 @@ function Events() {
 
   // =====================================================
   // FORMAT TIME
-  // 15:30 -> 3:30 PM
-  // 09:05 -> 9:05 AM
   // =====================================================
 
   const formatTime = (time) => {
@@ -82,7 +91,6 @@ function Events() {
       return "Not specified";
     }
 
-    // Handle HH:mm format
     const parts = time.split(":");
 
     if (parts.length < 2) {
@@ -137,7 +145,6 @@ function Events() {
       return;
     }
 
-    // Check image
     if (!file.type.startsWith("image/")) {
       alert("Please select an image file");
       return;
@@ -148,7 +155,6 @@ function Events() {
       image: file,
     }));
 
-    // Preview
     const previewURL = URL.createObjectURL(file);
 
     setImagePreview(previewURL);
@@ -181,7 +187,6 @@ function Events() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Image validation
     if (!event.image) {
       alert("Please select an event image");
       return;
@@ -205,7 +210,6 @@ function Events() {
         event.date
       );
 
-      // Keep backend time as HH:mm
       formData.append(
         "time",
         event.time
@@ -231,7 +235,6 @@ function Events() {
         event.status
       );
 
-      // Backend expects "image"
       formData.append(
         "image",
         event.image
@@ -240,7 +243,7 @@ function Events() {
       console.log("SENDING EVENT");
 
       const response = await axios.post(
-        "http://localhost:9000/events/create",
+        `${API_URL}/events/create`,
         formData
       );
 
@@ -255,7 +258,6 @@ function Events() {
 
       setShowForm(false);
 
-      // Reload events
       getEvents();
     } catch (error) {
       console.log(
@@ -290,7 +292,7 @@ function Events() {
 
     try {
       const response = await axios.delete(
-        `http://localhost:9000/events/delete/${id}`
+        `${API_URL}/events/delete/${id}`
       );
 
       console.log(
@@ -300,7 +302,6 @@ function Events() {
 
       alert("Event deleted successfully");
 
-      // Remove from frontend
       setEvents((previousEvents) =>
         previousEvents.filter(
           (item) => item._id !== id
@@ -328,7 +329,7 @@ function Events() {
       return "";
     }
 
-    // If already full URL
+    // If backend already returned a full URL
     if (
       image.startsWith("http://") ||
       image.startsWith("https://")
@@ -336,10 +337,10 @@ function Events() {
       return image;
     }
 
-    // Remove starting slash if present
+    // Remove leading slash
     const cleanImage = image.replace(/^\/+/, "");
 
-    return `http://localhost:9000/${cleanImage}`;
+    return `${API_URL}/${cleanImage}`;
   };
 
   // =====================================================
@@ -403,10 +404,6 @@ function Events() {
 
       <main className="main-content">
 
-        {/* =================================================
-            PAGE HEADER
-        ================================================= */}
-
         <div className="page-header">
 
           <div className="page-title-area">
@@ -441,15 +438,7 @@ function Events() {
 
         </div>
 
-        {/* =================================================
-            EVENTS CARD CONTAINER
-        ================================================= */}
-
         <section className="events-card">
-
-          {/* =================================================
-              TOOLBAR
-          ================================================= */}
 
           <div className="event-toolbar">
 
@@ -466,8 +455,6 @@ function Events() {
             </div>
 
             <div className="event-filters">
-
-              {/* SEARCH */}
 
               <div className="search-box">
 
@@ -486,8 +473,6 @@ function Events() {
 
               </div>
 
-              {/* STATUS */}
-
               <select
                 className="filter-select"
                 value={statusFilter}
@@ -495,7 +480,6 @@ function Events() {
                   setStatusFilter(e.target.value)
                 }
               >
-
                 <option value="All Status">
                   All Status
                 </option>
@@ -511,16 +495,11 @@ function Events() {
                 <option value="Completed">
                   Completed
                 </option>
-
               </select>
 
             </div>
 
           </div>
-
-          {/* =================================================
-              EVENT CARDS
-          ================================================= */}
 
           <div className="events-card-grid">
 
@@ -550,10 +529,6 @@ function Events() {
                   className="event-card"
                   key={item._id}
                 >
-
-                  {/* =================================================
-                      IMAGE
-                  ================================================= */}
 
                   <div className="event-card-image">
 
@@ -588,8 +563,6 @@ function Events() {
 
                     )}
 
-                    {/* STATUS */}
-
                     <span
                       className={`card-status ${
                         item.status
@@ -605,19 +578,11 @@ function Events() {
 
                   </div>
 
-                  {/* =================================================
-                      CONTENT
-                  ================================================= */}
-
                   <div className="event-card-content">
-
-                    {/* EVENT NAME */}
 
                     <h2 className="event-card-title">
                       {item.name}
                     </h2>
-
-                    {/* ORGANIZER */}
 
                     <p className="event-organizer">
 
@@ -630,8 +595,6 @@ function Events() {
 
                     </p>
 
-                    {/* DESCRIPTION */}
-
                     <p className="event-description">
 
                       {item.description ||
@@ -639,13 +602,7 @@ function Events() {
 
                     </p>
 
-                    {/* =================================================
-                        DETAILS
-                    ================================================= */}
-
                     <div className="event-details">
-
-                      {/* DATE */}
 
                       <div className="event-detail">
 
@@ -667,8 +624,6 @@ function Events() {
                         </div>
 
                       </div>
-
-                      {/* TIME */}
 
                       <div className="event-detail">
 
@@ -692,8 +647,6 @@ function Events() {
 
                       </div>
 
-                      {/* LOCATION */}
-
                       <div className="event-detail">
 
                         <span className="detail-icon">
@@ -714,8 +667,6 @@ function Events() {
                         </div>
 
                       </div>
-
-                      {/* TICKETS */}
 
                       <div className="event-detail">
 
@@ -738,10 +689,6 @@ function Events() {
                       </div>
 
                     </div>
-
-                    {/* =================================================
-                        ACTION BUTTONS
-                    ================================================= */}
 
                     <div className="event-card-actions">
 
@@ -783,17 +730,11 @@ function Events() {
 
         </section>
 
-        {/* =================================================
-            ADD EVENT MODAL
-        ================================================= */}
-
         {showForm && (
 
           <div className="event-form-overlay">
 
             <div className="event-form-card">
-
-              {/* HEADER */}
 
               <div className="event-form-header">
 
@@ -822,13 +763,7 @@ function Events() {
 
               </div>
 
-              {/* FORM */}
-
               <form onSubmit={handleSubmit}>
-
-                {/* =================================================
-                    IMAGE
-                ================================================= */}
 
                 <div className="form-group">
 
@@ -846,8 +781,6 @@ function Events() {
                     required
                   />
 
-                  {/* PREVIEW */}
-
                   {imagePreview && (
 
                     <div className="event-image-preview">
@@ -862,8 +795,6 @@ function Events() {
                   )}
 
                 </div>
-
-                {/* EVENT NAME */}
 
                 <div className="form-group">
 
@@ -882,8 +813,6 @@ function Events() {
 
                 </div>
 
-                {/* ORGANIZER */}
-
                 <div className="form-group">
 
                   <label>
@@ -901,8 +830,6 @@ function Events() {
 
                 </div>
 
-                {/* DATE */}
-
                 <div className="form-group">
 
                   <label>
@@ -919,8 +846,6 @@ function Events() {
 
                 </div>
 
-                {/* TIME */}
-
                 <div className="form-group">
 
                   <label>
@@ -936,8 +861,6 @@ function Events() {
                   />
 
                 </div>
-
-                {/* LOCATION */}
 
                 <div className="form-group">
 
@@ -956,8 +879,6 @@ function Events() {
 
                 </div>
 
-                {/* DESCRIPTION */}
-
                 <div className="form-group">
 
                   <label>
@@ -974,8 +895,6 @@ function Events() {
                   />
 
                 </div>
-
-                {/* TICKETS */}
 
                 <div className="form-group">
 
@@ -994,8 +913,6 @@ function Events() {
                   />
 
                 </div>
-
-                {/* STATUS */}
 
                 <div className="form-group">
 
@@ -1025,8 +942,6 @@ function Events() {
                   </select>
 
                 </div>
-
-                {/* BUTTONS */}
 
                 <div className="form-buttons">
 
