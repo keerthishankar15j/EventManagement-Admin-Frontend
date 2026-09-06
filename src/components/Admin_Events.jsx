@@ -9,8 +9,17 @@ import AdminNavbar from "../components/Admin_navbar";
 // API URL
 // =====================================================
 
-const API_URL =
-  import.meta.env.VITE_API_URL?.replace(/\/+$/, "");
+// Vercel Environment Variable:
+// VITE_API_URL=https://api-admin-rouge.vercel.app
+
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  "https://api-admin-rouge.vercel.app"
+).replace(/\/+$/, "");
+
+console.log("=================================");
+console.log("API URL:", API_URL);
+console.log("=================================");
 
 function Events() {
   const navigate = useNavigate();
@@ -49,11 +58,19 @@ function Events() {
 
   const getEvents = async () => {
     try {
+      console.log(
+        "GET EVENTS URL:",
+        `${API_URL}/events/getevents`
+      );
+
       const response = await axios.get(
         `${API_URL}/events/getevents`
       );
 
-      console.log("GET EVENTS:", response.data);
+      console.log(
+        "GET EVENTS RESPONSE:",
+        response.data
+      );
 
       if (Array.isArray(response.data?.data)) {
         setEvents(response.data.data);
@@ -64,6 +81,11 @@ function Events() {
       } else if (Array.isArray(response.data)) {
         setEvents(response.data);
       } else {
+        console.log(
+          "Unexpected events response:",
+          response.data
+        );
+
         setEvents([]);
       }
     } catch (error) {
@@ -71,6 +93,8 @@ function Events() {
         "GET EVENTS ERROR:",
         error.response?.data || error.message
       );
+
+      setEvents([]);
     }
   };
 
@@ -115,10 +139,9 @@ function Events() {
       formattedHours = 12;
     }
 
-    return `${formattedHours}:${String(minutes).padStart(
-      2,
-      "0"
-    )} ${period}`;
+    return `${formattedHours}:${String(
+      minutes
+    ).padStart(2, "0")} ${period}`;
   };
 
   // =====================================================
@@ -139,7 +162,7 @@ function Events() {
   // =====================================================
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
 
     if (!file) {
       return;
@@ -240,6 +263,11 @@ function Events() {
         event.image
       );
 
+      console.log(
+        "CREATE EVENT URL:",
+        `${API_URL}/events/create`
+      );
+
       console.log("SENDING EVENT");
 
       const response = await axios.post(
@@ -258,7 +286,7 @@ function Events() {
 
       setShowForm(false);
 
-      getEvents();
+      await getEvents();
     } catch (error) {
       console.log(
         "CREATE EVENT ERROR:",
@@ -291,6 +319,11 @@ function Events() {
     }
 
     try {
+      console.log(
+        "DELETE EVENT URL:",
+        `${API_URL}/events/delete/${id}`
+      );
+
       const response = await axios.delete(
         `${API_URL}/events/delete/${id}`
       );
@@ -325,22 +358,37 @@ function Events() {
   // =====================================================
 
   const getImageUrl = (image) => {
-    if (!image) {
+    if (!image || typeof image !== "string") {
       return "";
     }
 
-    // If backend already returned a full URL
+    const trimmedImage = image.trim();
+
+    if (!trimmedImage) {
+      return "";
+    }
+
+    // Backend already returned a full URL
     if (
-      image.startsWith("http://") ||
-      image.startsWith("https://")
+      trimmedImage.startsWith("http://") ||
+      trimmedImage.startsWith("https://")
     ) {
-      return image;
+      return trimmedImage;
     }
 
     // Remove leading slash
-    const cleanImage = image.replace(/^\/+/, "");
+    const cleanImage =
+      trimmedImage.replace(/^\/+/, "");
 
-    return `${API_URL}/${cleanImage}`;
+    const imageUrl =
+      `${API_URL}/${cleanImage}`;
+
+    console.log(
+      "IMAGE URL:",
+      imageUrl
+    );
+
+    return imageUrl;
   };
 
   // =====================================================
@@ -391,7 +439,10 @@ function Events() {
       statusFilter === "All Status" ||
       item.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    return (
+      matchesSearch &&
+      matchesStatus
+    );
   });
 
   // =====================================================
@@ -403,6 +454,10 @@ function Events() {
       <AdminNavbar />
 
       <main className="main-content">
+
+        {/* =====================================================
+            PAGE HEADER
+        ===================================================== */}
 
         <div className="page-header">
 
@@ -421,7 +476,9 @@ function Events() {
           <button
             type="button"
             className="add-event-btn"
-            onClick={() => setShowForm(true)}
+            onClick={() =>
+              setShowForm(true)
+            }
           >
             <span className="add-icon">
               +
@@ -437,6 +494,10 @@ function Events() {
           </button>
 
         </div>
+
+        {/* =====================================================
+            EVENTS CARD
+        ===================================================== */}
 
         <section className="events-card">
 
@@ -467,7 +528,9 @@ function Events() {
                   placeholder="Search events..."
                   value={search}
                   onChange={(e) =>
-                    setSearch(e.target.value)
+                    setSearch(
+                      e.target.value
+                    )
                   }
                 />
 
@@ -477,9 +540,12 @@ function Events() {
                 className="filter-select"
                 value={statusFilter}
                 onChange={(e) =>
-                  setStatusFilter(e.target.value)
+                  setStatusFilter(
+                    e.target.value
+                  )
                 }
               >
+
                 <option value="All Status">
                   All Status
                 </option>
@@ -495,11 +561,16 @@ function Events() {
                 <option value="Completed">
                   Completed
                 </option>
+
               </select>
 
             </div>
 
           </div>
+
+          {/* =====================================================
+              EVENTS GRID
+          ===================================================== */}
 
           <div className="events-card-grid">
 
@@ -529,6 +600,10 @@ function Events() {
                   className="event-card"
                   key={item._id}
                 >
+
+                  {/* =====================================================
+                      EVENT IMAGE
+                  ===================================================== */}
 
                   <div className="event-card-image">
 
@@ -578,6 +653,10 @@ function Events() {
 
                   </div>
 
+                  {/* =====================================================
+                      EVENT CONTENT
+                  ===================================================== */}
+
                   <div className="event-card-content">
 
                     <h2 className="event-card-title">
@@ -601,6 +680,10 @@ function Events() {
                         "No description available."}
 
                     </p>
+
+                    {/* =====================================================
+                        EVENT DETAILS
+                    ===================================================== */}
 
                     <div className="event-details">
 
@@ -690,6 +773,10 @@ function Events() {
 
                     </div>
 
+                    {/* =====================================================
+                        ACTIONS
+                    ===================================================== */}
+
                     <div className="event-card-actions">
 
                       <button
@@ -730,11 +817,19 @@ function Events() {
 
         </section>
 
+        {/* =====================================================
+            ADD EVENT FORM
+        ===================================================== */}
+
         {showForm && (
 
           <div className="event-form-overlay">
 
             <div className="event-form-card">
+
+              {/* =====================================================
+                  FORM HEADER
+              ===================================================== */}
 
               <div className="event-form-header">
 
@@ -763,7 +858,13 @@ function Events() {
 
               </div>
 
+              {/* =====================================================
+                  FORM
+              ===================================================== */}
+
               <form onSubmit={handleSubmit}>
+
+                {/* EVENT IMAGE */}
 
                 <div className="form-group">
 
@@ -774,7 +875,7 @@ function Events() {
                   <input
                     type="file"
                     name="image"
-                    accept="image/*"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
                     onChange={
                       handleImageChange
                     }
@@ -796,6 +897,8 @@ function Events() {
 
                 </div>
 
+                {/* EVENT NAME */}
+
                 <div className="form-group">
 
                   <label>
@@ -812,6 +915,8 @@ function Events() {
                   />
 
                 </div>
+
+                {/* ORGANIZER */}
 
                 <div className="form-group">
 
@@ -830,6 +935,8 @@ function Events() {
 
                 </div>
 
+                {/* DATE */}
+
                 <div className="form-group">
 
                   <label>
@@ -846,6 +953,8 @@ function Events() {
 
                 </div>
 
+                {/* TIME */}
+
                 <div className="form-group">
 
                   <label>
@@ -861,6 +970,8 @@ function Events() {
                   />
 
                 </div>
+
+                {/* LOCATION */}
 
                 <div className="form-group">
 
@@ -879,6 +990,8 @@ function Events() {
 
                 </div>
 
+                {/* DESCRIPTION */}
+
                 <div className="form-group">
 
                   <label>
@@ -895,6 +1008,8 @@ function Events() {
                   />
 
                 </div>
+
+                {/* TICKETS */}
 
                 <div className="form-group">
 
@@ -913,6 +1028,8 @@ function Events() {
                   />
 
                 </div>
+
+                {/* STATUS */}
 
                 <div className="form-group">
 
@@ -942,6 +1059,8 @@ function Events() {
                   </select>
 
                 </div>
+
+                {/* FORM BUTTONS */}
 
                 <div className="form-buttons">
 
