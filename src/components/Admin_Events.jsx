@@ -31,8 +31,8 @@ function Events() {
 
   const [search, setSearch] = useState("");
 
-  const [statusFilter, setStatusFilter] =
-    useState("All Status");
+  const [categoryFilter, setCategoryFilter] =
+    useState("All Categories");
 
   const [imagePreview, setImagePreview] =
     useState("");
@@ -44,8 +44,9 @@ function Events() {
     time: "",
     location: "",
     description: "",
+    category: "",
     tickets: "",
-    status: "Upcoming",
+    ticketPrice: "",
     image: null,
   });
 
@@ -192,8 +193,9 @@ function Events() {
       time: "",
       location: "",
       description: "",
+      category: "",
       tickets: "",
-      status: "Upcoming",
+      ticketPrice: "",
       image: null,
     });
 
@@ -246,13 +248,18 @@ function Events() {
       );
 
       formData.append(
+        "category",
+        event.category
+      );
+
+      formData.append(
         "tickets",
         Number(event.tickets)
       );
 
       formData.append(
-        "status",
-        event.status
+        "ticketPrice",
+        Number(event.ticketPrice)
       );
 
       formData.append(
@@ -448,18 +455,22 @@ function Events() {
     const location =
       item.location?.toLowerCase() || "";
 
+    const category =
+      item.category?.toLowerCase() || "";
+
     const matchesSearch =
       name.includes(searchText) ||
       organizer.includes(searchText) ||
-      location.includes(searchText);
+      location.includes(searchText) ||
+      category.includes(searchText);
 
-    const matchesStatus =
-      statusFilter === "All Status" ||
-      item.status === statusFilter;
+    const matchesCategory =
+      categoryFilter === "All Categories" ||
+      item.category === categoryFilter;
 
     return (
       matchesSearch &&
-      matchesStatus
+      matchesCategory
     );
   });
 
@@ -552,28 +563,48 @@ function Events() {
 
               <select
                 className="filter-select"
-                value={statusFilter}
+                value={categoryFilter}
                 onChange={(e) =>
-                  setStatusFilter(
+                  setCategoryFilter(
                     e.target.value
                   )
                 }
               >
 
-                <option value="All Status">
-                  All Status
+                <option value="All Categories">
+                  All Categories
                 </option>
 
-                <option value="Upcoming">
-                  Upcoming
+                <option value="Music">
+                  Music
                 </option>
 
-                <option value="Ongoing">
-                  Ongoing
+                <option value="Conferences">
+                  Conferences
                 </option>
 
-                <option value="Completed">
-                  Completed
+                <option value="Workshop">
+                  Workshop
+                </option>
+
+                <option value="Sports">
+                  Sports
+                </option>
+
+                <option value="Technology">
+                  Technology
+                </option>
+
+                <option value="Education">
+                  Education
+                </option>
+
+                <option value="Entertainment">
+                  Entertainment
+                </option>
+
+                <option value="Other">
+                  Other
                 </option>
 
               </select>
@@ -648,17 +679,11 @@ function Events() {
 
                     )}
 
-                    <span
-                      className={`card-status ${
-                        item.status
-                          ?.toLowerCase()
-                          .replace(
-                            /\s+/g,
-                            "-"
-                          )
-                      }`}
-                    >
-                      {item.status}
+                    {/* CATEGORY */}
+
+                    <span className="card-status">
+                      {item.category ||
+                        "Other"}
                     </span>
 
                   </div>
@@ -693,6 +718,8 @@ function Events() {
 
                     <div className="event-details">
 
+                      {/* DATE */}
+
                       <div className="event-detail">
 
                         <span className="detail-icon">
@@ -713,6 +740,8 @@ function Events() {
                         </div>
 
                       </div>
+
+                      {/* TIME */}
 
                       <div className="event-detail">
 
@@ -736,6 +765,8 @@ function Events() {
 
                       </div>
 
+                      {/* LOCATION */}
+
                       <div className="event-detail">
 
                         <span className="detail-icon">
@@ -757,6 +788,8 @@ function Events() {
 
                       </div>
 
+                      {/* TICKETS */}
+
                       <div className="event-detail">
 
                         <span className="detail-icon">
@@ -771,6 +804,28 @@ function Events() {
 
                           <strong>
                             {item.tickets || 0}
+                          </strong>
+
+                        </div>
+
+                      </div>
+
+                      {/* TICKET PRICE */}
+
+                      <div className="event-detail">
+
+                        <span className="detail-icon">
+                          💰
+                        </span>
+
+                        <div>
+
+                          <small>
+                            Ticket Price
+                          </small>
+
+                          <strong>
+                            ₹{item.ticketPrice || 0}
                           </strong>
 
                         </div>
@@ -1007,6 +1062,61 @@ function Events() {
 
                 </div>
 
+                {/* CATEGORY */}
+
+                <div className="form-group">
+
+                  <label>
+                    Category
+                  </label>
+
+                  <select
+                    name="category"
+                    value={event.category}
+                    onChange={handleChange}
+                    required
+                  >
+
+                    <option value="">
+                      Select category
+                    </option>
+
+                    <option value="Music">
+                      Music
+                    </option>
+
+                    <option value="Conferences">
+                      Conferences
+                    </option>
+
+                    <option value="Workshop">
+                      Workshop
+                    </option>
+
+                    <option value="Sports">
+                      Sports
+                    </option>
+
+                    <option value="Technology">
+                      Technology
+                    </option>
+
+                    <option value="Education">
+                      Education
+                    </option>
+
+                    <option value="Entertainment">
+                      Entertainment
+                    </option>
+
+                    <option value="Other">
+                      Other
+                    </option>
+
+                  </select>
+
+                </div>
+
                 {/* TICKETS */}
 
                 <div className="form-group">
@@ -1027,34 +1137,23 @@ function Events() {
 
                 </div>
 
-                {/* STATUS */}
+                {/* TICKET PRICE */}
 
                 <div className="form-group">
 
                   <label>
-                    Status
+                    Ticket Price
                   </label>
 
-                  <select
-                    name="status"
-                    value={event.status}
+                  <input
+                    type="number"
+                    name="ticketPrice"
+                    value={event.ticketPrice}
                     onChange={handleChange}
+                    placeholder="Enter ticket price"
+                    min="0"
                     required
-                  >
-
-                    <option value="Upcoming">
-                      Upcoming
-                    </option>
-
-                    <option value="Ongoing">
-                      Ongoing
-                    </option>
-
-                    <option value="Completed">
-                      Completed
-                    </option>
-
-                  </select>
+                  />
 
                 </div>
 
