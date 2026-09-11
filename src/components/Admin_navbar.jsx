@@ -38,6 +38,8 @@ const AdminNavbar = () => {
 
       <nav className="admin-menu">
 
+        {/* ================= DASHBOARD ================= */}
+
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
@@ -56,6 +58,8 @@ const AdminNavbar = () => {
         </NavLink>
 
 
+        {/* ================= EVENTS ================= */}
+
         <NavLink
           to="/events"
           className={({ isActive }) =>
@@ -73,6 +77,28 @@ const AdminNavbar = () => {
           </span>
         </NavLink>
 
+
+        {/* ================= GALLERY ================= */}
+
+        <NavLink
+          to="/gallery"
+          className={({ isActive }) =>
+            isActive
+              ? "menu-item active"
+              : "menu-item"
+          }
+        >
+          <span className="menu-icon">
+            ▣
+          </span>
+
+          <span>
+            Gallery
+          </span>
+        </NavLink>
+
+
+        {/* ================= USERS ================= */}
 
         <NavLink
           to="/users"
