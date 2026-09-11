@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Admin_Gallery.css";
+import "../styles/Admin_Gallery.css";
 
 function Admin_Gallery() {
   const [memories, setMemories] = useState([
