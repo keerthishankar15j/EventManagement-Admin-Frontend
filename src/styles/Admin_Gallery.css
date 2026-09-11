@@ -1,0 +1,888 @@
+/* =====================================================
+   GALLERY PAGE
+===================================================== */
+
+.gallery-page {
+  padding: 42px;
+  min-height: 100vh;
+  background: #f7f8fc;
+  color: #111827;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.gallery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 30px;
+}
+
+.gallery-heading {
+  display: flex;
+  flex-direction: column;
+}
+
+.gallery-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: #ff654f;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+
+  margin-bottom: 8px;
+}
+
+.gallery-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff654f;
+  display: inline-block;
+}
+
+.gallery-heading h1 {
+  margin: 0;
+  font-size: 48px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+}
+
+.gallery-heading p {
+  margin: 10px 0 0;
+  color: #667085;
+  font-size: 16px;
+}
+
+
+/* =====================================================
+   ADD BUTTON
+===================================================== */
+
+.add-memory-btn {
+  border: none;
+  background: linear-gradient(
+    135deg,
+    #6c3bff,
+    #7c4dff
+  );
+
+  color: white;
+
+  padding: 15px 23px;
+
+  border-radius: 13px;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  box-shadow:
+    0 10px 25px rgba(108, 59, 255, 0.22);
+
+  transition: 0.25s ease;
+}
+
+.add-memory-btn span {
+  font-size: 21px;
+}
+
+.add-memory-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 15px 30px rgba(108, 59, 255, 0.3);
+}
+
+
+/* =====================================================
+   MEMORY BANNER
+===================================================== */
+
+.memory-banner {
+  background:
+    linear-gradient(
+      135deg,
+      #0b1020,
+      #191344,
+      #25135a
+    );
+
+  border-radius: 24px;
+
+  padding: 27px 32px;
+
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 35px;
+
+  overflow: hidden;
+
+  position: relative;
+}
+
+.memory-banner::after {
+  content: "";
+
+  width: 240px;
+  height: 240px;
+
+  border-radius: 50%;
+
+  position: absolute;
+
+  right: -80px;
+  top: -110px;
+
+  background: rgba(124, 77, 255, 0.2);
+}
+
+.memory-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+
+  position: relative;
+  z-index: 2;
+}
+
+.memory-icon {
+  width: 58px;
+  height: 58px;
+
+  border-radius: 17px;
+
+  background: rgba(255, 255, 255, 0.12);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 26px;
+}
+
+.memory-banner h2 {
+  margin: 0 0 6px;
+
+  font-size: 21px;
+}
+
+.memory-banner p {
+  margin: 0;
+
+  max-width: 680px;
+
+  color: #c8c9d5;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+}
+
+.memory-count {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  min-width: 90px;
+}
+
+.memory-count strong {
+  font-size: 35px;
+}
+
+.memory-count span {
+  color: #c8c9d5;
+  font-size: 12px;
+}
+
+
+/* =====================================================
+   TOOLBAR
+===================================================== */
+
+.gallery-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+
+  margin-bottom: 22px;
+}
+
+.gallery-toolbar h2 {
+  margin: 0;
+
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.gallery-toolbar p {
+  margin: 5px 0 0;
+
+  color: #7a8396;
+
+  font-size: 14px;
+}
+
+.gallery-filter {
+  display: flex;
+  gap: 7px;
+
+  background: white;
+
+  padding: 5px;
+
+  border-radius: 12px;
+
+  border: 1px solid #eaecf0;
+}
+
+.gallery-filter button {
+  border: none;
+
+  background: transparent;
+
+  padding: 9px 13px;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  color: #667085;
+
+  cursor: pointer;
+}
+
+.gallery-filter button.active {
+  background: #6c3bff;
+  color: white;
+}
+
+
+/* =====================================================
+   MEMORY GRID
+===================================================== */
+
+.memory-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 24px;
+}
+
+
+/* =====================================================
+   MEMORY CARD
+===================================================== */
+
+.memory-card {
+  background: white;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+
+  border: 1px solid #eaecf0;
+
+  box-shadow:
+    0 7px 25px rgba(16, 24, 40, 0.05);
+
+  transition: 0.3s ease;
+}
+
+.memory-card:hover {
+  transform: translateY(-6px);
+
+  box-shadow:
+    0 20px 40px rgba(16, 24, 40, 0.1);
+}
+
+
+/* =====================================================
+   IMAGE
+===================================================== */
+
+.memory-image-wrapper {
+  height: 225px;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+.memory-image {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+  transition: 0.45s ease;
+}
+
+.memory-card:hover .memory-image {
+  transform: scale(1.06);
+}
+
+.memory-category {
+  position: absolute;
+
+  top: 15px;
+  left: 15px;
+
+  background: white;
+
+  color: #6c3bff;
+
+  padding: 7px 11px;
+
+  border-radius: 8px;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.delete-memory {
+  position: absolute;
+
+  top: 15px;
+  right: 15px;
+
+  width: 34px;
+  height: 34px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, 0.9);
+
+  cursor: pointer;
+
+  opacity: 0;
+
+  transition: 0.2s;
+}
+
+.memory-card:hover .delete-memory {
+  opacity: 1;
+}
+
+.delete-memory:hover {
+  background: #ffe8e5;
+}
+
+.image-overlay {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  padding: 30px 16px 15px;
+
+  background:
+    linear-gradient(
+      transparent,
+      rgba(0, 0, 0, 0.65)
+    );
+
+  color: white;
+
+  opacity: 0;
+
+  transition: 0.3s;
+}
+
+.memory-card:hover .image-overlay {
+  opacity: 1;
+}
+
+.image-overlay span {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+/* =====================================================
+   MEMORY CONTENT
+===================================================== */
+
+.memory-content {
+  padding: 20px;
+}
+
+.memory-date {
+  color: #7c4dff;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  margin-bottom: 8px;
+}
+
+.memory-content h3 {
+  margin: 0 0 8px;
+
+  font-size: 18px;
+
+  color: #111827;
+}
+
+.memory-content p {
+  margin: 0;
+
+  color: #667085;
+
+  font-size: 13px;
+
+  line-height: 1.6;
+
+  min-height: 42px;
+}
+
+.memory-footer {
+  margin-top: 18px;
+
+  padding-top: 14px;
+
+  border-top: 1px solid #f0f1f4;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+}
+
+.memory-footer span:first-child {
+  color: #98a2b3;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.memory-arrow {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #f1edff;
+
+  color: #6c3bff;
+
+  font-weight: 700;
+}
+
+
+/* =====================================================
+   EMPTY STATE
+===================================================== */
+
+.empty-gallery {
+  background: white;
+
+  border: 1px dashed #d0d5dd;
+
+  border-radius: 20px;
+
+  padding: 70px 20px;
+
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 45px;
+  margin-bottom: 10px;
+}
+
+.empty-gallery h2 {
+  margin: 0 0 7px;
+}
+
+.empty-gallery p {
+  color: #667085;
+}
+
+.empty-add-btn {
+  margin-top: 15px;
+
+  border: none;
+
+  background: #6c3bff;
+
+  color: white;
+
+  padding: 12px 20px;
+
+  border-radius: 10px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.gallery-modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(8, 12, 25, 0.65);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+
+  padding: 20px;
+}
+
+.gallery-modal {
+  width: 650px;
+  max-width: 100%;
+
+  max-height: 92vh;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border-radius: 22px;
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.25);
+}
+
+.modal-header {
+  padding: 24px 27px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  border-bottom: 1px solid #eaecf0;
+}
+
+.modal-header span {
+  color: #ff654f;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+.modal-header h2 {
+  margin: 5px 0 0;
+
+  font-size: 23px;
+}
+
+.close-modal {
+  border: none;
+
+  background: #f2f4f7;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 9px;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  color: #475467;
+}
+
+.modal-body {
+  padding: 25px 27px;
+}
+
+.form-row {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 17px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  color: #344054;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 10px;
+
+  padding: 12px 13px;
+
+  outline: none;
+
+  font-family: inherit;
+
+  font-size: 13px;
+
+  color: #344054;
+
+  transition: 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #7c4dff;
+
+  box-shadow:
+    0 0 0 3px rgba(124, 77, 255, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+
+/* =====================================================
+   IMAGE UPLOAD
+===================================================== */
+
+.upload-box {
+  position: relative;
+
+  height: 150px;
+
+  border: 2px dashed #d0d5dd;
+
+  border-radius: 13px;
+
+  overflow: hidden;
+
+  background: #fafafa;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-box:hover {
+  border-color: #7c4dff;
+
+  background: #faf9ff;
+}
+
+.upload-box input {
+  position: absolute;
+
+  inset: 0;
+
+  opacity: 0;
+
+  cursor: pointer;
+}
+
+.upload-content {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 5px;
+
+  color: #667085;
+}
+
+.upload-icon {
+  font-size: 30px;
+}
+
+.upload-content strong {
+  color: #344054;
+
+  font-size: 13px;
+}
+
+.upload-content span {
+  font-size: 11px;
+}
+
+.image-preview {
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* =====================================================
+   MODAL FOOTER
+===================================================== */
+
+.modal-footer {
+  padding: 18px 27px;
+
+  border-top: 1px solid #eaecf0;
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+.cancel-btn,
+.save-memory-btn {
+  padding: 12px 20px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: white;
+
+  border: 1px solid #d0d5dd;
+
+  color: #344054;
+}
+
+.save-memory-btn {
+  border: none;
+
+  background: #6c3bff;
+
+  color: white;
+
+  box-shadow:
+    0 8px 18px rgba(108, 59, 255, 0.2);
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+  .memory-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .gallery-filter {
+    display: none;
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .gallery-page {
+    padding: 25px 18px;
+  }
+
+  .gallery-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 20px;
+  }
+
+  .gallery-heading h1 {
+    font-size: 38px;
+  }
+
+  .memory-banner {
+    align-items: flex-start;
+
+    gap: 20px;
+
+    flex-direction: column;
+  }
+
+  .gallery-toolbar {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .memory-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+}

@@ -9,7 +9,7 @@ import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
 import AdminUsers from "./components/Admin_users";
 import EditEvent from "./components/EditEvent";
-
+import Admin_Gallery from "./components/Admin_Gallery";
 function App() {
 
   return (
@@ -68,7 +68,7 @@ function App() {
             />
           }
         />
-
+<Route path="/gallery" element={<Admin_Gallery />} />
       </Routes>
 
     </BrowserRouter>
