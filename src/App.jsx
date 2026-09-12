@@ -10,6 +10,7 @@ import AdminEvents from "./components/Admin_Events";
 import AdminUsers from "./components/Admin_users";
 import EditEvent from "./components/EditEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
+import EventDetails from "./components/EventDetails";
 function App() {
 
   return (
@@ -71,6 +72,10 @@ function App() {
 <Route path="/gallery" element={<Admin_Gallery />} />
       </Routes>
 
+<Route
+  path="/events/details/:id"
+  element={<EventDetails />}
+/>
     </BrowserRouter>
 
   );
