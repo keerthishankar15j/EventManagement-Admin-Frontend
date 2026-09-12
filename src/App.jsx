@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter,
   Routes,
@@ -13,6 +14,7 @@ import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
 import AdminUsers from "./components/Admin_users";
 import EditEvent from "./components/EditEvent";
+import AddEvent from "./components/AddEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
 
@@ -92,6 +94,14 @@ function App() {
           />
 
 
+          {/* ADD EVENT */}
+
+          <Route
+            path="/events/add"
+            element={<AddEvent />}
+          />
+
+
           {/* EVENT DETAILS */}
 
           <Route
@@ -164,3 +174,4 @@ function App() {
 }
 
 export default App;
+

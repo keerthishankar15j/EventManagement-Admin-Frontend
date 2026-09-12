@@ -1512,3 +1512,228 @@ body {
     }
 
 }
+/* =====================================================
+   FINAL EVENTS PAGE FIX
+===================================================== */
+
+.main-content {
+  width: 100% !important;
+  min-width: 0;
+  min-height: 100vh;
+
+  margin-left: 0 !important;
+
+  padding: 35px 40px 50px;
+
+  overflow-x: hidden;
+}
+
+/* =====================================================
+   EVENTS GRID - FORCE DISPLAY
+===================================================== */
+
+.events-card-grid {
+  width: 100% !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr)) !important;
+
+  gap: 20px !important;
+
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* =====================================================
+   EVENT CARD - FORCE DISPLAY
+===================================================== */
+
+.event-card {
+  width: 100% !important;
+
+  min-width: 0;
+
+  display: flex !important;
+  flex-direction: column;
+
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  background: #ffffff;
+
+  border: 1px solid #e3e6ef;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+}
+
+/* =====================================================
+   CARD IMAGE
+===================================================== */
+
+.event-card-image {
+  width: 100%;
+  height: 145px;
+
+  display: block !important;
+
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* =====================================================
+   CARD CONTENT
+===================================================== */
+
+.event-card-content {
+  width: 100%;
+
+  display: flex !important;
+  flex-direction: column;
+
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* =====================================================
+   ACTION BUTTONS
+===================================================== */
+
+.event-card-actions {
+  width: 100%;
+
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 9px;
+
+  margin-top: 13px;
+}
+
+/* VIEW DETAILS */
+
+.view-details-btn {
+  min-height: 40px;
+
+  border: 1px solid #d9caff;
+
+  border-radius: 11px;
+
+  background: #faf8ff;
+
+  color: #673de6;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+/* EDIT */
+
+.edit-event-btn {
+  min-height: 40px;
+
+  border: 1px solid #d9caff;
+
+  border-radius: 11px;
+
+  background: #faf8ff;
+
+  color: #673de6;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+/* DELETE */
+
+.delete-event-btn {
+  min-height: 40px;
+
+  border: 1px solid #ffcaca;
+
+  border-radius: 11px;
+
+  background: #fffafa;
+
+  color: #ef4444;
+
+  font-size: 13px;
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+/* BUTTON HOVER */
+
+.view-details-btn:hover,
+.edit-event-btn:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #6c3bff,
+      #8b5cf6
+    );
+
+  color: #ffffff;
+
+  border-color: #6c3bff;
+
+  transform: translateY(-2px);
+}
+
+.delete-event-btn:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #f87171
+    );
+
+  color: #ffffff;
+
+  border-color: #ef4444;
+
+  transform: translateY(-2px);
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 1100px) {
+
+  .events-card-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 800px) {
+
+  .main-content {
+    padding:
+      25px
+      18px
+      40px;
+  }
+
+  .events-card-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 400px) {
+
+  .event-card-actions {
+    grid-template-columns: 1fr !important;
+  }
+}
