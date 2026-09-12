@@ -12,7 +12,10 @@ import AdminNavbar from "./components/Admin_navbar";
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
 import AdminUsers from "./components/Admin_users";
+
+import AddEvent from "./components/AddEvent";
 import EditEvent from "./components/EditEvent";
+
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
 
@@ -25,10 +28,8 @@ const AdminLayout = () => {
   return (
     <div className="admin-layout">
 
-      {/* SIDEBAR */}
       <AdminNavbar />
 
-      {/* PAGE CONTENT */}
       <div className="admin-page-content">
         <Outlet />
       </div>
@@ -49,7 +50,7 @@ function App() {
       <Routes>
 
         {/* =================================================
-            ADMIN LOGIN
+            LOGIN
         ================================================= */}
 
         <Route
@@ -59,7 +60,7 @@ function App() {
 
 
         {/* =================================================
-            ADMIN PAGES
+            ADMIN LAYOUT
         ================================================= */}
 
         <Route element={<AdminLayout />}>
@@ -71,7 +72,9 @@ function App() {
             element={<AdminDashboard />}
           />
 
-          {/* Optional old dashboard URL */}
+
+          {/* OLD DASHBOARD */}
+
           <Route
             path="/dashboard"
             element={
@@ -83,7 +86,9 @@ function App() {
           />
 
 
-          {/* EVENTS */}
+          {/* =================================================
+              EVENTS
+          ================================================= */}
 
           <Route
             path="/events"
@@ -91,7 +96,19 @@ function App() {
           />
 
 
-          {/* EVENT DETAILS */}
+          {/* =================================================
+              ADD EVENT
+          ================================================= */}
+
+          <Route
+            path="/events/add"
+            element={<AddEvent />}
+          />
+
+
+          {/* =================================================
+              EVENT DETAILS
+          ================================================= */}
 
           <Route
             path="/events/details/:id"
@@ -99,7 +116,9 @@ function App() {
           />
 
 
-          {/* EDIT EVENT */}
+          {/* =================================================
+              EDIT EVENT
+          ================================================= */}
 
           <Route
             path="/events/edit/:id"

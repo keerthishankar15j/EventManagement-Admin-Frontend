@@ -12,8 +12,8 @@ const API_URL = (
 const AdminEvents = () => {
   const navigate = useNavigate();
 
-  // NO LOADING STATE
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // =====================================================
   // GET ALL EVENTS
@@ -21,23 +21,27 @@ const AdminEvents = () => {
 
   const getEvents = async () => {
     try {
+      setLoading(true);
+
       const response = await axios.get(
         `${API_URL}/events/getevents`
       );
 
+      console.log("=================================");
       console.log("ALL EVENTS:", response.data);
+      console.log("=================================");
 
-      const eventData =
-        response.data?.data ||
-        response.data?.events ||
-        response.data;
+      const eventData = response.data?.data;
 
       if (Array.isArray(eventData)) {
+        console.log("EVENT ARRAY:", eventData);
+        console.log("EVENT COUNT:", eventData.length);
+
         setEvents(eventData);
       } else {
+        console.log("EVENT DATA IS NOT ARRAY:", eventData);
         setEvents([]);
       }
-
     } catch (error) {
       console.error(
         "GET EVENTS ERROR:",
@@ -45,8 +49,27 @@ const AdminEvents = () => {
       );
 
       setEvents([]);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // =====================================================
+  // CHECK EVENTS STATE
+  // =====================================================
+
+  useEffect(() => {
+    console.log("EVENTS STATE:", events);
+    console.log("EVENTS STATE COUNT:", events.length);
+  }, [events]);
+
+  // =====================================================
+  // LOAD EVENTS
+  // =====================================================
+
+  useEffect(() => {
+    getEvents();
+  }, []);
 
   // =====================================================
   // VIEW DETAILS
@@ -60,7 +83,6 @@ const AdminEvents = () => {
       return;
     }
 
-    // Send complete event to details page
     navigate(`/events/details/${id}`, {
       state: {
         event: event,
@@ -69,11 +91,23 @@ const AdminEvents = () => {
   };
 
   // =====================================================
+  // EDIT EVENT
+  // =====================================================
+
+  const handleEdit = (id) => {
+    if (!id) {
+      alert("Event ID not found");
+      return;
+    }
+
+    navigate(`/events/edit/${id}`);
+  };
+
+  // =====================================================
   // DELETE EVENT
   // =====================================================
 
   const handleDelete = async (id) => {
-
     if (!id) {
       alert("Event ID not found");
       return;
@@ -88,12 +122,10 @@ const AdminEvents = () => {
     }
 
     try {
-
       await axios.delete(
         `${API_URL}/events/delete/${id}`
       );
 
-      // REMOVE FROM SCREEN IMMEDIATELY
       setEvents((previousEvents) =>
         previousEvents.filter(
           (item) => item._id !== id
@@ -101,15 +133,16 @@ const AdminEvents = () => {
       );
 
       alert("Event deleted successfully");
-
     } catch (error) {
-
       console.error(
-        "DELETE ERROR:",
+        "DELETE EVENT ERROR:",
         error.response?.data || error.message
       );
 
-      alert("Failed to delete event");
+      alert(
+        error.response?.data?.message ||
+        "Failed to delete event"
+      );
     }
   };
 
@@ -118,7 +151,6 @@ const AdminEvents = () => {
   // =====================================================
 
   const getImageUrl = (image) => {
-
     if (!image) {
       return "";
     }
@@ -136,7 +168,7 @@ const AdminEvents = () => {
       return image;
     }
 
-    // Relative path
+    // Relative URL
     if (image.startsWith("/")) {
       return `${API_URL}${image}`;
     }
@@ -145,12 +177,50 @@ const AdminEvents = () => {
   };
 
   // =====================================================
-  // FETCH EVENTS
+  // ADD EVENT
   // =====================================================
 
-  useEffect(() => {
-    getEvents();
-  }, []);
+  const handleAddEvent = () => {
+    console.log("ADD EVENT CLICKED");
+    navigate("/events/add");
+  };
+
+  // =====================================================
+  // LOADING
+  // =====================================================
+
+  if (loading) {
+    return (
+      <main className="main-content">
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">
+              Events
+            </h1>
+
+            <p className="page-description">
+              Manage and organize all your events
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="add-event-btn"
+            onClick={handleAddEvent}
+          >
+            <span>+</span>
+            Add Event
+          </button>
+        </div>
+
+        <section className="events-card">
+          <div className="events-loading">
+            Loading events...
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   // =====================================================
   // PAGE
@@ -165,7 +235,7 @@ const AdminEvents = () => {
 
       <div className="page-header">
 
-        <div>
+        <div className="page-title-area">
 
           <h1 className="page-title">
             Events
@@ -177,27 +247,38 @@ const AdminEvents = () => {
 
         </div>
 
-
         <button
           type="button"
           className="add-event-btn"
-          onClick={() => navigate("/events/add")}
+          onClick={handleAddEvent}
         >
-          + Add Event
+          <span className="add-icon">
+            +
+          </span>
+
+          Add Event
+
+          <span className="arrow-icon">
+            →
+          </span>
         </button>
 
       </div>
 
 
       {/* =================================================
-          EVENTS CARD
+          EVENTS CONTAINER
       ================================================= */}
 
       <section className="events-card">
 
+        {/* =================================================
+            TOOLBAR
+        ================================================= */}
+
         <div className="event-toolbar">
 
-          <div>
+          <div className="event-count">
 
             <h2 className="event-count-title">
               All Events
@@ -213,7 +294,7 @@ const AdminEvents = () => {
 
 
         {/* =================================================
-            EVENTS GRID
+            EVENT GRID
         ================================================= */}
 
         <div className="events-card-grid">
@@ -221,6 +302,10 @@ const AdminEvents = () => {
           {events.length === 0 ? (
 
             <div className="no-events">
+
+              <div className="no-events-icon">
+                📅
+              </div>
 
               <h3>
                 No Events Found
@@ -261,43 +346,55 @@ const AdminEvents = () => {
                   ) : (
 
                     <div className="no-image">
-                      📷
+
+                      <span>
+                        📷
+                      </span>
+
+                      <p>
+                        No Image
+                      </p>
+
                     </div>
 
                   )}
 
+                  {/* CATEGORY */}
 
                   <span className="card-status">
-
                     {item.category || "Other"}
-
                   </span>
 
                 </div>
 
 
                 {/* =================================================
-                    CONTENT
+                    CARD CONTENT
                 ================================================= */}
 
                 <div className="event-card-content">
+
+                  {/* EVENT NAME */}
 
                   <h2 className="event-card-title">
                     {item.name || "Untitled Event"}
                   </h2>
 
 
+                  {/* ORGANIZER */}
+
                   <p className="event-organizer">
 
                     Organized by{" "}
 
                     <strong>
-                      {item.organizer ||
-                        "Not specified"}
+                      {item.organizer || "Not specified"}
                     </strong>
 
                   </p>
 
+
+                  {/* DESCRIPTION */}
 
                   <p className="event-description">
 
@@ -319,12 +416,11 @@ const AdminEvents = () => {
 
                   <div className="event-details">
 
-
                     {/* DATE */}
 
                     <div className="event-detail">
 
-                      <span>
+                      <span className="detail-icon">
                         📅
                       </span>
 
@@ -348,7 +444,7 @@ const AdminEvents = () => {
 
                     <div className="event-detail">
 
-                      <span>
+                      <span className="detail-icon">
                         ⏰
                       </span>
 
@@ -372,7 +468,7 @@ const AdminEvents = () => {
 
                     <div className="event-detail">
 
-                      <span>
+                      <span className="detail-icon">
                         📍
                       </span>
 
@@ -396,7 +492,7 @@ const AdminEvents = () => {
 
                     <div className="event-detail">
 
-                      <span>
+                      <span className="detail-icon">
                         🎟
                       </span>
 
@@ -407,7 +503,7 @@ const AdminEvents = () => {
                         </small>
 
                         <strong>
-                          {item.tickets || 0}
+                          {item.tickets ?? 0}
                         </strong>
 
                       </div>
@@ -419,7 +515,7 @@ const AdminEvents = () => {
 
                     <div className="event-detail">
 
-                      <span>
+                      <span className="detail-icon">
                         💰
                       </span>
 
@@ -430,7 +526,7 @@ const AdminEvents = () => {
                         </small>
 
                         <strong>
-                          ₹{item.ticketPrice || 0}
+                          ₹{item.ticketPrice ?? 0}
                         </strong>
 
                       </div>
@@ -441,13 +537,12 @@ const AdminEvents = () => {
 
 
                   {/* =================================================
-                      BUTTONS
+                      ACTION BUTTONS
                   ================================================= */}
 
                   <div className="event-card-actions">
 
-
-                    {/* VIEW DETAILS */}
+                    {/* VIEW */}
 
                     <button
                       type="button"
@@ -466,9 +561,7 @@ const AdminEvents = () => {
                       type="button"
                       className="edit-event-btn"
                       onClick={() =>
-                        navigate(
-                          `/events/edit/${item._id}`
-                        )
+                        handleEdit(item._id)
                       }
                     >
                       ✏ Edit
