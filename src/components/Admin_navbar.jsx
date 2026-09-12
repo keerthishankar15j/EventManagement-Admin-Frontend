@@ -41,7 +41,7 @@ const AdminNavbar = () => {
         {/* ================= DASHBOARD ================= */}
 
         <NavLink
-          to="/dashboard"
+         to="/admin-dashboard"
           className={({ isActive }) =>
             isActive
               ? "menu-item active"

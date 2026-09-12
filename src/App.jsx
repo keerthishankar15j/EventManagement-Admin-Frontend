@@ -7,19 +7,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-
         <Route path="/" element={<AdminLogin />} />
-
-        <Route
-          path="/admin-login"
-          element={<AdminLogin />}
-        />
-
-        <Route
-          path="/admin-dashboard"
-          element={<AdminDashboard />}
-        />
-
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   );
