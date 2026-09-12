@@ -43,7 +43,7 @@ const AdminNavbar = () => {
         <NavLink
          to="/admin-dashboard"
           className={({ isActive }) =>
-            isActive
+            isgActive
               ? "menu-item active"
               : "menu-item"
           }
