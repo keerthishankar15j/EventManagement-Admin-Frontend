@@ -11,6 +11,7 @@ import AdminUsers from "./components/Admin_users";
 import EditEvent from "./components/EditEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
+
 function App() {
 
   return (
@@ -33,7 +34,14 @@ function App() {
         />
 
 
-        {/* IMPORTANT: EDIT ROUTE */}
+        {/* Single Event Details */}
+        <Route
+          path="/events/details/:id"
+          element={<EventDetails />}
+        />
+
+
+        {/* Edit Event */}
         <Route
           path="/events/edit/:id"
           element={<EditEvent />}
@@ -44,6 +52,13 @@ function App() {
         <Route
           path="/users"
           element={<AdminUsers />}
+        />
+
+
+        {/* Gallery */}
+        <Route
+          path="/gallery"
+          element={<Admin_Gallery />}
         />
 
 
@@ -69,13 +84,9 @@ function App() {
             />
           }
         />
-<Route path="/gallery" element={<Admin_Gallery />} />
+
       </Routes>
 
-<Route
-  path="/events/details/:id"
-  element={<EventDetails />}
-/>
     </BrowserRouter>
 
   );
