@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./AdminLogin.css";
+import "../styles/AdminLogin.css";
 
 const ADMIN_EMAIL = "admin@eventhub.com";
 const ADMIN_PASSWORD = "Admin@123";

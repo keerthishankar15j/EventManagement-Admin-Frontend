@@ -5,7 +5,7 @@ import {
   Navigate,
   Outlet
 } from "react-router-dom";
-
+import AdminLogin from "./components/AdminLogin";
 import AdminNavbar from "./components/Admin_navbar";
 
 import AdminDashboard from "./components/Admin_dashboard";
@@ -52,7 +52,7 @@ function App() {
         {/* =================================================
             ADMIN LAYOUT
         ================================================= */}
-
+<Route path="/admin-login" element={<AdminLogin />} />
         <Route element={<AdminLayout />}>
 
           {/* DASHBOARD */}
