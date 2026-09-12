@@ -9,12 +9,14 @@ const API_URL = (
   "https://api-admin-rouge.vercel.app"
 ).replace(/\/+$/, "");
 
+
 const AdminEvents = () => {
 
   const navigate = useNavigate();
 
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+
 
   // =====================================================
   // GET ALL EVENTS
@@ -30,7 +32,7 @@ const AdminEvents = () => {
         `${API_URL}/events/getevents`
       );
 
-      console.log("All Events:", response.data);
+      console.log("ALL EVENTS:", response.data);
 
       const eventData =
         response.data?.data ||
@@ -51,49 +53,14 @@ const AdminEvents = () => {
         error.message
       );
 
+      setEvents([]);
+
     } finally {
 
       setLoading(false);
 
     }
-  };
 
-
-  // =====================================================
-  // GET SINGLE EVENT BY ID
-  // =====================================================
-
-  const getEventById = async (id) => {
-
-    try {
-
-      const response = await axios.get(
-        `${API_URL}/events/get/${id}`
-      );
-
-      console.log(
-        "Single Event:",
-        response.data
-      );
-
-      const eventData =
-        response.data?.data ||
-        response.data?.event ||
-        response.data;
-
-      return eventData;
-
-    } catch (error) {
-
-      console.error(
-        "GET SINGLE EVENT ERROR:",
-        error.response?.data ||
-        error.message
-      );
-
-      return null;
-
-    }
   };
 
 
@@ -152,6 +119,7 @@ const AdminEvents = () => {
       alert("Failed to delete event");
 
     }
+
   };
 
 
@@ -165,16 +133,28 @@ const AdminEvents = () => {
       return "";
     }
 
+
+    // YOUR BACKEND SAVES BASE64 IMAGE
+    if (image.startsWith("data:image/")) {
+      return image;
+    }
+
+
+    // External image
     if (
       image.startsWith("http://") ||
       image.startsWith("https://")
     ) {
-
       return image;
-
     }
 
-    return `${API_URL}/${image.replace(/^\/+/, "")}`;
+
+    // Fallback for old filename-based images
+    if (image.startsWith("/")) {
+      return `${API_URL}${image}`;
+    }
+
+    return `${API_URL}/${image}`;
 
   };
 
@@ -223,6 +203,7 @@ const AdminEvents = () => {
 
     <main className="main-content">
 
+
       {/* PAGE HEADER */}
 
       <div className="page-header">
@@ -239,6 +220,7 @@ const AdminEvents = () => {
 
         </div>
 
+
         <button
           className="add-event-btn"
           onClick={() =>
@@ -254,8 +236,6 @@ const AdminEvents = () => {
       {/* EVENTS SECTION */}
 
       <section className="events-card">
-
-        {/* TOOLBAR */}
 
         <div className="event-toolbar">
 
@@ -301,6 +281,7 @@ const AdminEvents = () => {
                 key={item._id}
               >
 
+
                 {/* IMAGE */}
 
                 <div className="event-card-image">
@@ -309,7 +290,10 @@ const AdminEvents = () => {
 
                     <img
                       src={getImageUrl(item.image)}
-                      alt={item.name}
+                      alt={item.name || "Event"}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
                     />
 
                   ) : (
@@ -319,6 +303,7 @@ const AdminEvents = () => {
                     </div>
 
                   )}
+
 
                   <span className="card-status">
                     {item.category || "Other"}
@@ -365,6 +350,7 @@ const AdminEvents = () => {
                   {/* EVENT INFORMATION */}
 
                   <div className="event-details">
+
 
                     <div className="event-detail">
 
@@ -463,6 +449,7 @@ const AdminEvents = () => {
 
                     </div>
 
+
                   </div>
 
 
@@ -470,7 +457,8 @@ const AdminEvents = () => {
 
                   <div className="event-card-actions">
 
-                    {/* VIEW DETAILS */}
+
+                    {/* VIEW */}
 
                     <button
                       type="button"
@@ -531,6 +519,8 @@ const AdminEvents = () => {
     </main>
 
   );
+
 };
+
 
 export default AdminEvents;

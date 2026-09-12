@@ -2,8 +2,11 @@ import {
   BrowserRouter,
   Routes,
   Route,
-  Navigate
+  Navigate,
+  Outlet
 } from "react-router-dom";
+
+import AdminNavbar from "./components/Admin_navbar";
 
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
@@ -11,6 +14,32 @@ import AdminUsers from "./components/Admin_users";
 import EditEvent from "./components/EditEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
+
+
+// =====================================================
+// ADMIN LAYOUT
+// =====================================================
+
+const AdminLayout = () => {
+  return (
+    <div className="admin-layout">
+
+      {/* SIDEBAR */}
+      <AdminNavbar />
+
+      {/* PAGE CONTENT */}
+      <div className="admin-page-content">
+        <Outlet />
+      </div>
+
+    </div>
+  );
+};
+
+
+// =====================================================
+// APP
+// =====================================================
 
 function App() {
 
@@ -20,49 +49,60 @@ function App() {
 
       <Routes>
 
-        {/* Dashboard */}
-        <Route
-          path="/dashboard"
-          element={<AdminDashboard />}
-        />
+        {/* =================================================
+            ADMIN LAYOUT
+        ================================================= */}
+
+        <Route element={<AdminLayout />}>
+
+          {/* DASHBOARD */}
+          <Route
+            path="/dashboard"
+            element={<AdminDashboard />}
+          />
 
 
-        {/* Events */}
-        <Route
-          path="/events"
-          element={<AdminEvents />}
-        />
+          {/* EVENTS */}
+          <Route
+            path="/events"
+            element={<AdminEvents />}
+          />
 
 
-        {/* Single Event Details */}
-        <Route
-          path="/events/details/:id"
-          element={<EventDetails />}
-        />
+          {/* SINGLE EVENT DETAILS */}
+          <Route
+            path="/events/details/:id"
+            element={<EventDetails />}
+          />
 
 
-        {/* Edit Event */}
-        <Route
-          path="/events/edit/:id"
-          element={<EditEvent />}
-        />
+          {/* EDIT EVENT */}
+          <Route
+            path="/events/edit/:id"
+            element={<EditEvent />}
+          />
 
 
-        {/* Users */}
-        <Route
-          path="/users"
-          element={<AdminUsers />}
-        />
+          {/* USERS */}
+          <Route
+            path="/users"
+            element={<AdminUsers />}
+          />
 
 
-        {/* Gallery */}
-        <Route
-          path="/gallery"
-          element={<Admin_Gallery />}
-        />
+          {/* GALLERY */}
+          <Route
+            path="/gallery"
+            element={<Admin_Gallery />}
+          />
+
+        </Route>
 
 
-        {/* Default */}
+        {/* =================================================
+            DEFAULT
+        ================================================= */}
+
         <Route
           path="/"
           element={
@@ -74,7 +114,10 @@ function App() {
         />
 
 
-        {/* Unknown URL - MUST BE LAST */}
+        {/* =================================================
+            UNKNOWN URL
+        ================================================= */}
+
         <Route
           path="*"
           element={

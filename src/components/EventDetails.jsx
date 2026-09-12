@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useParams, useNavigate } from "react-router-dom";
-
-import AdminNavbar from "../components/Admin_navbar";
+import { useNavigate, useParams } from "react-router-dom";
 import "../styles/EventDetails.css";
 
 const API_URL = (
@@ -10,94 +7,15 @@ const API_URL = (
   "https://api-admin-rouge.vercel.app"
 ).replace(/\/+$/, "");
 
-const EventDetails = () => {
 
-  // =====================================================
-  // GET EVENT ID FROM URL
-  // =====================================================
+function EventDetails() {
 
   const { id } = useParams();
-
   const navigate = useNavigate();
 
-
-  // =====================================================
-  // STATE
-  // =====================================================
-
   const [event, setEvent] = useState(null);
-
   const [loading, setLoading] = useState(true);
-
-
-  // =====================================================
-  // GET SINGLE EVENT BY ID
-  // =====================================================
-
-  useEffect(() => {
-
-    const getEventById = async () => {
-
-      try {
-
-        console.log("Getting Event ID:", id);
-
-        const response = await axios.get(
-          `${API_URL}/events/get/${id}`
-        );
-
-        console.log(
-          "Single Event Response:",
-          response.data
-        );
-
-
-        const eventData =
-          response.data?.data ||
-          response.data?.event ||
-          response.data;
-
-
-        console.log(
-          "Event Data:",
-          eventData
-        );
-
-
-        console.log(
-          "Image Path:",
-          eventData?.image
-        );
-
-
-        setEvent(eventData);
-
-      } catch (error) {
-
-        console.error(
-          "GET SINGLE EVENT ERROR:",
-          error.response?.data ||
-          error.message
-        );
-
-        setEvent(null);
-
-      } finally {
-
-        setLoading(false);
-
-      }
-
-    };
-
-
-    if (id) {
-
-      getEventById();
-
-    }
-
-  }, [id]);
+  const [error, setError] = useState("");
 
 
   // =====================================================
@@ -110,22 +28,87 @@ const EventDetails = () => {
       return "";
     }
 
+    // Base64 image
+    if (image.startsWith("data:image/")) {
+      return image;
+    }
 
-    // If image is already a complete URL
+    // Full URL
     if (
       image.startsWith("http://") ||
       image.startsWith("https://")
     ) {
-
       return image;
-
     }
 
+    // Relative path
+    if (image.startsWith("/")) {
+      return `${API_URL}${image}`;
+    }
 
-    // If image is stored as uploads/filename
-    return `${API_URL}/${image.replace(/^\/+/, "")}`;
-
+    return `${API_URL}/${image}`;
   };
+
+
+  // =====================================================
+  // FETCH EVENT DETAILS
+  // =====================================================
+
+  useEffect(() => {
+
+    const fetchEvent = async () => {
+
+      try {
+
+        setLoading(true);
+        setError("");
+
+        const response = await fetch(
+          `${API_URL}/events/get/${id}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || "Failed to fetch event"
+          );
+        }
+
+        // Backend may return event directly
+        // or inside data.event
+        const eventData =
+          data.event ||
+          data.data ||
+          data;
+
+        setEvent(eventData);
+
+      } catch (err) {
+
+        console.error(
+          "Error fetching event:",
+          err
+        );
+
+        setError(
+          err.message ||
+          "Unable to load event details"
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+
+    if (id) {
+      fetchEvent();
+    }
+
+  }, [id]);
 
 
   // =====================================================
@@ -135,68 +118,46 @@ const EventDetails = () => {
   if (loading) {
 
     return (
-      <>
-        <AdminNavbar />
+      <div className="event-details-loading">
 
-        <main className="main-content">
+        <div className="loading-spinner"></div>
 
-          <div className="event-details-loading">
+        <h2>Loading event details...</h2>
 
-            <div className="loading-spinner"></div>
-
-            <h2>
-              Loading Event Details...
-            </h2>
-
-          </div>
-
-        </main>
-      </>
+      </div>
     );
 
   }
 
 
   // =====================================================
-  // EVENT NOT FOUND
+  // ERROR / NOT FOUND
   // =====================================================
 
-  if (!event) {
+  if (error || !event) {
 
     return (
-      <>
-        <AdminNavbar />
+      <div className="event-not-found">
 
-        <main className="main-content">
+        <div className="not-found-icon">
+          😕
+        </div>
 
-          <div className="event-not-found">
+        <h2>Event Not Found</h2>
 
-            <div className="not-found-icon">
-              ⚠️
-            </div>
+        <p>
+          {error ||
+            "The event you are looking for does not exist."}
+        </p>
 
-            <h2>
-              Event Not Found
-            </h2>
+        <button
+          className="details-back-btn"
+          onClick={() => navigate("/events")}
+        >
+          ← Back to Events
+        </button>
 
-            <p>
-              The event you're looking for
-              does not exist.
-            </p>
-
-            <button
-              className="back-events-btn"
-              onClick={() =>
-                navigate("/events")
-              }
-            >
-              ← Back to Events
-            </button>
-
-          </div>
-
-        </main>
-      </>
+      </div>
     );
 
   }
@@ -207,340 +168,330 @@ const EventDetails = () => {
   // =====================================================
 
   return (
-    <>
+
+    <div className="event-details-page">
+
       {/* =================================================
-          NAVBAR
+          BACK TO EVENTS
       ================================================= */}
 
-      <AdminNavbar />
+      <button
+        className="back-events-btn"
+        onClick={() => navigate("/events")}
+      >
+        ← Back to Events
+      </button>
 
 
       {/* =================================================
+          HEADER
+      ================================================= */}
+
+      <div className="event-details-header">
+
+        <span className="details-label">
           EVENT DETAILS
+        </span>
+
+        <h1>
+          {event.name || "Event Details"}
+        </h1>
+
+        <p>
+          View complete information about this event.
+        </p>
+
+      </div>
+
+
+      {/* =================================================
+          MAIN CARD
       ================================================= */}
 
-      <main className="main-content event-details-page">
+      <div className="event-details-card">
 
 
-        {/* BACK BUTTON */}
+        {/* =================================================
+            IMAGE
+        ================================================= */}
 
-        <button
-          className="back-events-btn"
-          onClick={() =>
-            navigate("/events")
-          }
-        >
-          ← Back to Events
-        </button>
+        <div className="event-details-image">
+
+          {event.image ? (
+
+            <img
+              src={getImageUrl(event.image)}
+              alt={event.name || "Event"}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+
+          ) : (
+
+            <div className="details-no-image">
+
+              🖼️
+
+              <span>
+                No Image Available
+              </span>
+
+            </div>
+
+          )}
 
 
-        {/* HEADER */}
+          {/* CATEGORY */}
 
-        <div className="event-details-header">
+          {event.category && (
 
-          <span className="details-label">
-            EVENT DETAILS
-          </span>
+            <div className="details-category">
+              {event.category}
+            </div>
 
-          <h1>
-            {event.name}
-          </h1>
-
-          <p>
-            Complete information about this event
-          </p>
+          )}
 
         </div>
 
 
-        {/* MAIN CARD */}
+        {/* =================================================
+            CONTENT
+        ================================================= */}
 
-        <div className="event-details-card">
+        <div className="event-details-content">
+
+          <h2>
+            {event.name || "Untitled Event"}
+          </h2>
+
+
+          {/* ORGANIZER */}
+
+          <p className="details-organizer">
+
+            Organized by{" "}
+
+            <strong>
+              {event.organizer || "Not specified"}
+            </strong>
+
+          </p>
 
 
           {/* =================================================
-              EVENT IMAGE
+              INFORMATION GRID
           ================================================= */}
 
-          <div className="event-details-image">
+          <div className="details-info-grid">
 
-            {event.image ? (
 
-              <img
-                src={getImageUrl(event.image)}
-                alt={event.name}
-                onError={(e) => {
-                  console.log(
-                    "Image failed to load:",
-                    getImageUrl(event.image)
-                  );
+            {/* DATE */}
 
-                  e.currentTarget.style.display =
-                    "none";
-                }}
-              />
+            <div className="details-info-box">
 
-            ) : (
+              <div className="details-icon">
+                📅
+              </div>
 
-              <div className="details-no-image">
+              <div>
 
-                📷
+                <small>
+                  DATE
+                </small>
 
-                <span>
-                  No Image Available
-                </span>
+                <strong>
+                  {event.date || "Not specified"}
+                </strong>
 
               </div>
 
-            )}
+            </div>
+
+
+            {/* TIME */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                ⏰
+              </div>
+
+              <div>
+
+                <small>
+                  TIME
+                </small>
+
+                <strong>
+                  {event.time || "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* LOCATION */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                📍
+              </div>
+
+              <div>
+
+                <small>
+                  LOCATION
+                </small>
+
+                <strong>
+                  {event.location || "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
 
 
             {/* CATEGORY */}
 
-            <span className="details-category">
+            <div className="details-info-box">
 
-              {event.category || "Other"}
+              <div className="details-icon">
+                🎫
+              </div>
 
-            </span>
+              <div>
+
+                <small>
+                  CATEGORY
+                </small>
+
+                <strong>
+                  {event.category || "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* AVAILABLE TICKETS */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                👥
+              </div>
+
+              <div>
+
+                <small>
+                  AVAILABLE TICKETS
+                </small>
+
+                <strong>
+                  {event.tickets !== undefined &&
+                  event.tickets !== null
+                    ? event.tickets
+                    : "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* TICKET PRICE */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                💰
+              </div>
+
+              <div>
+
+                <small>
+                  TICKET PRICE
+                </small>
+
+                <strong>
+
+                  {event.ticketPrice !== undefined &&
+                  event.ticketPrice !== null
+                    ? `₹${event.ticketPrice}`
+                    : "Not specified"}
+
+                </strong>
+
+              </div>
+
+            </div>
 
           </div>
 
 
           {/* =================================================
-              EVENT CONTENT
+              DESCRIPTION
           ================================================= */}
 
-          <div className="event-details-content">
+          <div className="details-description">
 
+            <h3>
+              Description
+            </h3>
 
-            {/* EVENT NAME */}
-
-            <h2>
-              {event.name}
-            </h2>
-
-
-            {/* ORGANIZER */}
-
-            <p className="details-organizer">
-
-              Organized by{" "}
-
-              <strong>
-                {event.organizer ||
-                  "Not specified"}
-              </strong>
-
+            <p>
+              {event.description ||
+                "No description available for this event."}
             </p>
 
+          </div>
 
-            {/* =================================================
-                EVENT INFORMATION
-            ================================================= */}
 
-            <div className="details-info-grid">
+          {/* =================================================
+              ACTION BUTTONS
+          ================================================= */}
 
+          <div className="details-actions">
 
-              {/* DATE */}
 
-              <div className="details-info-box">
+            {/* BACK */}
 
-                <span className="details-icon">
-                  📅
-                </span>
+            <button
+              className="details-back-btn"
+              onClick={() => navigate("/events")}
+            >
+              ← Back to Events
+            </button>
 
-                <div>
 
-                  <small>
-                    Date
-                  </small>
+            {/* EDIT */}
 
-                  <strong>
-                    {event.date ||
-                      "Not specified"}
-                  </strong>
-
-                </div>
-
-              </div>
-
-
-              {/* TIME */}
-
-              <div className="details-info-box">
-
-                <span className="details-icon">
-                  ⏰
-                </span>
-
-                <div>
-
-                  <small>
-                    Time
-                  </small>
-
-                  <strong>
-                    {event.time ||
-                      "Not specified"}
-                  </strong>
-
-                </div>
-
-              </div>
-
-
-              {/* LOCATION */}
-
-              <div className="details-info-box">
-
-                <span className="details-icon">
-                  📍
-                </span>
-
-                <div>
-
-                  <small>
-                    Location
-                  </small>
-
-                  <strong>
-                    {event.location ||
-                      "Not specified"}
-                  </strong>
-
-                </div>
-
-              </div>
-
-
-              {/* CATEGORY */}
-
-              <div className="details-info-box">
-
-                <span className="details-icon">
-                  🏷️
-                </span>
-
-                <div>
-
-                  <small>
-                    Category
-                  </small>
-
-                  <strong>
-                    {event.category ||
-                      "Other"}
-                  </strong>
-
-                </div>
-
-              </div>
-
-
-              {/* TICKETS */}
-
-              <div className="details-info-box">
-
-                <span className="details-icon">
-                  🎟️
-                </span>
-
-                <div>
-
-                  <small>
-                    Available Tickets
-                  </small>
-
-                  <strong>
-                    {event.tickets || 0}
-                  </strong>
-
-                </div>
-
-              </div>
-
-
-              {/* PRICE */}
-
-              <div className="details-info-box">
-
-                <span className="details-icon">
-                  💰
-                </span>
-
-                <div>
-
-                  <small>
-                    Ticket Price
-                  </small>
-
-                  <strong>
-                    ₹{event.ticketPrice || 0}
-                  </strong>
-
-                </div>
-
-              </div>
-
-            </div>
-
-
-            {/* =================================================
-                DESCRIPTION
-            ================================================= */}
-
-            <div className="details-description">
-
-              <h3>
-                About This Event
-              </h3>
-
-              <p>
-                {event.description ||
-                  "No description available."}
-              </p>
-
-            </div>
-
-
-            {/* =================================================
-                BUTTONS
-            ================================================= */}
-
-            <div className="details-actions">
-
-              <button
-                className="details-back-btn"
-                onClick={() =>
-                  navigate("/events")
-                }
-              >
-                ← Back to Events
-              </button>
-
-
-              <button
-                className="details-edit-btn"
-                onClick={() =>
-                  navigate(
-                    `/events/edit/${event._id}`
-                  )
-                }
-              >
-                ✏️ Edit Event
-              </button>
-
-            </div>
+            <button
+              className="details-edit-btn"
+              onClick={() =>
+                navigate(
+                  `/events/edit/${event._id || event.id}`
+                )
+              }
+            >
+              ✏️ Edit Event
+            </button>
 
           </div>
 
         </div>
 
-      </main>
+      </div>
 
-    </>
+    </div>
+
   );
 
-};
+}
 
 export default EventDetails;
