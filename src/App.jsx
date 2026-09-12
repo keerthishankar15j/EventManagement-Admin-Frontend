@@ -3,7 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
-  Outlet,
+  Outlet
 } from "react-router-dom";
 
 import AdminLogin from "./components/AdminLogin";
@@ -12,24 +12,23 @@ import AdminNavbar from "./components/Admin_navbar";
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
 import AdminUsers from "./components/Admin_users";
-
-import AddEvent from "./components/AddEvent";
 import EditEvent from "./components/EditEvent";
-
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
 
 
-/* =====================================================
-   ADMIN LAYOUT
-===================================================== */
+// =====================================================
+// ADMIN LAYOUT
+// =====================================================
 
 const AdminLayout = () => {
   return (
     <div className="admin-layout">
 
+      {/* SIDEBAR */}
       <AdminNavbar />
 
+      {/* PAGE CONTENT */}
       <div className="admin-page-content">
         <Outlet />
       </div>
@@ -39,18 +38,21 @@ const AdminLayout = () => {
 };
 
 
-/* =====================================================
-   APP
-===================================================== */
+// =====================================================
+// APP
+// =====================================================
 
 function App() {
+
   return (
+
     <BrowserRouter>
 
       <Routes>
 
+
         {/* =================================================
-            LOGIN
+            LOGIN PAGE
         ================================================= */}
 
         <Route
@@ -65,7 +67,16 @@ function App() {
 
         <Route element={<AdminLayout />}>
 
+
           {/* DASHBOARD */}
+
+          <Route
+            path="/dashboard"
+            element={<AdminDashboard />}
+          />
+
+
+          {/* ADMIN DASHBOARD ALIAS */}
 
           <Route
             path="/admin-dashboard"
@@ -73,22 +84,7 @@ function App() {
           />
 
 
-          {/* OLD DASHBOARD */}
-
-          <Route
-            path="/dashboard"
-            element={
-              <Navigate
-                to="/admin-dashboard"
-                replace
-              />
-            }
-          />
-
-
-          {/* =================================================
-              EVENTS
-          ================================================= */}
+          {/* EVENTS */}
 
           <Route
             path="/events"
@@ -96,19 +92,7 @@ function App() {
           />
 
 
-          {/* =================================================
-              ADD EVENT
-          ================================================= */}
-
-          <Route
-            path="/events/add"
-            element={<AddEvent />}
-          />
-
-
-          {/* =================================================
-              EVENT DETAILS
-          ================================================= */}
+          {/* EVENT DETAILS */}
 
           <Route
             path="/events/details/:id"
@@ -116,9 +100,7 @@ function App() {
           />
 
 
-          {/* =================================================
-              EDIT EVENT
-          ================================================= */}
+          {/* EDIT EVENT */}
 
           <Route
             path="/events/edit/:id"
@@ -145,7 +127,7 @@ function App() {
 
 
         {/* =================================================
-            FIRST OPEN
+            FIRST OPEN → LOGIN
         ================================================= */}
 
         <Route
@@ -160,7 +142,7 @@ function App() {
 
 
         {/* =================================================
-            UNKNOWN URL
+            UNKNOWN URL → LOGIN
         ================================================= */}
 
         <Route
@@ -176,7 +158,9 @@ function App() {
       </Routes>
 
     </BrowserRouter>
+
   );
+
 }
 
 export default App;
