@@ -25,13 +25,10 @@ body {
 ========================================================= */
 
 .main-content {
-  margin-left: 290px;
-
-  /* IMPORTANT */
-  width: calc(100% - 290px);
+  width: 100%;
   min-height: 100vh;
 
-  /* Reduced spacing */
+  margin-left: 0;
   padding: 25px 25px 45px;
 
   background:
@@ -56,6 +53,8 @@ body {
       #fff8f5,
       #f3f6ff
     );
+
+  font-family: "Inter", Arial, sans-serif;
 }
 
 /* =========================================================
@@ -81,10 +80,7 @@ body {
 .page-title {
   margin: 0;
 
-  font-family:
-    "Poppins",
-    "Inter",
-    sans-serif;
+  font-family: "Poppins", "Inter", sans-serif;
 
   font-size: 42px;
   font-weight: 800;
@@ -407,8 +403,7 @@ body {
 
   object-fit: cover;
 
-  transition:
-    transform 0.45s ease;
+  transition: transform 0.45s ease;
 }
 
 .event-card:hover
@@ -463,6 +458,7 @@ body {
   height: 100%;
 
   display: flex;
+
   justify-content: center;
   align-items: center;
 
@@ -505,8 +501,6 @@ body {
     rgba(0, 0, 0, 0.08);
 }
 
-/* UPCOMING */
-
 .card-status.upcoming {
   background: #fff8e7;
 
@@ -515,8 +509,6 @@ body {
   border: 1px solid #ffd36a;
 }
 
-/* ONGOING */
-
 .card-status.ongoing {
   background: #e8fff5;
 
@@ -524,8 +516,6 @@ body {
 
   border: 1px solid #6ee7b7;
 }
-
-/* COMPLETED */
 
 .card-status.completed {
   background: #eef2ff;
@@ -557,10 +547,7 @@ body {
 
   color: #111827;
 
-  font-family:
-    "Poppins",
-    "Inter",
-    sans-serif;
+  font-family: "Poppins", "Inter", sans-serif;
 
   font-size: 23px;
   font-weight: 800;
@@ -737,10 +724,6 @@ body {
   margin-top: 13px;
 }
 
-/* =========================================================
-   EDIT + DELETE
-========================================================= */
-
 .card-edit-btn,
 .card-delete-btn {
   height: 40px;
@@ -756,7 +739,9 @@ body {
   transition: all 0.25s ease;
 }
 
-/* EDIT */
+/* =========================================================
+   EDIT
+========================================================= */
 
 .card-edit-btn {
   border: 1px solid #d9caff;
@@ -790,7 +775,9 @@ body {
     rgba(108, 59, 255, 0.20);
 }
 
-/* DELETE */
+/* =========================================================
+   DELETE
+========================================================= */
 
 .card-delete-btn {
   border: 1px solid #ffcaca;
@@ -1153,8 +1140,6 @@ body {
   transition: 0.25s ease;
 }
 
-/* CANCEL */
-
 .cancel-btn {
   border: 1px solid #dfe3ed;
 
@@ -1166,8 +1151,6 @@ body {
 .cancel-btn:hover {
   background: #f1f5f9;
 }
-
-/* SAVE */
 
 .save-btn {
   border: none;
@@ -1201,9 +1184,8 @@ body {
 @media (max-width: 1400px) {
 
   .main-content {
-    margin-left: 290px;
-
-    width: calc(100% - 290px);
+    margin-left: 0;
+    width: 100%;
 
     padding:
       25px
@@ -1242,9 +1224,8 @@ body {
 @media (max-width: 1100px) {
 
   .main-content {
-    margin-left: 270px;
-
-    width: calc(100% - 270px);
+    margin-left: 0;
+    width: 100%;
 
     padding:
       25px
@@ -1283,7 +1264,6 @@ body {
 
   .main-content {
     margin-left: 0;
-
     width: 100%;
 
     padding:
