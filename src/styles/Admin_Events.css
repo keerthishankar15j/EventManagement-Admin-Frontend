@@ -3,14 +3,36 @@
 ========================================================= */
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Inter", Arial, sans-serif;
+  background: #f5f1ff;
+}
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
 .main-content {
   margin-left: 290px;
+
+  /* IMPORTANT */
+  width: calc(100% - 290px);
   min-height: 100vh;
 
-  padding: 45px 45px 60px;
+  /* Reduced spacing */
+  padding: 25px 25px 45px;
 
   background:
     radial-gradient(
@@ -34,10 +56,7 @@
       #fff8f5,
       #f3f6ff
     );
-
-  font-family: "Inter", Arial, sans-serif;
 }
-
 
 /* =========================================================
    PAGE HEADER
@@ -50,14 +69,13 @@
   align-items: center;
   justify-content: space-between;
 
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .page-title-area {
   display: flex;
   flex-direction: column;
-
-  gap: 7px;
+  gap: 5px;
 }
 
 .page-title {
@@ -83,10 +101,9 @@
 
   color: #64748b;
 
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 500;
 }
-
 
 /* =========================================================
    ADD EVENT BUTTON
@@ -143,7 +160,6 @@
   font-size: 21px;
 }
 
-
 /* =========================================================
    EVENTS MAIN CONTAINER
 ========================================================= */
@@ -151,15 +167,13 @@
 .events-card {
   width: 100%;
 
-  padding: 28px;
+  padding: 25px;
 
   border-radius: 25px;
 
-  background:
-    rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.94);
 
-  border: 1px solid
-    rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 
   box-shadow:
     0 18px 55px
@@ -167,7 +181,6 @@
 
   backdrop-filter: blur(15px);
 }
-
 
 /* =========================================================
    TOOLBAR
@@ -180,9 +193,9 @@
   align-items: center;
   justify-content: space-between;
 
-  padding-bottom: 23px;
+  padding-bottom: 20px;
 
-  margin-bottom: 27px;
+  margin-bottom: 22px;
 
   border-bottom: 1px solid #e9eaf1;
 }
@@ -208,7 +221,6 @@
   font-weight: 500;
 }
 
-
 /* =========================================================
    FILTERS
 ========================================================= */
@@ -220,8 +232,9 @@
   gap: 13px;
 }
 
-
-/* SEARCH */
+/* =========================================================
+   SEARCH
+========================================================= */
 
 .search-box {
   width: 255px;
@@ -274,8 +287,9 @@
   color: #94a3b8;
 }
 
-
-/* SELECT */
+/* =========================================================
+   SELECT
+========================================================= */
 
 .filter-select {
   width: 170px;
@@ -306,22 +320,22 @@
     rgba(124, 77, 255, 0.10);
 }
 
-
 /* =========================================================
    EVENT CARD GRID
 ========================================================= */
 
 .events-card-grid {
+  width: 100%;
+
   display: grid;
 
   grid-template-columns:
     repeat(3, minmax(0, 1fr));
 
-  gap: 22px;
+  gap: 20px;
 
   align-items: stretch;
 }
-
 
 /* =========================================================
    EVENT CARD
@@ -364,7 +378,6 @@
     rgba(67, 54, 130, 0.15);
 }
 
-
 /* =========================================================
    CARD IMAGE
 ========================================================= */
@@ -373,8 +386,6 @@
   position: relative;
 
   width: 100%;
-
-  /* REDUCED HEIGHT */
   height: 145px;
 
   overflow: hidden;
@@ -404,7 +415,6 @@
 .event-card-image img {
   transform: scale(1.05);
 }
-
 
 /* =========================================================
    NO IMAGE
@@ -444,7 +454,6 @@
   font-weight: 650;
 }
 
-
 /* =========================================================
    IMAGE ERROR
 ========================================================= */
@@ -469,7 +478,6 @@
   font-size: 14px;
   font-weight: 700;
 }
-
 
 /* =========================================================
    STATUS BADGE
@@ -497,7 +505,6 @@
     rgba(0, 0, 0, 0.08);
 }
 
-
 /* UPCOMING */
 
 .card-status.upcoming {
@@ -507,7 +514,6 @@
 
   border: 1px solid #ffd36a;
 }
-
 
 /* ONGOING */
 
@@ -519,7 +525,6 @@
   border: 1px solid #6ee7b7;
 }
 
-
 /* COMPLETED */
 
 .card-status.completed {
@@ -529,7 +534,6 @@
 
   border: 1px solid #c7d2fe;
 }
-
 
 /* =========================================================
    CARD CONTENT
@@ -541,10 +545,8 @@
   display: flex;
   flex-direction: column;
 
-  /* REDUCED PADDING */
   padding: 17px 19px 16px;
 }
-
 
 /* =========================================================
    EVENT TITLE
@@ -568,7 +570,6 @@
   letter-spacing: -0.3px;
 }
 
-
 /* =========================================================
    ORGANIZER
 ========================================================= */
@@ -590,7 +591,6 @@
   font-weight: 800;
 }
 
-
 /* =========================================================
    DESCRIPTION
 ========================================================= */
@@ -598,7 +598,6 @@
 .event-description {
   margin: 0;
 
-  /* REDUCED */
   min-height: 43px;
 
   color: #64748b;
@@ -617,7 +616,6 @@
   overflow: hidden;
 }
 
-
 /* =========================================================
    EVENT DETAILS
 ========================================================= */
@@ -630,17 +628,14 @@
 
   gap: 9px 10px;
 
-  /* REDUCED */
   margin-top: 13px;
 
   padding-top: 12px;
   padding-bottom: 12px;
 
   border-top: 1px solid #eceef4;
-
   border-bottom: 1px solid #eceef4;
 }
-
 
 /* =========================================================
    DETAIL ITEM
@@ -654,7 +649,6 @@
 
   gap: 8px;
 }
-
 
 /* =========================================================
    DETAIL ICON
@@ -686,7 +680,6 @@
     0 4px 10px
     rgba(108, 59, 255, 0.07);
 }
-
 
 /* =========================================================
    DETAIL TEXT
@@ -729,7 +722,6 @@
   font-weight: 750;
 }
 
-
 /* =========================================================
    ACTION BUTTONS
 ========================================================= */
@@ -742,10 +734,8 @@
 
   gap: 9px;
 
-  /* REDUCED */
   margin-top: 13px;
 }
-
 
 /* =========================================================
    EDIT + DELETE
@@ -765,7 +755,6 @@
 
   transition: all 0.25s ease;
 }
-
 
 /* EDIT */
 
@@ -801,7 +790,6 @@
     rgba(108, 59, 255, 0.20);
 }
 
-
 /* DELETE */
 
 .card-delete-btn {
@@ -835,7 +823,6 @@
     0 7px 16px
     rgba(239, 68, 68, 0.18);
 }
-
 
 /* =========================================================
    NO EVENTS
@@ -889,7 +876,6 @@
   font-size: 14px;
 }
 
-
 /* =========================================================
    ADD EVENT MODAL
 ========================================================= */
@@ -915,7 +901,6 @@
 
   overflow-y: auto;
 }
-
 
 /* =========================================================
    FORM CARD
@@ -945,7 +930,6 @@
 }
 
 @keyframes formAppear {
-
   from {
     opacity: 0;
 
@@ -962,7 +946,6 @@
       scale(1);
   }
 }
-
 
 /* =========================================================
    FORM HEADER
@@ -999,7 +982,6 @@
   font-size: 14px;
 }
 
-
 /* =========================================================
    CLOSE BUTTON
 ========================================================= */
@@ -1030,7 +1012,6 @@
 
   transform: rotate(90deg);
 }
-
 
 /* =========================================================
    FORM GROUP
@@ -1097,8 +1078,9 @@
     rgba(124, 77, 255, 0.10);
 }
 
-
-/* FILE */
+/* =========================================================
+   FILE
+========================================================= */
 
 .form-group input[type="file"] {
   height: auto;
@@ -1109,7 +1091,6 @@
 
   background: #faf9ff;
 }
-
 
 /* =========================================================
    IMAGE PREVIEW
@@ -1136,7 +1117,6 @@
 
   object-fit: cover;
 }
-
 
 /* =========================================================
    FORM BUTTONS
@@ -1173,7 +1153,6 @@
   transition: 0.25s ease;
 }
 
-
 /* CANCEL */
 
 .cancel-btn {
@@ -1187,7 +1166,6 @@
 .cancel-btn:hover {
   background: #f1f5f9;
 }
-
 
 /* SAVE */
 
@@ -1216,26 +1194,29 @@
     rgba(108, 59, 255, 0.30);
 }
 
-
 /* =========================================================
-   1400px
+   RESPONSIVE - 1400px
 ========================================================= */
 
 @media (max-width: 1400px) {
 
   .main-content {
+    margin-left: 290px;
+
+    width: calc(100% - 290px);
+
     padding:
-      40px
-      30px
-      55px;
+      25px
+      20px
+      45px;
   }
 
   .events-card {
-    padding: 25px;
+    padding: 23px;
   }
 
   .events-card-grid {
-    gap: 20px;
+    gap: 18px;
   }
 
   .event-card-image {
@@ -1250,13 +1231,12 @@
   }
 
   .event-card-title {
-    font-size: 22px;
+    font-size: 21px;
   }
 }
 
-
 /* =========================================================
-   1100px
+   RESPONSIVE - 1100px
 ========================================================= */
 
 @media (max-width: 1100px) {
@@ -1264,10 +1244,12 @@
   .main-content {
     margin-left: 270px;
 
+    width: calc(100% - 270px);
+
     padding:
-      35px
-      22px
-      50px;
+      25px
+      18px
+      40px;
   }
 
   .events-card-grid {
@@ -1293,9 +1275,8 @@
   }
 }
 
-
 /* =========================================================
-   800px
+   RESPONSIVE - 800px
 ========================================================= */
 
 @media (max-width: 800px) {
@@ -1303,10 +1284,12 @@
   .main-content {
     margin-left: 0;
 
+    width: 100%;
+
     padding:
-      30px
-      20px
-      45px;
+      25px
+      18px
+      40px;
   }
 
   .page-header {
@@ -1314,7 +1297,7 @@
 
     align-items: flex-start;
 
-    gap: 20px;
+    gap: 18px;
   }
 
   .add-event-btn {
@@ -1352,18 +1335,17 @@
   }
 }
 
-
 /* =========================================================
-   600px
+   RESPONSIVE - 600px
 ========================================================= */
 
 @media (max-width: 600px) {
 
   .main-content {
     padding:
-      25px
-      15px
-      40px;
+      20px
+      12px
+      35px;
   }
 
   .page-title {
@@ -1453,9 +1435,8 @@
   }
 }
 
-
 /* =========================================================
-   400px
+   RESPONSIVE - 400px
 ========================================================= */
 
 @media (max-width: 400px) {
