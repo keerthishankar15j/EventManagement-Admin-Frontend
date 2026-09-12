@@ -1,995 +1,312 @@
-/* =====================================================
-RESET
-===================================================== */
-
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
-/* =====================================================
-BODY
-===================================================== */
-
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f7f8fc;
-  color: #17203a;
-}
 
 /* =====================================================
-MAIN LAYOUT
+   PAGE
 ===================================================== */
 
-.users-layout {
+.admin-users-page {
   width: 100%;
   min-height: 100vh;
-  display: flex;
-  background: #f7f8fc;
+
+  padding: 30px;
+
+  background: #f5f6fb;
+
+  font-family: "Poppins", sans-serif;
 }
 
-/* =====================================================
-MAIN CONTENT
-===================================================== */
-
-.users-content {
-  flex: 1;
-  min-height: 100vh;
-  margin-left: 250px;
-  padding: 38px 40px;
-  background: #f7f8fc;
-  overflow-x: hidden;
-}
 
 /* =====================================================
-PAGE HEADER
+   HEADER
 ===================================================== */
 
 .users-header {
-  width: 100%;
   display: flex;
+
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 30px;
+
+  align-items: center;
+
+  margin-bottom: 25px;
 }
 
-/* =====================================================
-TITLE AREA
-===================================================== */
-
-.users-title-area {
-  display: flex;
-  flex-direction: column;
-}
 
 .users-breadcrumb {
-  margin-bottom: 8px;
-  color: #7040e9;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 1px;
+  font-size: 12px;
+
+  font-weight: 600;
+
+  letter-spacing: 1.5px;
+
+  color: #7c3aed;
+
+  margin-bottom: 6px;
 }
+
 
 .users-header h1 {
   margin: 0;
-  color: #17203a;
-  font-size: 30px;
+
+  font-size: 32px;
+
   font-weight: 700;
+
+  color: #1f2937;
 }
+
 
 .users-header p {
-  margin: 7px 0 0;
-  color: #b7491a;
-  font-size: 15px;
-}
-
-/* =====================================================
-ADMIN BOX
-===================================================== */
-
-.admin-box {
-  height: 42px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 0 13px;
-
-  background: #ffffff;
-  border: 1px solid #e3e5eb;
-  border-radius: 9px;
-
-  color: #555d70;
-  font-size: 12px;
-  font-weight: 600;
-
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.admin-box:hover {
-  border-color: #c4b5fd;
-  box-shadow: 0 6px 18px rgba(112, 64, 233, 0.10);
-  transform: translateY(-1px);
-}
-
-.admin-avatar {
-  width: 25px;
-  height: 25px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: #eeeaff;
-  color: #7040e9;
-
-  font-size: 10px;
-  font-weight: 700;
-}
-
-.admin-arrow {
-  margin-left: 5px;
-  color: #888fa0;
-  font-size: 12px;
-}
-
-/* =====================================================
-USERS CARD
-===================================================== */
-
-.users-card {
-  width: 100%;
-
-  background: #ffffff;
-
-  border: 1px solid #e6e8ee;
-  border-radius: 16px;
-
-  overflow: hidden;
-
-  box-shadow:
-    0 5px 20px rgba(20, 25, 45, 0.04);
-
-  transition:
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
-}
-
-.users-card:hover {
-  box-shadow:
-    0 15px 40px rgba(20, 25, 45, 0.08);
-}
-
-/* =====================================================
-TOOLBAR
-===================================================== */
-
-.users-toolbar {
-  min-height: 90px;
-
-  padding: 20px 24px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  border-bottom: 1px solid #eceef3;
-}
-
-/* =====================================================
-USERS HEADING
-===================================================== */
-
-.users-heading h2 {
-  margin: 0;
-
-  color: #17203a;
-
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.users-heading p {
   margin: 5px 0 0;
 
-  color: #697386;
+  font-size: 14px;
 
-  font-size: 11px;
+  color: #6b7280;
 }
+
 
 /* =====================================================
-ACTIONS
+   TOTAL USERS
 ===================================================== */
 
-.users-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.total-users {
+  background: white;
+
+  padding: 15px 22px;
+
+  border-radius: 12px;
+
+  color: #6b7280;
+
+  font-size: 14px;
+
+  box-shadow:
+    0 4px 15px rgba(0, 0, 0, 0.05);
 }
+
+
+.total-users strong {
+  color: #7c3aed;
+
+  font-size: 20px;
+
+  margin-left: 8px;
+}
+
 
 /* =====================================================
-SEARCH BOX
+   TABLE CONTAINER
 ===================================================== */
 
-.search-box {
-  width: 220px;
-  height: 42px;
-
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  padding: 0 12px;
-
-  background: #ffffff;
-
-  border: 1px solid #dfe2e9;
-  border-radius: 10px;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-
-.search-box:hover {
-  border-color: #b7a5f8;
-
-  box-shadow:
-    0 6px 18px rgba(112, 64, 233, 0.08);
-
-  transform: translateY(-1px);
-}
-
-.search-box:focus-within {
-  border-color: #7040e9;
-
-  box-shadow:
-    0 0 0 4px rgba(112, 64, 233, 0.10);
-}
-
-.search-icon {
-  color: #747c90;
-  font-size: 16px;
-
-  transition:
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.search-box:focus-within .search-icon {
-  color: #7040e9;
-  transform: scale(1.08);
-}
-
-.search-box input {
-  width: 100%;
-  height: 100%;
-
-  border: none;
-  outline: none;
-
-  background: transparent;
-
-  color: #17203a;
-
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.search-box input::placeholder {
-  color: #747c90;
-  opacity: 1;
-}
-
-/* =====================================================
-STATUS FILTER
-===================================================== */
-
-.status-filter {
-  width: 125px;
-  height: 42px;
-
-  padding: 0 12px;
-
-  border: 1px solid #dfe2e9;
-  border-radius: 10px;
-
-  outline: none;
-
-  background: #ffffff;
-
-  color: #3f485d;
-
-  font-family: Arial, sans-serif;
-
-  font-size: 12px;
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.status-filter:hover {
-  border-color: #7040e9;
-  color: #7040e9;
-
-  box-shadow:
-    0 6px 18px rgba(112, 64, 233, 0.10);
-
-  transform: translateY(-1px);
-}
-
-.status-filter:focus {
-  border-color: #7040e9;
-
-  box-shadow:
-    0 0 0 4px rgba(112, 64, 233, 0.10);
-}
-
-/* =====================================================
-ADD USER BUTTON
-===================================================== */
-
-.add-user-btn {
-  min-height: 42px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  gap: 8px;
-
-  padding: 0 17px;
-
-  border: none;
-  border-radius: 10px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #7657f5,
-      #7040e9
-    );
-
-  color: #ffffff;
-
-  font-family: Arial, sans-serif;
-
-  font-size: 12px;
-  font-weight: 700;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 7px 16px rgba(112, 64, 233, 0.20);
-
-  transition:
-    transform 0.18s cubic-bezier(.4, 0, .2, 1),
-    background 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.add-user-btn:hover {
-  background:
-    linear-gradient(
-      135deg,
-      #7040e9,
-      #6233d8
-    );
-
-  transform: translateY(-2px) scale(0.98);
-
-  box-shadow:
-    0 12px 25px rgba(112, 64, 233, 0.28);
-}
-
-.add-user-btn:active {
-  transform: translateY(0) scale(0.94);
-}
-
-/* =====================================================
-TABLE WRAPPER
-===================================================== */
-
-.users-table-wrapper {
+.users-table-container {
   width: 100%;
 
-  min-height: 420px;
+  background: white;
+
+  border-radius: 16px;
 
   overflow-x: auto;
 
-  scrollbar-width: thin;
-  scrollbar-color: #c4b5fd transparent;
+  box-shadow:
+    0 5px 25px rgba(0, 0, 0, 0.06);
 }
 
-.users-table-wrapper::-webkit-scrollbar {
-  height: 7px;
-}
-
-.users-table-wrapper::-webkit-scrollbar-track {
-  background: #fafafa;
-}
-
-.users-table-wrapper::-webkit-scrollbar-thumb {
-  background: #c4b5fd;
-  border-radius: 20px;
-}
 
 /* =====================================================
-TABLE
+   TABLE
 ===================================================== */
 
-.users-table {
+.users-table-container table {
   width: 100%;
-
-  min-width: 750px;
 
   border-collapse: collapse;
 
-  table-layout: fixed;
+  min-width: 900px;
 }
 
-/* =====================================================
-TABLE HEADER
-===================================================== */
 
-.users-table thead {
-  background: #fafaff;
-}
-
-.users-table th {
-  height: 56px;
-
-  padding: 0 20px;
-
-  background: #fafaff;
-
-  border-bottom: 1px solid #e9ebf1;
-
-  color: #4b556b;
+.users-table-container th {
+  padding: 18px 20px;
 
   text-align: left;
 
-  font-size: 11px;
+  background: #fafafa;
 
-  font-weight: 800;
+  color: #6b7280;
+
+  font-size: 12px;
+
+  font-weight: 600;
 
   text-transform: uppercase;
 
-  letter-spacing: 0.7px;
+  letter-spacing: 0.5px;
 
-  white-space: nowrap;
-
-  cursor: default;
-
-  position: relative;
-
-  transition:
-    background 0.22s ease,
-    color 0.22s ease,
-    transform 0.22s ease,
-    box-shadow 0.22s ease;
+  border-bottom: 1px solid #eeeeee;
 }
+
+
+.users-table-container td {
+  padding: 17px 20px;
+
+  font-size: 14px;
+
+  color: #374151;
+
+  border-bottom: 1px solid #f0f0f0;
+}
+
+
+.users-table-container tbody tr:hover {
+  background: #fafaff;
+}
+
 
 /* =====================================================
-TABLE HEADER HOVER
+   USER NAME
 ===================================================== */
 
-/* 
-   When you move/touch the mouse over:
-   User Name
-   Email
-   Joined Date
-   Status
-   Edit
-   Delete
-
-   the header becomes purple.
-*/
-
-.users-table th:hover {
-  background:
-    linear-gradient(
-      135deg,
-      #f2eeff,
-      #eee9ff
-    );
-
-  color: #7040e9;
-
-  transform: translateY(-1px);
-
-  box-shadow:
-    inset 0 -3px 0 #7040e9;
-}
-
-/* =====================================================
-HEADER HOVER GLOW
-===================================================== */
-
-.users-table th::after {
-  content: "";
-
-  position: absolute;
-
-  left: 20px;
-  right: 20px;
-  bottom: 0;
-
-  height: 2px;
-
-  border-radius: 10px;
-
-  background:
-    linear-gradient(
-      90deg,
-      #7040e9,
-      #9b7cff
-    );
-
-  transform: scaleX(0);
-
-  transform-origin: center;
-
-  transition:
-    transform 0.25s ease;
-}
-
-.users-table th:hover::after {
-  transform: scaleX(1);
-}
-
-/* =====================================================
-COLUMN WIDTHS
-===================================================== */
-
-.users-table th:nth-child(1) {
-  width: 25%;
-}
-
-.users-table th:nth-child(2) {
-  width: 23%;
-}
-
-.users-table th:nth-child(3) {
-  width: 18%;
-}
-
-.users-table th:nth-child(4) {
-  width: 14%;
-}
-
-.users-table th:nth-child(5) {
-  width: 10%;
-}
-
-.users-table th:nth-child(6) {
-  width: 10%;
-}
-
-/* =====================================================
-SPECIAL HEADER COLORS
-===================================================== */
-
-/* User Name */
-
-.users-table th:nth-child(1):hover {
-  color: #7040e9;
-}
-
-/* Email */
-
-.users-table th:nth-child(2):hover {
-  color: #635bff;
-}
-
-/* Joined Date */
-
-.users-table th:nth-child(3):hover {
-  color: #2563eb;
-}
-
-/* Status */
-
-.users-table th:nth-child(4):hover {
-  color: #f59e0b;
-  background:
-    linear-gradient(
-      135deg,
-      #fffaf0,
-      #fff5df
-    );
-
-  box-shadow:
-    inset 0 -3px 0 #f59e0b;
-}
-
-/* Edit */
-
-.users-table th:nth-child(5):hover {
-  color: #16a34a;
-
-  background:
-    linear-gradient(
-      135deg,
-      #f0fdf4,
-      #e9fbea
-    );
-
-  box-shadow:
-    inset 0 -3px 0 #16a34a;
-}
-
-/* Delete */
-
-.users-table th:nth-child(6):hover {
-  color: #ef4444;
-
-  background:
-    linear-gradient(
-      135deg,
-      #fff5f5,
-      #ffeded
-    );
-
-  box-shadow:
-    inset 0 -3px 0 #ef4444;
-}
-
-/* =====================================================
-TABLE BODY
-===================================================== */
-
-.users-table tbody {
-  height: 360px;
-}
-
-.users-table tbody tr {
-  background: #ffffff;
-
-  transition:
-    background 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-/* =====================================================
-ROW HOVER
-===================================================== */
-
-.users-table tbody tr:hover {
-  background:
-    linear-gradient(
-      90deg,
-      rgba(112, 64, 233, 0.035),
-      rgba(255, 101, 79, 0.02)
-    );
-
-  box-shadow:
-    inset 4px 0 0 #7040e9;
-}
-
-/* =====================================================
-TABLE CELLS
-===================================================== */
-
-.users-table td {
-  height: 68px;
-
-  padding: 0 20px;
-
-  border-bottom: 1px solid #eef0f4;
-
-  color: #3f485d;
-
-  font-size: 13px;
-
-  font-weight: 500;
-
-  white-space: nowrap;
-
-  transition:
-    color 0.2s ease,
-    background 0.2s ease;
-}
-
-.users-table tbody tr:hover td {
-  color: #17203a;
-}
-
-/* =====================================================
-USER NAME
-===================================================== */
-
-.users-table td:first-child {
-  color: #17203a;
-  font-weight: 700;
-}
-
-/* =====================================================
-STATUS BADGE
-===================================================== */
-
-.status {
-  display: inline-flex;
+.user-name {
+  display: flex;
 
   align-items: center;
+
+  gap: 10px;
+
+  font-weight: 600;
+}
+
+
+.user-avatar {
+  width: 36px;
+
+  height: 36px;
+
+  display: flex;
+
+  align-items: center;
+
   justify-content: center;
 
-  gap: 7px;
+  border-radius: 50%;
 
-  min-width: 85px;
+  background: #ede9fe;
 
-  padding: 7px 12px;
-
-  border-radius: 999px;
-
-  font-size: 11px;
+  color: #7c3aed;
 
   font-weight: 700;
-
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.2s ease;
 }
 
-.status:hover {
-  transform: translateY(-1px);
-  box-shadow:
-    0 6px 15px rgba(15, 23, 42, 0.08);
-}
-
-/* Status Dot */
-
-.status::before {
-  content: "";
-
-  width: 7px;
-  height: 7px;
-
-  border-radius: 50%;
-}
-
-/* Active */
-
-.status.active {
-  background: #eafbf5;
-  border: 1px solid #a7e7cf;
-  color: #087f5b;
-}
-
-.status.active::before {
-  background: #16b981;
-}
-
-/* Inactive */
-
-.status.inactive {
-  background: #fff0f0;
-  border: 1px solid #f5b4b4;
-  color: #c53030;
-}
-
-.status.inactive::before {
-  background: #ef4444;
-}
 
 /* =====================================================
-EDIT BUTTON
+   ROLE
 ===================================================== */
 
-.edit-btn {
-  min-height: 38px;
+.role-badge {
+  display: inline-block;
 
-  padding: 8px 14px;
+  padding: 5px 12px;
 
-  border: 1px solid #d8d0ff;
+  border-radius: 20px;
 
-  border-radius: 9px;
+  background: #ede9fe;
 
-  background: #ffffff;
-
-  color: #5b3fd3;
+  color: #6d28d9;
 
   font-size: 12px;
 
-  font-weight: 700;
+  font-weight: 600;
 
-  cursor: pointer;
-
-  transition:
-    transform 0.18s cubic-bezier(.4,0,.2,1),
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
+  text-transform: capitalize;
 }
 
-.edit-btn:hover {
-  background: #f1edff;
-
-  border-color: #b9a7ff;
-
-  color: #5b2fe0;
-
-  transform: translateY(-1px) scale(0.96);
-
-  box-shadow:
-    0 6px 16px rgba(112, 64, 233, 0.12);
-}
-
-.edit-btn:active {
-  transform: scale(0.92);
-}
 
 /* =====================================================
-DELETE BUTTON
+   STATUS
 ===================================================== */
 
-.delete-btn {
-  min-height: 38px;
+.status-badge {
+  color: #16a34a;
 
-  padding: 8px 14px;
+  font-size: 12px;
 
-  border: 1px solid #fecaca;
+  font-weight: 600;
+}
 
-  border-radius: 9px;
 
-  background: #ffffff;
+/* =====================================================
+   NO USERS
+===================================================== */
+
+.no-users {
+  text-align: center !important;
+
+  padding: 50px !important;
+
+  color: #9ca3af !important;
+
+  font-size: 15px !important;
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.users-loading {
+  min-height: 100vh;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  background: #f5f6fb;
+
+  color: #6d28d9;
+
+  font-size: 16px;
+
+  font-weight: 600;
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.users-error {
+  margin: 30px;
+
+  padding: 20px;
+
+  background: #fff1f2;
 
   color: #dc2626;
 
-  font-size: 12px;
+  border-radius: 10px;
 
-  font-weight: 700;
+  text-align: center;
 
-  cursor: pointer;
-
-  transition:
-    transform 0.18s cubic-bezier(.4,0,.2,1),
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
+  font-weight: 500;
 }
 
-.delete-btn:hover {
-  background: #fff0f0;
-
-  border-color: #fca5a5;
-
-  color: #b91c1c;
-
-  transform: translateY(-1px) scale(0.96);
-
-  box-shadow:
-    0 6px 16px rgba(239, 68, 68, 0.12);
-}
-
-.delete-btn:active {
-  transform: scale(0.92);
-}
 
 /* =====================================================
-PAGINATION
+   RESPONSIVE
 ===================================================== */
 
-.pagination {
-  height: 70px;
+@media (max-width: 768px) {
 
-  display: flex;
-
-  align-items: center;
-
-  justify-content: flex-end;
-
-  gap: 6px;
-
-  padding: 0 24px;
-
-  border-top: 1px solid #eceef3;
-
-  background: #ffffff;
-}
-
-.pagination button {
-  width: 40px;
-  height: 40px;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid #e2e4ea;
-
-  border-radius: 9px;
-
-  background: #ffffff;
-
-  color: #3f485d;
-
-  font-family: Arial, sans-serif;
-
-  font-size: 12px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.18s ease,
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.pagination button:hover {
-  background: #f1edff;
-
-  border-color: #c4b5fd;
-
-  color: #7040e9;
-
-  transform: scale(0.96);
-}
-
-.pagination button:active {
-  transform: scale(0.92);
-}
-
-.pagination button.active {
-  background:
-    linear-gradient(
-      135deg,
-      #7040e9,
-      #7c4dff
-    );
-
-  border-color: #7040e9;
-
-  color: #ffffff;
-
-  box-shadow:
-    0 8px 18px rgba(112, 64, 233, 0.25);
-}
-
-/* =====================================================
-FOCUS ACCESSIBILITY
-===================================================== */
-
-button:focus-visible,
-input:focus-visible,
-select:focus-visible {
-  outline: 3px solid rgba(124, 77, 255, 0.35);
-
-  outline-offset: 3px;
-}
-
-/* =====================================================
-RESPONSIVE - 1100px
-===================================================== */
-
-@media (max-width: 1100px) {
-
-  .users-content {
-    padding: 30px 25px;
+  .admin-users-page {
+    padding: 20px;
   }
 
-  .users-toolbar {
+
+  .users-header {
     flex-direction: column;
 
     align-items: flex-start;
@@ -997,103 +314,9 @@ RESPONSIVE - 1100px
     gap: 15px;
   }
 
-  .users-actions {
-    width: 100%;
-  }
-}
 
-/* =====================================================
-RESPONSIVE - 800px
-===================================================== */
-
-@media (max-width: 800px) {
-
-  .users-content {
-    margin-left: 0;
-
-    padding: 25px 20px;
-  }
-
-  .users-header {
-    flex-direction: column;
-
-    align-items: flex-start;
-
-    gap: 20px;
-  }
-
-  .users-actions {
-    flex-wrap: wrap;
-  }
-
-  .users-table-wrapper {
-    overflow-x: auto;
-  }
-}
-
-/* =====================================================
-RESPONSIVE - 600px
-===================================================== */
-
-@media (max-width: 600px) {
-
-  .users-content {
-    padding: 20px 15px;
-  }
-
-  .users-header h1 {
-    font-size: 25px;
-  }
-
-  .users-actions {
-    width: 100%;
-
-    flex-direction: column;
-
-    align-items: stretch;
-  }
-
-  .search-box {
+  .total-users {
     width: 100%;
   }
 
-  .status-filter {
-    width: 100%;
-  }
-
-  .add-user-btn {
-    width: 100%;
-
-    min-height: 44px;
-  }
-
-  .users-table-wrapper {
-    min-height: 350px;
-  }
-
-  .pagination {
-    justify-content: center;
-  }
-
-  .pagination button {
-    width: 40px;
-    height: 40px;
-  }
-}
-
-/* =====================================================
-REDUCED MOTION
-===================================================== */
-
-@media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-
-    animation-iteration-count: 1 !important;
-
-    transition-duration: 0.01ms !important;
-  }
 }

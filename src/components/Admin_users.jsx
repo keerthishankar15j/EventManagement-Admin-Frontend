@@ -1,225 +1,311 @@
-import React from "react";
-import AdminNavbar from "../components/Admin_navbar";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
 import "../styles/Admin_Users.css";
 
-function Users() {
+
+const AdminUsers = () => {
+
+  const [users, setUsers] = useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+
+  // =====================================================
+  // GET USERS
+  // =====================================================
+
+  const fetchUsers = async () => {
+
+    try {
+
+      setLoading(true);
+
+      setError("");
+
+
+      const response =
+        await axios.get(
+          "http://localhost:9001/api/admin/users"
+        );
+
+
+      setUsers(
+        response.data.users
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "FETCH USERS ERROR:",
+        error
+      );
+
+
+      setError(
+        error.response?.data?.message ||
+        "Unable to load users"
+      );
+
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+
+  // =====================================================
+  // PAGE LOAD
+  // =====================================================
+
+  useEffect(() => {
+
+    fetchUsers();
+
+  }, []);
+
+
+  // =====================================================
+  // LOADING
+  // =====================================================
+
+  if (loading) {
+
+    return (
+      <div className="users-loading">
+        Loading users...
+      </div>
+    );
+
+  }
+
+
+  // =====================================================
+  // ERROR
+  // =====================================================
+
+  if (error) {
+
+    return (
+      <div className="users-error">
+        {error}
+      </div>
+    );
+
+  }
+
+
+  // =====================================================
+  // UI
+  // =====================================================
+
   return (
-    <div className="users-layout">
 
-      {/* ================= SIDEBAR ================= */}
-      <AdminNavbar />
+    <div className="admin-users-page">
 
 
-      {/* ================= MAIN CONTENT ================= */}
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
-      <main className="users-content">
+      <div className="users-header">
 
-        {/* ================= PAGE HEADER ================= */}
+        <div>
 
-        <div className="users-header">
-
-          <div className="users-title-area">
-
-            <div className="users-breadcrumb">
-              ADMIN PANEL / USERS
-            </div>
-
-            <h1>Users</h1>
-
-            <p>
-              Manage and organize all registered users
-            </p>
-
+          <div className="users-breadcrumb">
+            ADMIN PANEL
           </div>
 
+          <h1>
+            Users
+          </h1>
 
-          {/* ================= ADMIN DROPDOWN ================= */}
-
-         
+          <p>
+            View all registered users
+          </p>
 
         </div>
 
 
-        {/* ================= USERS CARD ================= */}
+        <div className="total-users">
 
-        <section className="users-card">
+          Total Users:
 
+          <strong>
+            {users.length}
+          </strong>
 
-          {/* ================= TOOLBAR ================= */}
+        </div>
 
-          <div className="users-toolbar">
+      </div>
 
-            {/* LEFT SIDE */}
 
-            <div className="users-heading">
+      {/* =================================================
+          TABLE
+      ================================================= */}
 
-              <h2>
-                Users
-              </h2>
+      <div className="users-table-container">
 
-             
+        <table>
 
-            </div>
+          <thead>
 
+            <tr>
 
-            {/* RIGHT SIDE */}
+              <th>
+                #
+              </th>
 
-            <div className="users-actions">
+              <th>
+                Name
+              </th>
 
+              <th>
+                Email
+              </th>
 
-              {/* ================= SEARCH ================= */}
+              <th>
+                Role
+              </th>
 
-              <div className="search-box">
+              <th>
+                Phone
+              </th>
 
-                <span className="search-icon">
-                  ⌕
-                </span>
+              <th>
+                Joined Date
+              </th>
 
-                <input
-                  type="text"
-                  placeholder="Search users..."
-                />
+              <th>
+                Status
+              </th>
 
-              </div>
+            </tr>
 
+          </thead>
 
-              {/* ================= STATUS ================= */}
 
-              <select className="status-filter">
+          <tbody>
 
-                <option>
-                  All Status
-                </option>
+            {users.length === 0 ? (
 
-                <option>
-                  Active
-                </option>
+              <tr>
 
-                <option>
-                  Inactive
-                </option>
+                <td
+                  colSpan="7"
+                  className="no-users"
+                >
+                  No users found
+                </td>
 
-              </select>
+              </tr>
 
+            ) : (
 
-              {/* ================= ADD USER ================= */}
+              users.map(
+                (user, index) => {
 
-              <button
-                type="button"
-                className="add-user-btn"
-              >
+                  return (
 
-                <span>
-                  +
-                </span>
+                    <tr
+                      key={user._id}
+                    >
 
-                <span>
-                  Add Users
-                </span>
+                      <td>
+                        {index + 1}
+                      </td>
 
-                <span>
-                  →
-                </span>
 
-              </button>
+                      <td>
 
-            </div>
+                        <div className="user-name">
 
-          </div>
+                          <div className="user-avatar">
 
+                            {user.name
+                              ?.charAt(0)
+                              ?.toUpperCase()}
 
-          {/* ================= TABLE ================= */}
+                          </div>
 
-          <div className="users-table-wrapper">
+                          <span>
+                            {user.name || "-"}
+                          </span>
 
-            <table className="users-table">
+                        </div>
 
-              {/* ================= TABLE HEADER ================= */}
+                      </td>
 
-              <thead>
 
-                <tr>
+                      <td>
+                        {user.email || "-"}
+                      </td>
 
-                  <th>
-                    User Name
-                  </th>
 
-                  <th>
-                    Email
-                  </th>
+                      <td>
 
-                  <th>
-                    Joined Date
-                  </th>
+                        <span className="role-badge">
+                          {user.role || "-"}
+                        </span>
 
-                  <th>
-                    Status
-                  </th>
+                      </td>
 
-                  <th>
-                    Edit
-                  </th>
 
-                  <th>
-                    Delete
-                  </th>
+                      <td>
+                        {user.phone || "-"}
+                      </td>
 
-                </tr>
 
-              </thead>
+                      <td>
 
+                        {user.createdAt
+                          ? new Date(
+                              user.createdAt
+                            ).toLocaleDateString(
+                              "en-IN"
+                            )
+                          : "-"}
 
-              {/* ================= EMPTY TABLE ================= */}
+                      </td>
 
-              <tbody>
 
-                {/* 
-                  Backend user data will be displayed here later.
-                  No sample users are added.
-                */}
+                      <td>
 
-              </tbody>
+                        <span className="status-badge">
+                          ● Registered
+                        </span>
 
-            </table>
+                      </td>
 
-          </div>
+                    </tr>
 
+                  );
 
-          {/* ================= PAGINATION ================= */}
+                }
 
-          <div className="pagination">
+              )
 
-            <button type="button">
-              ‹
-            </button>
+            )}
 
-            <button
-              type="button"
-              className="active"
-            >
-              1
-            </button>
+          </tbody>
 
-            <button type="button">
-              2
-            </button>
+        </table>
 
-            <button type="button">
-              3
-            </button>
-
-            <button type="button">
-              ›
-            </button>
-
-          </div>
-
-        </section>
-
-      </main>
+      </div>
 
     </div>
-  );
-}
 
-export default Users;
+  );
+
+};
+
+
+export default AdminUsers;

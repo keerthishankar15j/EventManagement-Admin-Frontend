@@ -6,7 +6,9 @@ const AdminNavbar = () => {
   return (
     <aside className="admin-sidebar">
 
-      {/* ================= LOGO ================= */}
+      {/* =================================================
+          LOGO
+      ================================================= */}
 
       <div className="admin-logo">
 
@@ -15,6 +17,7 @@ const AdminNavbar = () => {
         </div>
 
         <div className="admin-logo-text">
+
           <h2>
             Admin<span>Hub</span>
           </h2>
@@ -22,32 +25,38 @@ const AdminNavbar = () => {
           <p>
             Management Panel
           </p>
+
         </div>
 
       </div>
 
 
-      {/* ================= MENU TITLE ================= */}
+      {/* =================================================
+          MENU TITLE
+      ================================================= */}
 
       <div className="menu-title">
         MAIN MENU
       </div>
 
 
-      {/* ================= NAVIGATION ================= */}
+      {/* =================================================
+          NAVIGATION
+      ================================================= */}
 
       <nav className="admin-menu">
 
-        {/* ================= DASHBOARD ================= */}
+        {/* DASHBOARD */}
 
         <NavLink
-         to="/admin-dashboard"
+          to="/admin-dashboard"
           className={({ isActive }) =>
-            isgActive
+            isActive
               ? "menu-item active"
               : "menu-item"
           }
         >
+
           <span className="menu-icon">
             ⌂
           </span>
@@ -55,10 +64,11 @@ const AdminNavbar = () => {
           <span>
             Dashboard
           </span>
+
         </NavLink>
 
 
-        {/* ================= EVENTS ================= */}
+        {/* EVENTS */}
 
         <NavLink
           to="/events"
@@ -68,6 +78,7 @@ const AdminNavbar = () => {
               : "menu-item"
           }
         >
+
           <span className="menu-icon">
             ◇
           </span>
@@ -75,10 +86,11 @@ const AdminNavbar = () => {
           <span>
             Events
           </span>
+
         </NavLink>
 
 
-        {/* ================= GALLERY ================= */}
+        {/* GALLERY */}
 
         <NavLink
           to="/gallery"
@@ -88,6 +100,7 @@ const AdminNavbar = () => {
               : "menu-item"
           }
         >
+
           <span className="menu-icon">
             ▣
           </span>
@@ -95,10 +108,11 @@ const AdminNavbar = () => {
           <span>
             Gallery
           </span>
+
         </NavLink>
 
 
-        {/* ================= USERS ================= */}
+        {/* USERS */}
 
         <NavLink
           to="/users"
@@ -108,6 +122,7 @@ const AdminNavbar = () => {
               : "menu-item"
           }
         >
+
           <span className="menu-icon">
             ♙
           </span>
@@ -115,12 +130,15 @@ const AdminNavbar = () => {
           <span>
             Users
           </span>
+
         </NavLink>
 
       </nav>
 
 
-      {/* ================= BOTTOM SECTION ================= */}
+      {/* =================================================
+          BOTTOM SECTION
+      ================================================= */}
 
       <div className="sidebar-bottom">
 
