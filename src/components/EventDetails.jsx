@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+  useNavigate,
+  useParams,
+  useLocation
+} from "react-router-dom";
+
 import "../styles/EventDetails.css";
 
 const API_URL = (
@@ -7,15 +12,28 @@ const API_URL = (
   "https://api-admin-rouge.vercel.app"
 ).replace(/\/+$/, "");
 
-
 function EventDetails() {
 
   const { id } = useParams();
+
   const navigate = useNavigate();
 
-  const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const location = useLocation();
+
+
+  // =====================================================
+  // GET EVENT FROM EVENTS PAGE
+  // =====================================================
+
+  const eventFromPage =
+    location.state?.event || null;
+
+
+  const [event, setEvent] =
+    useState(eventFromPage);
+
+  const [error, setError] =
+    useState("");
 
 
   // =====================================================
@@ -28,12 +46,10 @@ function EventDetails() {
       return "";
     }
 
-    // Base64 image
     if (image.startsWith("data:image/")) {
       return image;
     }
 
-    // Full URL
     if (
       image.startsWith("http://") ||
       image.startsWith("https://")
@@ -41,7 +57,6 @@ function EventDetails() {
       return image;
     }
 
-    // Relative path
     if (image.startsWith("/")) {
       return `${API_URL}${image}`;
     }
@@ -51,38 +66,43 @@ function EventDetails() {
 
 
   // =====================================================
-  // FETCH EVENT DETAILS
+  // GET LATEST EVENT IN BACKGROUND
   // =====================================================
 
   useEffect(() => {
 
     const fetchEvent = async () => {
 
-      try {
+      if (!id) {
+        return;
+      }
 
-        setLoading(true);
-        setError("");
+      try {
 
         const response = await fetch(
           `${API_URL}/events/get/${id}`
         );
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
         if (!response.ok) {
+
           throw new Error(
-            data.message || "Failed to fetch event"
+            data.message ||
+            "Failed to fetch event"
           );
+
         }
 
-        // Backend may return event directly
-        // or inside data.event
         const eventData =
           data.event ||
           data.data ||
           data;
 
-        setEvent(eventData);
+        if (eventData) {
+          setEvent(eventData);
+        }
 
       } catch (err) {
 
@@ -91,59 +111,46 @@ function EventDetails() {
           err
         );
 
-        setError(
-          err.message ||
-          "Unable to load event details"
-        );
+        /*
+          If event data was already received
+          from Events page, keep showing it.
+        */
 
-      } finally {
+        if (!eventFromPage) {
 
-        setLoading(false);
+          setError(
+            err.message ||
+            "Unable to load event details"
+          );
+
+        }
 
       }
 
     };
 
-    if (id) {
-      fetchEvent();
-    }
+    fetchEvent();
 
   }, [id]);
 
 
   // =====================================================
-  // LOADING
+  // EVENT NOT FOUND
   // =====================================================
 
-  if (loading) {
+  if (!event) {
 
     return (
-      <div className="event-details-loading">
 
-        <div className="loading-spinner"></div>
-
-        <h2>Loading event details...</h2>
-
-      </div>
-    );
-
-  }
-
-
-  // =====================================================
-  // ERROR / NOT FOUND
-  // =====================================================
-
-  if (error || !event) {
-
-    return (
       <div className="event-not-found">
 
         <div className="not-found-icon">
           😕
         </div>
 
-        <h2>Event Not Found</h2>
+        <h2>
+          Event Not Found
+        </h2>
 
         <p>
           {error ||
@@ -151,13 +158,17 @@ function EventDetails() {
         </p>
 
         <button
+          type="button"
           className="details-back-btn"
-          onClick={() => navigate("/events")}
+          onClick={() =>
+            navigate("/events")
+          }
         >
           ← Back to Events
         </button>
 
       </div>
+
     );
 
   }
@@ -171,21 +182,21 @@ function EventDetails() {
 
     <div className="event-details-page">
 
-      {/* =================================================
-          BACK TO EVENTS
-      ================================================= */}
+
+      {/* BACK */}
 
       <button
+        type="button"
         className="back-events-btn"
-        onClick={() => navigate("/events")}
+        onClick={() =>
+          navigate("/events")
+        }
       >
         ← Back to Events
       </button>
 
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+      {/* HEADER */}
 
       <div className="event-details-header">
 
@@ -204,16 +215,12 @@ function EventDetails() {
       </div>
 
 
-      {/* =================================================
-          MAIN CARD
-      ================================================= */}
+      {/* EVENT CARD */}
 
       <div className="event-details-card">
 
 
-        {/* =================================================
-            IMAGE
-        ================================================= */}
+        {/* IMAGE */}
 
         <div className="event-details-image">
 
@@ -223,7 +230,8 @@ function EventDetails() {
               src={getImageUrl(event.image)}
               alt={event.name || "Event"}
               onError={(e) => {
-                e.currentTarget.style.display = "none";
+                e.currentTarget.style.display =
+                  "none";
               }}
             />
 
@@ -242,8 +250,6 @@ function EventDetails() {
           )}
 
 
-          {/* CATEGORY */}
-
           {event.category && (
 
             <div className="details-category">
@@ -255,9 +261,7 @@ function EventDetails() {
         </div>
 
 
-        {/* =================================================
-            CONTENT
-        ================================================= */}
+        {/* CONTENT */}
 
         <div className="event-details-content">
 
@@ -266,22 +270,19 @@ function EventDetails() {
           </h2>
 
 
-          {/* ORGANIZER */}
-
           <p className="details-organizer">
 
             Organized by{" "}
 
             <strong>
-              {event.organizer || "Not specified"}
+              {event.organizer ||
+                "Not specified"}
             </strong>
 
           </p>
 
 
-          {/* =================================================
-              INFORMATION GRID
-          ================================================= */}
+          {/* INFORMATION */}
 
           <div className="details-info-grid">
 
@@ -301,7 +302,8 @@ function EventDetails() {
                 </small>
 
                 <strong>
-                  {event.date || "Not specified"}
+                  {event.date ||
+                    "Not specified"}
                 </strong>
 
               </div>
@@ -324,7 +326,8 @@ function EventDetails() {
                 </small>
 
                 <strong>
-                  {event.time || "Not specified"}
+                  {event.time ||
+                    "Not specified"}
                 </strong>
 
               </div>
@@ -347,7 +350,8 @@ function EventDetails() {
                 </small>
 
                 <strong>
-                  {event.location || "Not specified"}
+                  {event.location ||
+                    "Not specified"}
                 </strong>
 
               </div>
@@ -370,7 +374,8 @@ function EventDetails() {
                 </small>
 
                 <strong>
-                  {event.category || "Not specified"}
+                  {event.category ||
+                    "Not specified"}
                 </strong>
 
               </div>
@@ -378,7 +383,7 @@ function EventDetails() {
             </div>
 
 
-            {/* AVAILABLE TICKETS */}
+            {/* TICKETS */}
 
             <div className="details-info-box">
 
@@ -404,7 +409,7 @@ function EventDetails() {
             </div>
 
 
-            {/* TICKET PRICE */}
+            {/* PRICE */}
 
             <div className="details-info-box">
 
@@ -434,9 +439,7 @@ function EventDetails() {
           </div>
 
 
-          {/* =================================================
-              DESCRIPTION
-          ================================================= */}
+          {/* DESCRIPTION */}
 
           <div className="details-description">
 
@@ -452,30 +455,27 @@ function EventDetails() {
           </div>
 
 
-          {/* =================================================
-              ACTION BUTTONS
-          ================================================= */}
+          {/* BUTTONS */}
 
           <div className="details-actions">
 
-
-            {/* BACK */}
-
             <button
+              type="button"
               className="details-back-btn"
-              onClick={() => navigate("/events")}
+              onClick={() =>
+                navigate("/events")
+              }
             >
               ← Back to Events
             </button>
 
 
-            {/* EDIT */}
-
             <button
+              type="button"
               className="details-edit-btn"
               onClick={() =>
                 navigate(
-                  `/events/edit/${event._id || event.id}`
+                  `/events/edit/${event._id}`
                 )
               }
             >
@@ -491,7 +491,6 @@ function EventDetails() {
     </div>
 
   );
-
 }
 
 export default EventDetails;
