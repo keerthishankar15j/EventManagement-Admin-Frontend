@@ -1,4 +1,3 @@
-
 import {
   BrowserRouter,
   Routes,
@@ -9,7 +8,6 @@ import {
 
 import AdminLogin from "./components/AdminLogin";
 import AdminNavbar from "./components/Admin_navbar";
-
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
 import AdminUsers from "./components/Admin_users";
@@ -17,6 +15,7 @@ import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
+import AdminMessages from "./components/AdminMessages";
 
 
 // =====================================================
@@ -78,7 +77,7 @@ function App() {
           />
 
 
-          {/* ADMIN DASHBOARD ALIAS */}
+          {/* ADMIN DASHBOARD */}
 
           <Route
             path="/admin-dashboard"
@@ -133,6 +132,17 @@ function App() {
             element={<Admin_Gallery />}
           />
 
+
+          {/* =================================================
+              MESSAGES
+          ================================================= */}
+
+          <Route
+            path="/admin-messages"
+            element={<AdminMessages />}
+          />
+
+
         </Route>
 
 
@@ -174,4 +184,3 @@ function App() {
 }
 
 export default App;
-
