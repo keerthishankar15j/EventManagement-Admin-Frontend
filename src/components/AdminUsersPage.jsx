@@ -1,14 +1,8 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
-
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 
 import AdminUserDetails from "./AdminUserDetails";
-
 import "../styles/AdminUsersPage.css";
-
 
 // =====================================================
 // BACKEND API URL
@@ -17,7 +11,6 @@ import "../styles/AdminUsersPage.css";
 const API_BASE_URL =
   "https://user-api-iota-six.vercel.app";
 
-
 // =====================================================
 // AXIOS INSTANCE
 // =====================================================
@@ -25,49 +18,38 @@ const API_BASE_URL =
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
-
 
 // =====================================================
 // ADMIN USERS PAGE
 // =====================================================
 
 function AdminUsersPage() {
+  // =====================================================
+  // STATES
+  // =====================================================
 
   const [users, setUsers] = useState([]);
 
-  const [loginHistory, setLoginHistory] =
-    useState([]);
+  const [loginHistory, setLoginHistory] = useState([]);
 
-  const [search, setSearch] =
-    useState("");
+  const [search, setSearch] = useState("");
 
-  const [activeFilter, setActiveFilter] =
-    useState("all");
+  const [activeFilter, setActiveFilter] = useState("all");
 
-  const [selectedUser, setSelectedUser] =
-    useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState("");
-
+  const [error, setError] = useState("");
 
   // =====================================================
   // FETCH USERS
   // =====================================================
 
   const fetchUsers = async () => {
-
     try {
-
-      const response =
-        await api.get("/login/getusers");
+      const response = await api.get("/login/getusers");
 
       console.log(
         "USERS API RESPONSE:",
@@ -75,11 +57,7 @@ function AdminUsersPage() {
       );
 
       if (response.data?.success) {
-
-        setUsers(
-          response.data.users || []
-        );
-
+        setUsers(response.data.users || []);
         return true;
       }
 
@@ -87,16 +65,13 @@ function AdminUsersPage() {
         response.data?.message ||
           "Unable to fetch users"
       );
-
     } catch (err) {
-
       console.error(
         "FETCH USERS ERROR:",
         err
       );
 
       if (err.response) {
-
         console.error(
           "USERS STATUS:",
           err.response.status
@@ -106,26 +81,21 @@ function AdminUsersPage() {
           "USERS DATA:",
           err.response.data
         );
-
       }
 
       throw err;
     }
   };
 
-
   // =====================================================
   // FETCH LOGIN HISTORY
   // =====================================================
 
   const fetchLoginHistory = async () => {
-
     try {
-
-      const response =
-        await api.get(
-          "/loginhistory/gethistory"
-        );
+      const response = await api.get(
+        "/loginhistory/gethistory"
+      );
 
       console.log(
         "LOGIN HISTORY API RESPONSE:",
@@ -133,7 +103,6 @@ function AdminUsersPage() {
       );
 
       if (response.data?.success) {
-
         setLoginHistory(
           response.data.history || []
         );
@@ -145,16 +114,13 @@ function AdminUsersPage() {
         response.data?.message ||
           "Unable to fetch login history"
       );
-
     } catch (err) {
-
       console.error(
         "FETCH LOGIN HISTORY ERROR:",
         err
       );
 
       if (err.response) {
-
         console.error(
           "LOGIN HISTORY STATUS:",
           err.response.status
@@ -164,13 +130,11 @@ function AdminUsersPage() {
           "LOGIN HISTORY DATA:",
           err.response.data
         );
-
       }
 
       throw err;
     }
   };
-
 
   // =====================================================
   // FETCH ALL DATA
@@ -179,9 +143,7 @@ function AdminUsersPage() {
   const fetchAllData = async (
     showLoader = false
   ) => {
-
     try {
-
       if (showLoader) {
         setLoading(true);
       }
@@ -194,23 +156,18 @@ function AdminUsersPage() {
           fetchLoginHistory(),
         ]);
 
-
       const usersFailed =
         results[0].status === "rejected";
 
       const historyFailed =
         results[1].status === "rejected";
 
-
-      // -------------------------------------------------
       // BOTH FAILED
-      // -------------------------------------------------
 
       if (
         usersFailed &&
         historyFailed
       ) {
-
         setError(
           "Unable to connect to the user API. Please check the backend."
         );
@@ -218,13 +175,9 @@ function AdminUsersPage() {
         return;
       }
 
-
-      // -------------------------------------------------
       // USERS FAILED
-      // -------------------------------------------------
 
       if (usersFailed) {
-
         setError(
           "Unable to load users. Please check the user API."
         );
@@ -232,22 +185,16 @@ function AdminUsersPage() {
         return;
       }
 
-
-      // -------------------------------------------------
       // HISTORY FAILED
-      // -------------------------------------------------
 
       if (historyFailed) {
-
         setError(
           "Users loaded, but login history could not be loaded."
         );
 
         return;
       }
-
     } catch (err) {
-
       console.error(
         "FETCH ALL DATA ERROR:",
         err
@@ -256,45 +203,32 @@ function AdminUsersPage() {
       setError(
         "Unable to load user data."
       );
-
     } finally {
-
       setLoading(false);
     }
   };
 
-
   // =====================================================
-  // INITIAL LOAD
+  // INITIAL LOAD + AUTO REFRESH
   // =====================================================
 
   useEffect(() => {
-
     fetchAllData(true);
 
-    const interval =
-      setInterval(() => {
-
-        fetchAllData(false);
-
-      }, 10000);
-
+    const interval = setInterval(() => {
+      fetchAllData(false);
+    }, 10000);
 
     return () => {
-
       clearInterval(interval);
-
     };
-
   }, []);
 
-
   // =====================================================
-  // GET USER ID
+  // GET HISTORY USER ID
   // =====================================================
 
   const getHistoryUserId = (item) => {
-
     if (!item?.userId) {
       return "";
     }
@@ -302,7 +236,6 @@ function AdminUsersPage() {
     if (
       typeof item.userId === "object"
     ) {
-
       return String(
         item.userId._id || ""
       );
@@ -311,15 +244,11 @@ function AdminUsersPage() {
     return String(item.userId);
   };
 
-
   // =====================================================
   // GET USER HISTORY
   // =====================================================
 
-  const getUserHistory = (
-    userId
-  ) => {
-
+  const getUserHistory = (userId) => {
     return [...loginHistory]
       .filter(
         (item) =>
@@ -337,15 +266,11 @@ function AdminUsersPage() {
       );
   };
 
-
   // =====================================================
   // GET USER STATUS
   // =====================================================
 
-  const getUserStatus = (
-    userId
-  ) => {
-
+  const getUserStatus = (userId) => {
     const history =
       getUserHistory(userId);
 
@@ -362,15 +287,11 @@ function AdminUsersPage() {
       : "Offline";
   };
 
-
   // =====================================================
   // GET LAST LOGIN
   // =====================================================
 
-  const getLastLogin = (
-    userId
-  ) => {
-
+  const getLastLogin = (userId) => {
     const history =
       getUserHistory(userId);
 
@@ -381,14 +302,12 @@ function AdminUsersPage() {
     return history[0];
   };
 
-
   // =====================================================
   // SEARCH + FILTER
   // =====================================================
 
-  const filteredUsers =
-    users.filter((user) => {
-
+  const filteredUsers = users.filter(
+    (user) => {
       const status =
         getUserStatus(user._id);
 
@@ -398,24 +317,22 @@ function AdminUsersPage() {
           .trim();
 
       const name =
-        user.name
-          ?.toLowerCase() || "";
+        user.name?.toLowerCase() ||
+        "";
 
       const email =
-        user.email
-          ?.toLowerCase() || "";
+        user.email?.toLowerCase() ||
+        "";
 
       const phone =
         String(
           user.phone || ""
         ).toLowerCase();
 
-
       const matchesSearch =
         name.includes(searchValue) ||
         email.includes(searchValue) ||
         phone.includes(searchValue);
-
 
       const matchesFilter =
         activeFilter === "all" ||
@@ -428,14 +345,12 @@ function AdminUsersPage() {
           status === "Offline"
         );
 
-
       return (
         matchesSearch &&
         matchesFilter
       );
-
-    });
-
+    }
+  );
 
   // =====================================================
   // COUNTS
@@ -444,7 +359,6 @@ function AdminUsersPage() {
   const totalUsers =
     users.length;
 
-
   const onlineUsers =
     users.filter(
       (user) =>
@@ -452,20 +366,15 @@ function AdminUsersPage() {
         "Online"
     ).length;
 
-
   const offlineUsers =
     totalUsers -
     onlineUsers;
-
 
   // =====================================================
   // FORMAT DATE
   // =====================================================
 
-  const formatDate = (
-    date
-  ) => {
-
+  const formatDate = (date) => {
     if (!date) {
       return "Not available";
     }
@@ -478,7 +387,6 @@ function AdminUsersPage() {
         parsedDate.getTime()
       )
     ) {
-
       return "Not available";
     }
 
@@ -495,32 +403,22 @@ function AdminUsersPage() {
     );
   };
 
-
   // =====================================================
   // OPEN USER DETAILS
   // =====================================================
 
-  const handleUserClick = (
-    user
-  ) => {
-
+  const handleUserClick = (user) => {
     setSelectedUser(user);
-
   };
 
-
   // =====================================================
-  // BACK
+  // BACK TO USERS
   // =====================================================
 
   const handleBack = () => {
-
     setSelectedUser(null);
-
     fetchAllData(false);
-
   };
-
 
   // =====================================================
   // LOADING
@@ -530,13 +428,9 @@ function AdminUsersPage() {
     loading &&
     users.length === 0
   ) {
-
     return (
-
       <div className="admin-users-page">
-
         <div className="users-loading">
-
           <div className="loading-spinner"></div>
 
           <h3>
@@ -547,42 +441,35 @@ function AdminUsersPage() {
             Please wait while we load
             the user data.
           </p>
-
         </div>
-
       </div>
-
     );
   }
 
-
   // =====================================================
-  // USER DETAILS
+  // USER DETAILS PAGE
   // =====================================================
 
   if (selectedUser) {
-
     return (
-
       <AdminUserDetails
         user={selectedUser}
         loginHistory={loginHistory}
         onBack={handleBack}
       />
-
     );
   }
-
 
   // =====================================================
   // MAIN PAGE
   // =====================================================
 
   return (
-
     <div className="admin-users-page">
 
-      {/* HEADER */}
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
       <div className="users-header">
 
@@ -603,7 +490,6 @@ function AdminUsersPage() {
 
         </div>
 
-
         <button
           type="button"
           className="refresh-btn"
@@ -612,7 +498,6 @@ function AdminUsersPage() {
           }
           disabled={loading}
         >
-
           <span
             className={
               loading
@@ -626,15 +511,17 @@ function AdminUsersPage() {
           {loading
             ? "Refreshing"
             : "Refresh"}
-
         </button>
 
       </div>
 
-
-      {/* STATS */}
+      {/* =================================================
+          STATS
+      ================================================= */}
 
       <div className="user-stats">
+
+        {/* TOTAL USERS */}
 
         <div className="stat-card">
 
@@ -656,13 +543,12 @@ function AdminUsersPage() {
 
         </div>
 
+        {/* ONLINE USERS */}
 
         <div className="stat-card">
 
           <div className="stat-icon online-icon">
-
             <span className="status-circle"></span>
-
           </div>
 
           <div className="stat-content">
@@ -679,13 +565,12 @@ function AdminUsersPage() {
 
         </div>
 
+        {/* OFFLINE USERS */}
 
         <div className="stat-card">
 
           <div className="stat-icon offline-icon">
-
             <span className="status-circle"></span>
-
           </div>
 
           <div className="stat-content">
@@ -704,8 +589,9 @@ function AdminUsersPage() {
 
       </div>
 
-
-      {/* CONTROLS */}
+      {/* =================================================
+          SEARCH + FILTER
+      ================================================= */}
 
       <div className="user-controls">
 
@@ -727,7 +613,6 @@ function AdminUsersPage() {
           />
 
           {search && (
-
             <button
               type="button"
               className="clear-search"
@@ -737,13 +622,13 @@ function AdminUsersPage() {
             >
               ×
             </button>
-
           )}
 
         </div>
 
-
         <div className="filter-buttons">
+
+          {/* ALL */}
 
           <button
             type="button"
@@ -756,7 +641,6 @@ function AdminUsersPage() {
               setActiveFilter("all")
             }
           >
-
             <span>
               All Users
             </span>
@@ -764,9 +648,9 @@ function AdminUsersPage() {
             <small>
               {totalUsers}
             </small>
-
           </button>
 
+          {/* ONLINE */}
 
           <button
             type="button"
@@ -779,7 +663,6 @@ function AdminUsersPage() {
               setActiveFilter("online")
             }
           >
-
             <span className="mini-status online"></span>
 
             <span>
@@ -789,9 +672,9 @@ function AdminUsersPage() {
             <small>
               {onlineUsers}
             </small>
-
           </button>
 
+          {/* OFFLINE */}
 
           <button
             type="button"
@@ -804,7 +687,6 @@ function AdminUsersPage() {
               setActiveFilter("offline")
             }
           >
-
             <span className="mini-status offline"></span>
 
             <span>
@@ -814,18 +696,17 @@ function AdminUsersPage() {
             <small>
               {offlineUsers}
             </small>
-
           </button>
 
         </div>
 
       </div>
 
-
-      {/* ERROR */}
+      {/* =================================================
+          ERROR
+      ================================================= */}
 
       {error && (
-
         <div className="users-error">
 
           <span>
@@ -842,52 +723,43 @@ function AdminUsersPage() {
           </button>
 
         </div>
-
       )}
 
-
-      {/* RESULT */}
+      {/* =================================================
+          RESULT INFO
+      ================================================= */}
 
       <div className="result-info">
 
         <span>
-
           Showing{" "}
-
           <strong>
             {filteredUsers.length}
           </strong>{" "}
-
           {filteredUsers.length === 1
             ? "user"
             : "users"}
-
         </span>
-
 
         {(search ||
           activeFilter !== "all") && (
-
           <button
             type="button"
             className="reset-filter"
             onClick={() => {
-
               setSearch("");
-
               setActiveFilter("all");
-
             }}
           >
             Clear filters
           </button>
-
         )}
 
       </div>
 
-
-      {/* USERS */}
+      {/* =================================================
+          USERS
+      ================================================= */}
 
       {filteredUsers.length > 0 ? (
 
@@ -914,7 +786,6 @@ function AdminUsersPage() {
                   ?.charAt(0)
                   .toUpperCase() ||
                 "U";
-
 
               return (
 
@@ -953,7 +824,6 @@ function AdminUsersPage() {
 
                       )}
 
-
                       <span
                         className={
                           isOnline
@@ -964,7 +834,6 @@ function AdminUsersPage() {
 
                     </div>
 
-
                     <span
                       className={
                         isOnline
@@ -972,17 +841,14 @@ function AdminUsersPage() {
                           : "status-badge offline"
                       }
                     >
-
                       <span className="badge-dot"></span>
 
                       {status}
-
                     </span>
 
                   </div>
 
-
-                  {/* USER INFO */}
+                  {/* USER NAME */}
 
                   <div className="user-main-info">
 
@@ -1001,7 +867,6 @@ function AdminUsersPage() {
                     </div>
 
                   </div>
-
 
                   {/* USER DETAILS */}
 
@@ -1029,7 +894,6 @@ function AdminUsersPage() {
                       </div>
 
                     </div>
-
 
                     {/* PHONE */}
 
@@ -1060,7 +924,6 @@ function AdminUsersPage() {
 
                     </div>
 
-
                     {/* LAST LOGIN */}
 
                     <div className="detail-row">
@@ -1089,7 +952,6 @@ function AdminUsersPage() {
 
                   </div>
 
-
                   {/* VIEW DETAILS */}
 
                   <div className="view-user">
@@ -1105,15 +967,17 @@ function AdminUsersPage() {
                   </div>
 
                 </article>
-
               );
-
             }
           )}
 
         </div>
 
       ) : (
+
+        /* =================================================
+           NO USERS
+        ================================================= */
 
         <div className="no-users">
 
@@ -1133,22 +997,17 @@ function AdminUsersPage() {
           <button
             type="button"
             onClick={() => {
-
               setSearch("");
-
               setActiveFilter("all");
-
             }}
           >
             Show All Users
           </button>
 
         </div>
-
       )}
 
     </div>
-
   );
 }
 
