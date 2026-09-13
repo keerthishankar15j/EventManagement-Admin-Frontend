@@ -1,5 +1,5 @@
 import React from "react";
-import "./AdminUserDetails.css";
+import "../styles/AdminUserDetails.css";
 
 function AdminUserDetails({
   user,

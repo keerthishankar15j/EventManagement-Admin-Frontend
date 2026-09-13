@@ -3,7 +3,7 @@ import {
   Routes,
   Route,
   Navigate,
-  Outlet
+  Outlet,
 } from "react-router-dom";
 
 import AdminLogin from "./components/AdminLogin";
@@ -11,13 +11,11 @@ import AdminNavbar from "./components/Admin_navbar";
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
 import AdminUsers from "./components/AdminUsers.jsx";
-
 import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
 import AdminMessages from "./components/AdminMessages";
-
 
 // =====================================================
 // ADMIN LAYOUT
@@ -39,19 +37,14 @@ const AdminLayout = () => {
   );
 };
 
-
 // =====================================================
 // APP
 // =====================================================
 
 function App() {
-
   return (
-
     <BrowserRouter>
-
       <Routes>
-
 
         {/* =================================================
             LOGIN PAGE
@@ -62,13 +55,11 @@ function App() {
           element={<AdminLogin />}
         />
 
-
         {/* =================================================
             ADMIN LAYOUT
         ================================================= */}
 
         <Route element={<AdminLayout />}>
-
 
           {/* DASHBOARD */}
 
@@ -77,14 +68,12 @@ function App() {
             element={<AdminDashboard />}
           />
 
-
           {/* ADMIN DASHBOARD */}
 
           <Route
             path="/admin-dashboard"
             element={<AdminDashboard />}
           />
-
 
           {/* EVENTS */}
 
@@ -93,14 +82,12 @@ function App() {
             element={<AdminEvents />}
           />
 
-
           {/* ADD EVENT */}
 
           <Route
             path="/events/add"
             element={<AddEvent />}
           />
-
 
           {/* EVENT DETAILS */}
 
@@ -109,14 +96,12 @@ function App() {
             element={<EventDetails />}
           />
 
-
           {/* EDIT EVENT */}
 
           <Route
             path="/events/edit/:id"
             element={<EditEvent />}
           />
-
 
           {/* USERS */}
 
@@ -125,7 +110,6 @@ function App() {
             element={<AdminUsers />}
           />
 
-
           {/* GALLERY */}
 
           <Route
@@ -133,19 +117,14 @@ function App() {
             element={<Admin_Gallery />}
           />
 
-
-          {/* =================================================
-              MESSAGES
-          ================================================= */}
+          {/* MESSAGES */}
 
           <Route
             path="/admin-messages"
             element={<AdminMessages />}
           />
 
-
         </Route>
-
 
         {/* =================================================
             FIRST OPEN → LOGIN
@@ -160,7 +139,6 @@ function App() {
             />
           }
         />
-
 
         {/* =================================================
             UNKNOWN URL → LOGIN
@@ -177,11 +155,8 @@ function App() {
         />
 
       </Routes>
-
     </BrowserRouter>
-
   );
-
 }
 
 export default App;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AdminUserDetails from "./AdminUserDetails";
-import "../styles/Admin_users.css";
+import "../styles/AdminUsers.css";
 
 
 const API_BASE_URL = "https://user-api-iota-six.vercel.app";
