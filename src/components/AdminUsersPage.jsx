@@ -6,7 +6,7 @@ import "../styles/AdminUsersPage.css";
 
 const API_BASE_URL = "https://user-api-iota-six.vercel.app";
 
-function AdminUsers() {
+function AdminUsersPage() {
   const [users, setUsers] = useState([]);
   const [loginHistory, setLoginHistory] = useState([]);
 
@@ -776,4 +776,4 @@ function AdminUsers() {
   );
 }
 
-export default AdminUsers;
+export default AdminUsersPage;
