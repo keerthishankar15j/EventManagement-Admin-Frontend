@@ -17,74 +17,89 @@ function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ==========================================
+  // =====================================================
   // FETCH USERS
-  // ==========================================
+  // =====================================================
+
   const fetchUsers = async () => {
     try {
-      setLoading(true);
-      setError("");
-
       const response = await axios.get(
         `${API_BASE_URL}/login/getusers`
       );
 
-      if (response.data.success) {
+      if (response.data?.success) {
         setUsers(response.data.users || []);
       } else {
         setError("Unable to fetch users");
       }
-    } catch (error) {
-      console.error("Fetch users error:", error);
+    } catch (err) {
+      console.error("Fetch users error:", err);
       setError("Failed to load users");
-    } finally {
-      setLoading(false);
     }
   };
 
-  // ==========================================
+  // =====================================================
   // FETCH LOGIN HISTORY
-  // ==========================================
+  // =====================================================
+
   const fetchLoginHistory = async () => {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/loginhistory/gethistory`
       );
 
-      if (response.data.success) {
+      if (response.data?.success) {
         setLoginHistory(response.data.history || []);
       }
-    } catch (error) {
-      console.error("Login history error:", error);
+    } catch (err) {
+      console.error("Login history error:", err);
     }
   };
 
-  // ==========================================
-  // FETCH BOTH
-  // ==========================================
-  const fetchAllData = async () => {
-    await Promise.all([
-      fetchUsers(),
-      fetchLoginHistory(),
-    ]);
+  // =====================================================
+  // FETCH ALL DATA
+  // =====================================================
+
+  const fetchAllData = async (showLoader = false) => {
+    try {
+      if (showLoader) {
+        setLoading(true);
+      }
+
+      setError("");
+
+      await Promise.all([
+        fetchUsers(),
+        fetchLoginHistory(),
+      ]);
+    } catch (err) {
+      console.error("Fetch all data error:", err);
+      setError("Unable to load user data");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => {
-    fetchAllData();
+  // =====================================================
+  // INITIAL LOAD + AUTO REFRESH
+  // =====================================================
 
-    // Auto refresh every 10 seconds
+  useEffect(() => {
+    fetchAllData(true);
+
     const interval = setInterval(() => {
-      fetchAllData();
+      fetchAllData(false);
     }, 10000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // ==========================================
-  // GET USER STATUS
-  // ==========================================
-  const getUserStatus = (userId) => {
-    const userHistory = loginHistory
+  // =====================================================
+  // GET USER HISTORY
+  // =====================================================
+
+  const getUserHistory = (userId) => {
+    return loginHistory
       .filter(
         (item) =>
           String(item.userId) === String(userId)
@@ -94,6 +109,14 @@ function AdminUsers() {
           new Date(b.loginTime) -
           new Date(a.loginTime)
       );
+  };
+
+  // =====================================================
+  // GET USER STATUS
+  // =====================================================
+
+  const getUserStatus = (userId) => {
+    const userHistory = getUserHistory(userId);
 
     if (userHistory.length === 0) {
       return "Offline";
@@ -106,20 +129,12 @@ function AdminUsers() {
       : "Offline";
   };
 
-  // ==========================================
+  // =====================================================
   // GET LAST LOGIN
-  // ==========================================
+  // =====================================================
+
   const getLastLogin = (userId) => {
-    const userHistory = loginHistory
-      .filter(
-        (item) =>
-          String(item.userId) === String(userId)
-      )
-      .sort(
-        (a, b) =>
-          new Date(b.loginTime) -
-          new Date(a.loginTime)
-      );
+    const userHistory = getUserHistory(userId);
 
     if (userHistory.length === 0) {
       return null;
@@ -128,40 +143,45 @@ function AdminUsers() {
     return userHistory[0];
   };
 
-  // ==========================================
+  // =====================================================
   // SEARCH + FILTER
-  // ==========================================
+  // =====================================================
+
   const filteredUsers = users.filter((user) => {
-    const userStatus = getUserStatus(user._id);
+    const status = getUserStatus(user._id);
 
     const searchValue = search
       .toLowerCase()
       .trim();
 
+    const name =
+      user.name?.toLowerCase() || "";
+
+    const email =
+      user.email?.toLowerCase() || "";
+
+    const phone =
+      String(user.phone || "").toLowerCase();
+
     const matchesSearch =
-      user.name
-        ?.toLowerCase()
-        .includes(searchValue) ||
-      user.email
-        ?.toLowerCase()
-        .includes(searchValue) ||
-      user.phone
-        ?.toLowerCase()
-        .includes(searchValue);
+      name.includes(searchValue) ||
+      email.includes(searchValue) ||
+      phone.includes(searchValue);
 
     const matchesFilter =
       activeFilter === "all" ||
       (activeFilter === "online" &&
-        userStatus === "Online") ||
+        status === "Online") ||
       (activeFilter === "offline" &&
-        userStatus === "Offline");
+        status === "Offline");
 
     return matchesSearch && matchesFilter;
   });
 
-  // ==========================================
+  // =====================================================
   // COUNTS
-  // ==========================================
+  // =====================================================
+
   const totalUsers = users.length;
 
   const onlineUsers = users.filter(
@@ -172,41 +192,73 @@ function AdminUsers() {
   const offlineUsers =
     totalUsers - onlineUsers;
 
-  // ==========================================
+  // =====================================================
   // FORMAT DATE
-  // ==========================================
-  const formatDate = (date) => {
-    if (!date) return "Not available";
+  // =====================================================
 
-    return new Date(date).toLocaleString(
+  const formatDate = (date) => {
+    if (!date) {
+      return "Not available";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Not available";
+    }
+
+    return parsedDate.toLocaleString(
       "en-IN",
       {
-        dateStyle: "medium",
-        timeStyle: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
       }
     );
   };
 
-  // ==========================================
-  // OPEN SINGLE USER
-  // ==========================================
+  // =====================================================
+  // OPEN USER DETAILS
+  // =====================================================
+
   const handleUserClick = (user) => {
     setSelectedUser(user);
   };
 
-  // ==========================================
-  // CLOSE SINGLE USER
-  // ==========================================
+  // =====================================================
+  // BACK FROM USER DETAILS
+  // =====================================================
+
   const handleBack = () => {
     setSelectedUser(null);
-
-    // Refresh after returning
-    fetchAllData();
+    fetchAllData(false);
   };
 
-  // ==========================================
-  // SINGLE USER VIEW
-  // ==========================================
+  // =====================================================
+  // LOADING SCREEN
+  // =====================================================
+
+  if (loading && users.length === 0) {
+    return (
+      <div className="admin-users-page">
+        <div className="users-loading">
+          <div className="loading-spinner"></div>
+
+          <h3>Loading users</h3>
+
+          <p>Please wait while we load the user data.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // USER DETAILS
+  // =====================================================
+
   if (selectedUser) {
     return (
       <AdminUserDetails
@@ -217,98 +269,140 @@ function AdminUsers() {
     );
   }
 
-  // ==========================================
-  // LOADING
-  // ==========================================
-  if (loading && users.length === 0) {
-    return (
-      <div className="admin-users-page">
-        <div className="users-loading">
-          <div className="loading-spinner"></div>
-          <h3>Loading users...</h3>
-        </div>
-      </div>
-    );
-  }
-
-  // ==========================================
+  // =====================================================
   // MAIN PAGE
-  // ==========================================
+  // =====================================================
+
   return (
     <div className="admin-users-page">
 
-      {/* HEADER */}
-      <div className="users-header">
-        <div>
-          <p className="users-small-title">
-            ADMIN PANEL
-          </p>
+      {/* =================================================
+          HEADER
+      ================================================= */}
 
-          <h1>
-            User Management
-          </h1>
+      <div className="users-header">
+
+        <div className="users-heading">
+
+          <span className="users-small-title">
+            ADMIN PANEL
+          </span>
+
+          <h1>User Management</h1>
 
           <p className="users-subtitle">
             Manage and monitor all registered users
           </p>
+
         </div>
 
         <button
+          type="button"
           className="refresh-btn"
-          onClick={fetchAllData}
+          onClick={() => fetchAllData(true)}
+          disabled={loading}
         >
-          ↻ Refresh
+          <span
+            className={
+              loading
+                ? "refresh-icon spinning"
+                : "refresh-icon"
+            }
+          >
+            ↻
+          </span>
+
+          {loading ? "Refreshing" : "Refresh"}
         </button>
+
       </div>
 
-      {/* STATS */}
+      {/* =================================================
+          STATS
+      ================================================= */}
+
       <div className="user-stats">
 
+        {/* TOTAL */}
+
         <div className="stat-card">
-          <div className="stat-icon">
-            👥
+
+          <div className="stat-icon total-icon">
+            <span>♟</span>
           </div>
 
-          <div>
-            <span>Total Users</span>
-            <h2>{totalUsers}</h2>
+          <div className="stat-content">
+            <span className="stat-label">
+              Total Users
+            </span>
+
+            <strong className="stat-number">
+              {totalUsers}
+            </strong>
           </div>
+
         </div>
 
-        <div className="stat-card online-stat">
-          <div className="stat-icon">
-            🟢
+        {/* ONLINE */}
+
+        <div className="stat-card">
+
+          <div className="stat-icon online-icon">
+            <span className="status-circle"></span>
           </div>
 
-          <div>
-            <span>Online Users</span>
-            <h2>{onlineUsers}</h2>
+          <div className="stat-content">
+            <span className="stat-label">
+              Online Users
+            </span>
+
+            <strong className="stat-number">
+              {onlineUsers}
+            </strong>
           </div>
+
         </div>
 
-        <div className="stat-card offline-stat">
-          <div className="stat-icon">
-            ⚫
+        {/* OFFLINE */}
+
+        <div className="stat-card">
+
+          <div className="stat-icon offline-icon">
+            <span className="status-circle"></span>
           </div>
 
-          <div>
-            <span>Offline Users</span>
-            <h2>{offlineUsers}</h2>
+          <div className="stat-content">
+            <span className="stat-label">
+              Offline Users
+            </span>
+
+            <strong className="stat-number">
+              {offlineUsers}
+            </strong>
           </div>
+
         </div>
 
       </div>
 
-      {/* SEARCH + FILTER */}
+      {/* =================================================
+          CONTROLS
+      ================================================= */}
+
       <div className="user-controls">
 
+        {/* SEARCH */}
+
         <div className="search-box">
-          <span>🔍</span>
+
+          <span className="search-icon">
+            ⌕
+          </span>
 
           <input
             type="text"
-            placeholder="Search user by name, email or phone..."
             value={search}
+            placeholder="Search user by name, email or phone..."
             onChange={(e) =>
               setSearch(e.target.value)
             }
@@ -316,17 +410,23 @@ function AdminUsers() {
 
           {search && (
             <button
+              type="button"
               className="clear-search"
               onClick={() => setSearch("")}
+              aria-label="Clear search"
             >
               ×
             </button>
           )}
+
         </div>
+
+        {/* FILTERS */}
 
         <div className="filter-buttons">
 
           <button
+            type="button"
             className={
               activeFilter === "all"
                 ? "filter-btn active"
@@ -336,73 +436,131 @@ function AdminUsers() {
               setActiveFilter("all")
             }
           >
-            All Users
-            <span>{totalUsers}</span>
+            <span>All Users</span>
+
+            <small>
+              {totalUsers}
+            </small>
           </button>
 
           <button
+            type="button"
             className={
               activeFilter === "online"
-                ? "filter-btn online active"
-                : "filter-btn online"
+                ? "filter-btn active online-filter"
+                : "filter-btn online-filter"
             }
             onClick={() =>
               setActiveFilter("online")
             }
           >
-            🟢 Online
-            <span>{onlineUsers}</span>
+            <span className="mini-status online"></span>
+
+            <span>Online</span>
+
+            <small>
+              {onlineUsers}
+            </small>
           </button>
 
           <button
+            type="button"
             className={
               activeFilter === "offline"
-                ? "filter-btn offline active"
-                : "filter-btn offline"
+                ? "filter-btn active offline-filter"
+                : "filter-btn offline-filter"
             }
             onClick={() =>
               setActiveFilter("offline")
             }
           >
-            ⚫ Offline
-            <span>{offlineUsers}</span>
+            <span className="mini-status offline"></span>
+
+            <span>Offline</span>
+
+            <small>
+              {offlineUsers}
+            </small>
           </button>
 
         </div>
+
       </div>
 
-      {/* ERROR */}
+      {/* =================================================
+          ERROR
+      ================================================= */}
+
       {error && (
         <div className="users-error">
-          {error}
+          <span>{error}</span>
+
+          <button
+            type="button"
+            onClick={() => fetchAllData(true)}
+          >
+            Try again
+          </button>
         </div>
       )}
 
-      {/* RESULT COUNT */}
+      {/* =================================================
+          RESULT INFO
+      ================================================= */}
+
       <div className="result-info">
-        Showing{" "}
-        <strong>
-          {filteredUsers.length}
-        </strong>{" "}
-        users
+
+        <span>
+          Showing{" "}
+          <strong>
+            {filteredUsers.length}
+          </strong>{" "}
+          {filteredUsers.length === 1
+            ? "user"
+            : "users"}
+        </span>
+
+        {(search || activeFilter !== "all") && (
+          <button
+            type="button"
+            className="reset-filter"
+            onClick={() => {
+              setSearch("");
+              setActiveFilter("all");
+            }}
+          >
+            Clear filters
+          </button>
+        )}
+
       </div>
 
-      {/* USER CARDS */}
+      {/* =================================================
+          USER CARDS
+      ================================================= */}
+
       {filteredUsers.length > 0 ? (
 
         <div className="users-grid">
 
           {filteredUsers.map((user) => {
 
-            const status = getUserStatus(
-              user._id
-            );
+            const status =
+              getUserStatus(user._id);
 
             const latestHistory =
               getLastLogin(user._id);
 
+            const isOnline =
+              status === "Online";
+
+            const firstLetter =
+              user.name
+                ?.charAt(0)
+                .toUpperCase() || "U";
+
             return (
-              <div
+              <article
                 className="admin-user-card"
                 key={user._id}
                 onClick={() =>
@@ -410,98 +568,141 @@ function AdminUsers() {
                 }
               >
 
-                {/* CARD TOP */}
+                {/* TOP */}
+
                 <div className="card-top">
 
                   <div className="profile-wrapper">
 
                     {user.profileImage ? (
+
                       <img
                         src={user.profileImage}
-                        alt={user.name}
+                        alt={user.name || "User"}
                         className="user-avatar"
                       />
+
                     ) : (
+
                       <div className="user-avatar default-avatar">
-                        {user.name
-                          ?.charAt(0)
-                          .toUpperCase()}
+                        {firstLetter}
                       </div>
+
                     )}
 
                     <span
                       className={
-                        status === "Online"
+                        isOnline
                           ? "online-dot"
                           : "offline-dot"
                       }
-                    ></span>
+                    />
 
                   </div>
 
                   <span
                     className={
-                      status === "Online"
+                      isOnline
                         ? "status-badge online"
                         : "status-badge offline"
                     }
                   >
+                    <span className="badge-dot"></span>
+
                     {status}
                   </span>
 
                 </div>
 
-                {/* NAME */}
+                {/* USER NAME */}
+
                 <div className="user-main-info">
 
-                  <h2>
-                    {user.name}
-                  </h2>
+                  <div className="name-row">
 
-                  <span className="role-badge">
-                    {user.role || "user"}
-                  </span>
+                    <h2>
+                      {user.name ||
+                        "Unnamed User"}
+                    </h2>
+
+                    <span className="role-badge">
+                      {user.role || "user"}
+                    </span>
+
+                  </div>
 
                 </div>
 
                 {/* DETAILS */}
+
                 <div className="user-card-details">
 
-                  <div className="detail-row">
-                    <span className="detail-icon">
-                      ✉
-                    </span>
+                  {/* EMAIL */}
 
-                    <div>
-                      <small>Email</small>
+                  <div className="detail-row">
+
+                    <div className="detail-icon">
+                      @
+                    </div>
+
+                    <div className="detail-content">
+
+                      <small>
+                        EMAIL
+                      </small>
+
                       <p>
                         {user.email ||
                           "Not available"}
                       </p>
+
                     </div>
+
                   </div>
 
-                  <div className="detail-row">
-                    <span className="detail-icon">
-                      ☎
-                    </span>
+                  {/* PHONE */}
 
-                    <div>
-                      <small>Phone</small>
-                      <p>
+                  <div className="detail-row">
+
+                    <div className="detail-icon">
+                      ☎
+                    </div>
+
+                    <div className="detail-content">
+
+                      <small>
+                        PHONE
+                      </small>
+
+                      <p
+                        className={
+                          !user.phone
+                            ? "muted-detail"
+                            : ""
+                        }
+                      >
                         {user.phone ||
                           "Not available"}
                       </p>
+
                     </div>
+
                   </div>
 
-                  <div className="detail-row">
-                    <span className="detail-icon">
-                      🕒
-                    </span>
+                  {/* LAST LOGIN */}
 
-                    <div>
-                      <small>Last Login</small>
+                  <div className="detail-row">
+
+                    <div className="detail-icon">
+                      ◷
+                    </div>
+
+                    <div className="detail-content">
+
+                      <small>
+                        LAST LOGIN
+                      </small>
+
                       <p>
                         {latestHistory
                           ? formatDate(
@@ -509,13 +710,17 @@ function AdminUsers() {
                             )
                           : "Never logged in"}
                       </p>
+
                     </div>
+
                   </div>
 
                 </div>
 
-                {/* VIEW BUTTON */}
+                {/* FOOTER */}
+
                 <div className="view-user">
+
                   <span>
                     View Full Details
                   </span>
@@ -523,9 +728,10 @@ function AdminUsers() {
                   <span className="arrow">
                     →
                   </span>
+
                 </div>
 
-              </div>
+              </article>
             );
           })}
 
@@ -533,9 +739,14 @@ function AdminUsers() {
 
       ) : (
 
+        /* =================================================
+           EMPTY STATE
+        ================================================= */
+
         <div className="no-users">
+
           <div className="no-users-icon">
-            🔍
+            ⌕
           </div>
 
           <h2>
@@ -547,6 +758,7 @@ function AdminUsers() {
           </p>
 
           <button
+            type="button"
             onClick={() => {
               setSearch("");
               setActiveFilter("all");
@@ -554,6 +766,7 @@ function AdminUsers() {
           >
             Show All Users
           </button>
+
         </div>
 
       )}
