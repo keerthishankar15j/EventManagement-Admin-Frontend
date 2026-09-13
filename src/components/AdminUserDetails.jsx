@@ -7,14 +7,29 @@ function AdminUserDetails({
   onBack,
 }) {
   // =====================================================
+  // GET USER ID SAFELY
+  // =====================================================
+
+  const getUserId = (item) => {
+    if (!item?.userId) {
+      return "";
+    }
+
+    if (typeof item.userId === "object") {
+      return String(item.userId._id || "");
+    }
+
+    return String(item.userId);
+  };
+
+  // =====================================================
   // USER HISTORY
   // =====================================================
 
-  const userHistory = loginHistory
+  const userHistory = [...loginHistory]
     .filter(
       (item) =>
-        String(item.userId) ===
-        String(user?._id)
+        getUserId(item) === String(user?._id || "")
     )
     .sort(
       (a, b) =>
@@ -49,21 +64,14 @@ function AdminUserDetails({
 
     const parsedDate = new Date(date);
 
-    if (
-      Number.isNaN(
-        parsedDate.getTime()
-      )
-    ) {
+    if (Number.isNaN(parsedDate.getTime())) {
       return "Not available";
     }
 
-    return parsedDate.toLocaleString(
-      "en-IN",
-      {
-        dateStyle: "full",
-        timeStyle: "short",
-      }
-    );
+    return parsedDate.toLocaleString("en-IN", {
+      dateStyle: "full",
+      timeStyle: "short",
+    });
   };
 
   // =====================================================
@@ -80,9 +88,7 @@ function AdminUserDetails({
 
   const lastLogin =
     latestHistory?.loginTime
-      ? formatDate(
-          latestHistory.loginTime
-        )
+      ? formatDate(latestHistory.loginTime)
       : "Never logged in";
 
   // =====================================================
@@ -91,9 +97,7 @@ function AdminUserDetails({
 
   const lastLogout =
     latestHistory?.logoutTime
-      ? formatDate(
-          latestHistory.logoutTime
-        )
+      ? formatDate(latestHistory.logoutTime)
       : isOnline
       ? "Currently online"
       : "Not available";
@@ -103,9 +107,11 @@ function AdminUserDetails({
   // =====================================================
 
   const firstLetter =
-    user?.name
-      ?.charAt(0)
-      .toUpperCase() || "U";
+    user?.name?.charAt(0).toUpperCase() || "U";
+
+  // =====================================================
+  // RENDER
+  // =====================================================
 
   return (
     <div className="user-details-page">
@@ -124,13 +130,9 @@ function AdminUserDetails({
 
         <div className="details-heading">
 
-          <p>
-            USER PROFILE
-          </p>
+          <p>USER PROFILE</p>
 
-          <h1>
-            User Details
-          </h1>
+          <h1>User Details</h1>
 
         </div>
 
@@ -145,9 +147,7 @@ function AdminUserDetails({
           {user?.profileImage ? (
             <img
               src={user.profileImage}
-              alt={
-                user.name || "User"
-              }
+              alt={user?.name || "User"}
               className="large-profile-image"
             />
           ) : (
@@ -171,8 +171,7 @@ function AdminUserDetails({
           <div className="name-line">
 
             <h2>
-              {user?.name ||
-                "Unnamed User"}
+              {user?.name || "Unnamed User"}
             </h2>
 
             <span
@@ -182,16 +181,13 @@ function AdminUserDetails({
                   : "large-status-badge offline"
               }
             >
-              {isOnline
-                ? "● Online"
-                : "● Offline"}
+              {isOnline ? "● Online" : "● Offline"}
             </span>
 
           </div>
 
           <p className="profile-email">
-            {user?.email ||
-              "No email available"}
+            {user?.email || "No email available"}
           </p>
 
           <span className="profile-role">
@@ -207,13 +203,9 @@ function AdminUserDetails({
       <div className="details-section">
 
         <div className="section-title">
-
           <span></span>
 
-          <h2>
-            Personal Information
-          </h2>
-
+          <h2>Personal Information</h2>
         </div>
 
         <div className="details-grid">
@@ -225,16 +217,11 @@ function AdminUserDetails({
             </span>
 
             <div>
-
-              <small>
-                Full Name
-              </small>
+              <small>Full Name</small>
 
               <strong>
-                {user?.name ||
-                  "Not available"}
+                {user?.name || "Not available"}
               </strong>
-
             </div>
 
           </div>
@@ -246,16 +233,11 @@ function AdminUserDetails({
             </span>
 
             <div>
-
-              <small>
-                Email Address
-              </small>
+              <small>Email Address</small>
 
               <strong>
-                {user?.email ||
-                  "Not available"}
+                {user?.email || "Not available"}
               </strong>
-
             </div>
 
           </div>
@@ -267,16 +249,11 @@ function AdminUserDetails({
             </span>
 
             <div>
-
-              <small>
-                Phone Number
-              </small>
+              <small>Phone Number</small>
 
               <strong>
-                {user?.phone ||
-                  "Not available"}
+                {user?.phone || "Not available"}
               </strong>
-
             </div>
 
           </div>
@@ -288,16 +265,11 @@ function AdminUserDetails({
             </span>
 
             <div>
-
-              <small>
-                Account Role
-              </small>
+              <small>Account Role</small>
 
               <strong>
-                {user?.role ||
-                  "user"}
+                {user?.role || "user"}
               </strong>
-
             </div>
 
           </div>
@@ -309,15 +281,11 @@ function AdminUserDetails({
             </span>
 
             <div>
-
-              <small>
-                Joined Date
-              </small>
+              <small>Joined Date</small>
 
               <strong>
                 {joinedDate}
               </strong>
-
             </div>
 
           </div>
@@ -329,16 +297,11 @@ function AdminUserDetails({
             </span>
 
             <div>
-
-              <small>
-                User ID
-              </small>
+              <small>User ID</small>
 
               <strong className="user-id">
-                {user?._id ||
-                  "Not available"}
+                {user?._id || "Not available"}
               </strong>
-
             </div>
 
           </div>
@@ -347,18 +310,14 @@ function AdminUserDetails({
 
       </div>
 
-      {/* ABOUT */}
+      {/* ABOUT USER */}
 
       <div className="details-section">
 
         <div className="section-title">
-
           <span></span>
 
-          <h2>
-            About User
-          </h2>
-
+          <h2>About User</h2>
         </div>
 
         <div className="bio-box">
@@ -377,22 +336,16 @@ function AdminUserDetails({
       <div className="details-section">
 
         <div className="section-title">
-
           <span></span>
 
-          <h2>
-            Login Information
-          </h2>
-
+          <h2>Login Information</h2>
         </div>
 
         <div className="login-summary">
 
           <div className="login-box">
 
-            <span>
-              Current Status
-            </span>
+            <span>Current Status</span>
 
             <strong
               className={
@@ -401,18 +354,14 @@ function AdminUserDetails({
                   : "text-offline"
               }
             >
-              {isOnline
-                ? "Online"
-                : "Offline"}
+              {isOnline ? "Online" : "Offline"}
             </strong>
 
           </div>
 
           <div className="login-box">
 
-            <span>
-              Last Login
-            </span>
+            <span>Last Login</span>
 
             <strong>
               {lastLogin}
@@ -422,9 +371,7 @@ function AdminUserDetails({
 
           <div className="login-box">
 
-            <span>
-              Last Logout
-            </span>
+            <span>Last Logout</span>
 
             <strong>
               {lastLogout}
@@ -434,9 +381,7 @@ function AdminUserDetails({
 
           <div className="login-box">
 
-            <span>
-              Total Sessions
-            </span>
+            <span>Total Sessions</span>
 
             <strong>
               {userHistory.length}
@@ -453,13 +398,9 @@ function AdminUserDetails({
       <div className="details-section">
 
         <div className="section-title">
-
           <span></span>
 
-          <h2>
-            Login History
-          </h2>
-
+          <h2>Login History</h2>
         </div>
 
         {userHistory.length > 0 ? (
@@ -471,23 +412,10 @@ function AdminUserDetails({
               <thead>
 
                 <tr>
-
-                  <th>
-                    #
-                  </th>
-
-                  <th>
-                    Login Time
-                  </th>
-
-                  <th>
-                    Logout Time
-                  </th>
-
-                  <th>
-                    Status
-                  </th>
-
+                  <th>#</th>
+                  <th>Login Time</th>
+                  <th>Logout Time</th>
+                  <th>Status</th>
                 </tr>
 
               </thead>
@@ -526,8 +454,7 @@ function AdminUserDetails({
 
                         <span
                           className={
-                            history.status ===
-                            "Active"
+                            history.status === "Active"
                               ? "history-status active"
                               : "history-status logged-out"
                           }
@@ -553,9 +480,7 @@ function AdminUserDetails({
 
           <div className="no-history">
 
-            <span>
-              🕒
-            </span>
+            <span>🕒</span>
 
             <p>
               No login history available
