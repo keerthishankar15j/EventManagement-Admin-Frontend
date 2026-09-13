@@ -3,6 +3,7 @@ import axios from "axios";
 import AdminUserDetails from "./AdminUserDetails";
 import "../styles/Admin_users.css";
 
+
 const API_BASE_URL = "https://user-api-iota-six.vercel.app";
 
 function AdminUsers() {
