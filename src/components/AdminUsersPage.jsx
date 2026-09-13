@@ -3,7 +3,6 @@ import axios from "axios";
 import AdminUserDetails from "./AdminUserDetails";
 import "../styles/AdminUsersPage.css";
 
-
 const API_BASE_URL = "https://user-api-iota-six.vercel.app";
 
 function AdminUsersPage() {
@@ -25,17 +24,39 @@ function AdminUsersPage() {
   const fetchUsers = async () => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/login/getusers`
+        `${API_BASE_URL}/login/getusers`,
+        {
+          timeout: 15000,
+        }
       );
+
+      console.log("USERS API RESPONSE:", response.data);
 
       if (response.data?.success) {
         setUsers(response.data.users || []);
-      } else {
-        setError("Unable to fetch users");
+        return;
       }
+
+      setUsers([]);
+      setError(
+        response.data?.message || "Unable to fetch users"
+      );
     } catch (err) {
-      console.error("Fetch users error:", err);
-      setError("Failed to load users");
+      console.error("FETCH USERS ERROR:", err);
+
+      if (err.response) {
+        console.error(
+          "USERS API STATUS:",
+          err.response.status
+        );
+
+        console.error(
+          "USERS API DATA:",
+          err.response.data
+        );
+      }
+
+      throw err;
     }
   };
 
@@ -46,14 +67,42 @@ function AdminUsersPage() {
   const fetchLoginHistory = async () => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/loginhistory/gethistory`
+        `${API_BASE_URL}/loginhistory/gethistory`,
+        {
+          timeout: 15000,
+        }
+      );
+
+      console.log(
+        "LOGIN HISTORY API RESPONSE:",
+        response.data
       );
 
       if (response.data?.success) {
         setLoginHistory(response.data.history || []);
+        return;
       }
+
+      setLoginHistory([]);
     } catch (err) {
-      console.error("Login history error:", err);
+      console.error(
+        "FETCH LOGIN HISTORY ERROR:",
+        err
+      );
+
+      if (err.response) {
+        console.error(
+          "LOGIN HISTORY STATUS:",
+          err.response.status
+        );
+
+        console.error(
+          "LOGIN HISTORY DATA:",
+          err.response.data
+        );
+      }
+
+      throw err;
     }
   };
 
@@ -61,7 +110,9 @@ function AdminUsersPage() {
   // FETCH ALL DATA
   // =====================================================
 
-  const fetchAllData = async (showLoader = false) => {
+  const fetchAllData = async (
+    showLoader = false
+  ) => {
     try {
       if (showLoader) {
         setLoading(true);
@@ -69,20 +120,46 @@ function AdminUsersPage() {
 
       setError("");
 
-      await Promise.all([
+      const results = await Promise.allSettled([
         fetchUsers(),
         fetchLoginHistory(),
       ]);
+
+      const usersFailed =
+        results[0].status === "rejected";
+
+      const historyFailed =
+        results[1].status === "rejected";
+
+      if (usersFailed && historyFailed) {
+        setError(
+          "Unable to connect to the user API. Please check the backend."
+        );
+      } else if (usersFailed) {
+        setError(
+          "Unable to load users. Please check the user API."
+        );
+      } else if (historyFailed) {
+        setError(
+          "Users loaded, but login history could not be loaded."
+        );
+      }
     } catch (err) {
-      console.error("Fetch all data error:", err);
-      setError("Unable to load user data");
+      console.error(
+        "FETCH ALL DATA ERROR:",
+        err
+      );
+
+      setError(
+        "Unable to load user data."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   // =====================================================
-  // INITIAL LOAD + AUTO REFRESH
+  // INITIAL LOAD
   // =====================================================
 
   useEffect(() => {
@@ -92,7 +169,9 @@ function AdminUsersPage() {
       fetchAllData(false);
     }, 10000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   // =====================================================
@@ -107,8 +186,8 @@ function AdminUsersPage() {
       )
       .sort(
         (a, b) =>
-          new Date(b.loginTime) -
-          new Date(a.loginTime)
+          new Date(b.loginTime || 0) -
+          new Date(a.loginTime || 0)
       );
   };
 
@@ -117,13 +196,13 @@ function AdminUsersPage() {
   // =====================================================
 
   const getUserStatus = (userId) => {
-    const userHistory = getUserHistory(userId);
+    const history = getUserHistory(userId);
 
-    if (userHistory.length === 0) {
+    if (history.length === 0) {
       return "Offline";
     }
 
-    const latestLogin = userHistory[0];
+    const latestLogin = history[0];
 
     return latestLogin.status === "Active"
       ? "Online"
@@ -135,13 +214,13 @@ function AdminUsersPage() {
   // =====================================================
 
   const getLastLogin = (userId) => {
-    const userHistory = getUserHistory(userId);
+    const history = getUserHistory(userId);
 
-    if (userHistory.length === 0) {
+    if (history.length === 0) {
       return null;
     }
 
-    return userHistory[0];
+    return history[0];
   };
 
   // =====================================================
@@ -176,7 +255,10 @@ function AdminUsersPage() {
       (activeFilter === "offline" &&
         status === "Offline");
 
-    return matchesSearch && matchesFilter;
+    return (
+      matchesSearch &&
+      matchesFilter
+    );
   });
 
   // =====================================================
@@ -204,7 +286,11 @@ function AdminUsersPage() {
 
     const parsedDate = new Date(date);
 
-    if (Number.isNaN(parsedDate.getTime())) {
+    if (
+      Number.isNaN(
+        parsedDate.getTime()
+      )
+    ) {
       return "Not available";
     }
 
@@ -230,7 +316,7 @@ function AdminUsersPage() {
   };
 
   // =====================================================
-  // BACK FROM USER DETAILS
+  // BACK
   // =====================================================
 
   const handleBack = () => {
@@ -239,10 +325,13 @@ function AdminUsersPage() {
   };
 
   // =====================================================
-  // LOADING SCREEN
+  // LOADING
   // =====================================================
 
-  if (loading && users.length === 0) {
+  if (
+    loading &&
+    users.length === 0
+  ) {
     return (
       <div className="admin-users-page">
         <div className="users-loading">
@@ -250,7 +339,10 @@ function AdminUsersPage() {
 
           <h3>Loading users</h3>
 
-          <p>Please wait while we load the user data.</p>
+          <p>
+            Please wait while we load
+            the user data.
+          </p>
         </div>
       </div>
     );
@@ -277,9 +369,7 @@ function AdminUsersPage() {
   return (
     <div className="admin-users-page">
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+      {/* HEADER */}
 
       <div className="users-header">
 
@@ -292,7 +382,8 @@ function AdminUsersPage() {
           <h1>User Management</h1>
 
           <p className="users-subtitle">
-            Manage and monitor all registered users
+            Manage and monitor all
+            registered users
           </p>
 
         </div>
@@ -300,7 +391,9 @@ function AdminUsersPage() {
         <button
           type="button"
           className="refresh-btn"
-          onClick={() => fetchAllData(true)}
+          onClick={() =>
+            fetchAllData(true)
+          }
           disabled={loading}
         >
           <span
@@ -313,18 +406,16 @@ function AdminUsersPage() {
             ↻
           </span>
 
-          {loading ? "Refreshing" : "Refresh"}
+          {loading
+            ? "Refreshing"
+            : "Refresh"}
         </button>
 
       </div>
 
-      {/* =================================================
-          STATS
-      ================================================= */}
+      {/* STATS */}
 
       <div className="user-stats">
-
-        {/* TOTAL */}
 
         <div className="stat-card">
 
@@ -333,6 +424,7 @@ function AdminUsersPage() {
           </div>
 
           <div className="stat-content">
+
             <span className="stat-label">
               Total Users
             </span>
@@ -340,11 +432,10 @@ function AdminUsersPage() {
             <strong className="stat-number">
               {totalUsers}
             </strong>
+
           </div>
 
         </div>
-
-        {/* ONLINE */}
 
         <div className="stat-card">
 
@@ -353,6 +444,7 @@ function AdminUsersPage() {
           </div>
 
           <div className="stat-content">
+
             <span className="stat-label">
               Online Users
             </span>
@@ -360,11 +452,10 @@ function AdminUsersPage() {
             <strong className="stat-number">
               {onlineUsers}
             </strong>
+
           </div>
 
         </div>
-
-        {/* OFFLINE */}
 
         <div className="stat-card">
 
@@ -373,6 +464,7 @@ function AdminUsersPage() {
           </div>
 
           <div className="stat-content">
+
             <span className="stat-label">
               Offline Users
             </span>
@@ -380,19 +472,16 @@ function AdminUsersPage() {
             <strong className="stat-number">
               {offlineUsers}
             </strong>
+
           </div>
 
         </div>
 
       </div>
 
-      {/* =================================================
-          CONTROLS
-      ================================================= */}
+      {/* CONTROLS */}
 
       <div className="user-controls">
-
-        {/* SEARCH */}
 
         <div className="search-box">
 
@@ -413,16 +502,15 @@ function AdminUsersPage() {
             <button
               type="button"
               className="clear-search"
-              onClick={() => setSearch("")}
-              aria-label="Clear search"
+              onClick={() =>
+                setSearch("")
+              }
             >
               ×
             </button>
           )}
 
         </div>
-
-        {/* FILTERS */}
 
         <div className="filter-buttons">
 
@@ -437,7 +525,9 @@ function AdminUsersPage() {
               setActiveFilter("all")
             }
           >
-            <span>All Users</span>
+            <span>
+              All Users
+            </span>
 
             <small>
               {totalUsers}
@@ -457,7 +547,9 @@ function AdminUsersPage() {
           >
             <span className="mini-status online"></span>
 
-            <span>Online</span>
+            <span>
+              Online
+            </span>
 
             <small>
               {onlineUsers}
@@ -477,7 +569,9 @@ function AdminUsersPage() {
           >
             <span className="mini-status offline"></span>
 
-            <span>Offline</span>
+            <span>
+              Offline
+            </span>
 
             <small>
               {offlineUsers}
@@ -488,26 +582,28 @@ function AdminUsersPage() {
 
       </div>
 
-      {/* =================================================
-          ERROR
-      ================================================= */}
+      {/* ERROR */}
 
       {error && (
         <div className="users-error">
-          <span>{error}</span>
+
+          <span>
+            {error}
+          </span>
 
           <button
             type="button"
-            onClick={() => fetchAllData(true)}
+            onClick={() =>
+              fetchAllData(true)
+            }
           >
             Try again
           </button>
+
         </div>
       )}
 
-      {/* =================================================
-          RESULT INFO
-      ================================================= */}
+      {/* RESULT */}
 
       <div className="result-info">
 
@@ -521,7 +617,8 @@ function AdminUsersPage() {
             : "users"}
         </span>
 
-        {(search || activeFilter !== "all") && (
+        {(search ||
+          activeFilter !== "all") && (
           <button
             type="button"
             className="reset-filter"
@@ -536,9 +633,7 @@ function AdminUsersPage() {
 
       </div>
 
-      {/* =================================================
-          USER CARDS
-      ================================================= */}
+      {/* USERS */}
 
       {filteredUsers.length > 0 ? (
 
@@ -569,26 +664,23 @@ function AdminUsersPage() {
                 }
               >
 
-                {/* TOP */}
-
                 <div className="card-top">
 
                   <div className="profile-wrapper">
 
                     {user.profileImage ? (
-
                       <img
                         src={user.profileImage}
-                        alt={user.name || "User"}
+                        alt={
+                          user.name ||
+                          "User"
+                        }
                         className="user-avatar"
                       />
-
                     ) : (
-
                       <div className="user-avatar default-avatar">
                         {firstLetter}
                       </div>
-
                     )}
 
                     <span
@@ -615,8 +707,6 @@ function AdminUsersPage() {
 
                 </div>
 
-                {/* USER NAME */}
-
                 <div className="user-main-info">
 
                   <div className="name-row">
@@ -627,18 +717,15 @@ function AdminUsersPage() {
                     </h2>
 
                     <span className="role-badge">
-                      {user.role || "user"}
+                      {user.role ||
+                        "user"}
                     </span>
 
                   </div>
 
                 </div>
 
-                {/* DETAILS */}
-
                 <div className="user-card-details">
-
-                  {/* EMAIL */}
 
                   <div className="detail-row">
 
@@ -660,8 +747,6 @@ function AdminUsersPage() {
                     </div>
 
                   </div>
-
-                  {/* PHONE */}
 
                   <div className="detail-row">
 
@@ -690,8 +775,6 @@ function AdminUsersPage() {
 
                   </div>
 
-                  {/* LAST LOGIN */}
-
                   <div className="detail-row">
 
                     <div className="detail-icon">
@@ -718,8 +801,6 @@ function AdminUsersPage() {
 
                 </div>
 
-                {/* FOOTER */}
-
                 <div className="view-user">
 
                   <span>
@@ -740,10 +821,6 @@ function AdminUsersPage() {
 
       ) : (
 
-        /* =================================================
-           EMPTY STATE
-        ================================================= */
-
         <div className="no-users">
 
           <div className="no-users-icon">
@@ -755,7 +832,8 @@ function AdminUsersPage() {
           </h2>
 
           <p>
-            Try changing your search or filter.
+            Try changing your search
+            or filter.
           </p>
 
           <button
