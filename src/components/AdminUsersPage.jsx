@@ -1,363 +1,468 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+
 import AdminUserDetails from "./AdminUserDetails";
 import "../styles/AdminUsersPage.css";
 
 // =====================================================
-// API CONFIGURATION
+// BACKEND API URL
 // =====================================================
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL =
+  "https://user-api-iota-six.vercel.app";
+
+// =====================================================
+// AXIOS INSTANCE
+// =====================================================
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
 // =====================================================
 // ADMIN USERS PAGE
 // =====================================================
 
-const AdminUsersPage = () => {
-  // ===================================================
+function AdminUsersPage() {
+  // =====================================================
   // STATES
-  // ===================================================
+  // =====================================================
 
   const [users, setUsers] = useState([]);
+
   const [loginHistory, setLoginHistory] = useState([]);
 
-  const [loadingUsers, setLoadingUsers] = useState(true);
-  const [loadingHistory, setLoadingHistory] = useState(true);
-
-  const [error, setError] = useState("");
-  const [historyError, setHistoryError] = useState("");
-
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+
+  const [activeFilter, setActiveFilter] = useState("all");
 
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const [activeTab, setActiveTab] = useState("users");
+  const [loading, setLoading] = useState(true);
 
-  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
-  // ===================================================
+  // =====================================================
   // FETCH USERS
-  // ===================================================
+  // =====================================================
 
   const fetchUsers = async () => {
     try {
-      setLoadingUsers(true);
-      setError("");
-
       const response = await api.get("/login/getusers");
 
-      console.log("USERS RESPONSE:", response.data);
+      console.log(
+        "USERS API RESPONSE:",
+        response.data
+      );
 
       if (response.data?.success) {
         setUsers(response.data.users || []);
-      } else {
-        throw new Error(
-          response.data?.message || "Unable to fetch users"
+        return true;
+      }
+
+      throw new Error(
+        response.data?.message ||
+          "Unable to fetch users"
+      );
+    } catch (err) {
+      console.error(
+        "FETCH USERS ERROR:",
+        err
+      );
+
+      if (err.response) {
+        console.error(
+          "USERS STATUS:",
+          err.response.status
+        );
+
+        console.error(
+          "USERS DATA:",
+          err.response.data
         );
       }
-    } catch (err) {
-      console.error("FETCH USERS ERROR:", err);
 
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to fetch users"
-      );
-    } finally {
-      setLoadingUsers(false);
+      throw err;
     }
   };
 
-  // ===================================================
+  // =====================================================
   // FETCH LOGIN HISTORY
-  // ===================================================
+  // =====================================================
 
   const fetchLoginHistory = async () => {
     try {
-      setLoadingHistory(true);
-      setHistoryError("");
+      const response = await api.get(
+        "/loginhistory/gethistory"
+      );
 
-      const response = await api.get("/loginhistory/gethistory");
-
-      console.log("LOGIN HISTORY RESPONSE:", response.data);
+      console.log(
+        "LOGIN HISTORY API RESPONSE:",
+        response.data
+      );
 
       if (response.data?.success) {
-        setLoginHistory(response.data.history || []);
-      } else {
-        throw new Error(
-          response.data?.message ||
-            "Unable to fetch login history"
+        setLoginHistory(
+          response.data.history || []
+        );
+
+        return true;
+      }
+
+      throw new Error(
+        response.data?.message ||
+          "Unable to fetch login history"
+      );
+    } catch (err) {
+      console.error(
+        "FETCH LOGIN HISTORY ERROR:",
+        err
+      );
+
+      if (err.response) {
+        console.error(
+          "LOGIN HISTORY STATUS:",
+          err.response.status
+        );
+
+        console.error(
+          "LOGIN HISTORY DATA:",
+          err.response.data
         );
       }
-    } catch (err) {
-      console.error("FETCH LOGIN HISTORY ERROR:", err);
 
-      setHistoryError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to fetch login history"
-      );
-    } finally {
-      setLoadingHistory(false);
+      throw err;
     }
   };
 
-  // ===================================================
+  // =====================================================
   // FETCH ALL DATA
-  // ===================================================
+  // =====================================================
 
-  const fetchAllData = async () => {
-    await Promise.all([
-      fetchUsers(),
-      fetchLoginHistory(),
-    ]);
+  const fetchAllData = async (
+    showLoader = false
+  ) => {
+    try {
+      if (showLoader) {
+        setLoading(true);
+      }
+
+      setError("");
+
+      const results =
+        await Promise.allSettled([
+          fetchUsers(),
+          fetchLoginHistory(),
+        ]);
+
+      const usersFailed =
+        results[0].status === "rejected";
+
+      const historyFailed =
+        results[1].status === "rejected";
+
+      // BOTH FAILED
+
+      if (
+        usersFailed &&
+        historyFailed
+      ) {
+        setError(
+          "Unable to connect to the user API. Please check the backend."
+        );
+
+        return;
+      }
+
+      // USERS FAILED
+
+      if (usersFailed) {
+        setError(
+          "Unable to load users. Please check the user API."
+        );
+
+        return;
+      }
+
+      // HISTORY FAILED
+
+      if (historyFailed) {
+        setError(
+          "Users loaded, but login history could not be loaded."
+        );
+
+        return;
+      }
+    } catch (err) {
+      console.error(
+        "FETCH ALL DATA ERROR:",
+        err
+      );
+
+      setError(
+        "Unable to load user data."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ===================================================
-  // INITIAL LOAD
-  // ===================================================
+  // =====================================================
+  // INITIAL LOAD + AUTO REFRESH
+  // =====================================================
 
   useEffect(() => {
-    console.log("API BASE URL:", API_BASE_URL);
+    fetchAllData(true);
 
-    if (!API_BASE_URL) {
-      setError(
-        "VITE_API_URL is not configured. Please check your .env file."
-      );
+    const interval = setInterval(() => {
+      fetchAllData(false);
+    }, 10000);
 
-      setLoadingUsers(false);
-      setLoadingHistory(false);
-
-      return;
-    }
-
-    fetchAllData();
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
-  // ===================================================
-  // REFRESH
-  // ===================================================
+  // =====================================================
+  // GET HISTORY USER ID
+  // =====================================================
 
-  const handleRefresh = async () => {
-    try {
-      setRefreshing(true);
-
-      await fetchAllData();
-    } finally {
-      setRefreshing(false);
+  const getHistoryUserId = (item) => {
+    if (!item?.userId) {
+      return "";
     }
+
+    if (
+      typeof item.userId === "object"
+    ) {
+      return String(
+        item.userId._id || ""
+      );
+    }
+
+    return String(item.userId);
   };
 
-  // ===================================================
-  // FILTER USERS
-  // ===================================================
+  // =====================================================
+  // GET USER HISTORY
+  // =====================================================
 
-  const filteredUsers = useMemo(() => {
-    return users.filter((user) => {
-      const name =
-        user.name ||
-        user.username ||
-        "";
+  const getUserHistory = (userId) => {
+    return [...loginHistory]
+      .filter(
+        (item) =>
+          getHistoryUserId(item) ===
+          String(userId)
+      )
+      .sort(
+        (a, b) =>
+          new Date(
+            b.loginTime || 0
+          ) -
+          new Date(
+            a.loginTime || 0
+          )
+      );
+  };
 
-      const email =
-        user.email ||
-        "";
+  // =====================================================
+  // GET USER STATUS
+  // =====================================================
 
-      const role =
-        user.role ||
-        "";
+  const getUserStatus = (userId) => {
+    const history =
+      getUserHistory(userId);
 
-      const searchText = search
-        .toLowerCase()
-        .trim();
+    if (history.length === 0) {
+      return "Offline";
+    }
 
-      const matchesSearch =
-        name.toLowerCase().includes(searchText) ||
-        email.toLowerCase().includes(searchText) ||
-        role.toLowerCase().includes(searchText);
+    const latestLogin =
+      history[0];
 
-      const userStatus =
-        user.status ||
-        "Active";
+    return latestLogin.status ===
+      "Active"
+      ? "Online"
+      : "Offline";
+  };
 
-      const matchesStatus =
-        statusFilter === "All" ||
-        userStatus.toLowerCase() ===
-          statusFilter.toLowerCase();
+  // =====================================================
+  // GET LAST LOGIN
+  // =====================================================
 
-      return matchesSearch && matchesStatus;
-    });
-  }, [users, search, statusFilter]);
+  const getLastLogin = (userId) => {
+    const history =
+      getUserHistory(userId);
 
-  // ===================================================
-  // LOGIN HISTORY FILTER
-  // ===================================================
+    if (history.length === 0) {
+      return null;
+    }
 
-  const filteredHistory = useMemo(() => {
-    return loginHistory.filter((item) => {
-      const name =
-        item.name ||
-        "";
+    return history[0];
+  };
 
-      const email =
-        item.email ||
-        "";
+  // =====================================================
+  // SEARCH + FILTER
+  // =====================================================
 
+  const filteredUsers = users.filter(
+    (user) => {
       const status =
-        item.status ||
+        getUserStatus(user._id);
+
+      const searchValue =
+        search
+          .toLowerCase()
+          .trim();
+
+      const name =
+        user.name?.toLowerCase() ||
         "";
 
-      const searchText = search
-        .toLowerCase()
-        .trim();
+      const email =
+        user.email?.toLowerCase() ||
+        "";
+
+      const phone =
+        String(
+          user.phone || ""
+        ).toLowerCase();
 
       const matchesSearch =
-        name.toLowerCase().includes(searchText) ||
-        email.toLowerCase().includes(searchText);
+        name.includes(searchValue) ||
+        email.includes(searchValue) ||
+        phone.includes(searchValue);
 
-      const matchesStatus =
-        statusFilter === "All" ||
-        status.toLowerCase() ===
-          statusFilter.toLowerCase();
+      const matchesFilter =
+        activeFilter === "all" ||
+        (
+          activeFilter === "online" &&
+          status === "Online"
+        ) ||
+        (
+          activeFilter === "offline" &&
+          status === "Offline"
+        );
 
-      return matchesSearch && matchesStatus;
-    });
-  }, [loginHistory, search, statusFilter]);
+      return (
+        matchesSearch &&
+        matchesFilter
+      );
+    }
+  );
 
-  // ===================================================
+  // =====================================================
+  // COUNTS
+  // =====================================================
+
+  const totalUsers =
+    users.length;
+
+  const onlineUsers =
+    users.filter(
+      (user) =>
+        getUserStatus(user._id) ===
+        "Online"
+    ).length;
+
+  const offlineUsers =
+    totalUsers -
+    onlineUsers;
+
+  // =====================================================
   // FORMAT DATE
-  // ===================================================
+  // =====================================================
 
   const formatDate = (date) => {
     if (!date) {
-      return "—";
+      return "Not available";
     }
 
-    const parsedDate = new Date(date);
+    const parsedDate =
+      new Date(date);
 
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "—";
+    if (
+      Number.isNaN(
+        parsedDate.getTime()
+      )
+    ) {
+      return "Not available";
     }
 
-    return parsedDate.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return parsedDate.toLocaleString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      }
+    );
   };
 
-  // ===================================================
-  // FORMAT DATE + TIME
-  // ===================================================
-
-  const formatDateTime = (date) => {
-    if (!date) {
-      return "—";
-    }
-
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "—";
-    }
-
-    return parsedDate.toLocaleString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // ===================================================
-  // GET USER STATUS
-  // ===================================================
-
-  const getUserStatus = (user) => {
-    if (user.status) {
-      return user.status;
-    }
-
-    if (user.isActive === true) {
-      return "Active";
-    }
-
-    return "Active";
-  };
-
-  // ===================================================
-  // GET INITIALS
-  // ===================================================
-
-  const getInitials = (name) => {
-    if (!name) {
-      return "U";
-    }
-
-    const words = name
-      .trim()
-      .split(" ")
-      .filter(Boolean);
-
-    if (words.length === 1) {
-      return words[0]
-        .substring(0, 2)
-        .toUpperCase();
-    }
-
-    return (
-      words[0][0] +
-      words[words.length - 1][0]
-    ).toUpperCase();
-  };
-
-  // ===================================================
-  // USER COUNT
-  // ===================================================
-
-  const totalUsers = users.length;
-
-  const activeUsers = users.filter(
-    (user) =>
-      getUserStatus(user).toLowerCase() ===
-      "active"
-  ).length;
-
-  const loggedOutUsers = users.filter(
-    (user) =>
-      getUserStatus(user).toLowerCase() ===
-      "logged out"
-  ).length;
-
-  // ===================================================
+  // =====================================================
   // OPEN USER DETAILS
-  // ===================================================
+  // =====================================================
 
-  const handleViewUser = (user) => {
+  const handleUserClick = (user) => {
     setSelectedUser(user);
   };
 
-  // ===================================================
-  // CLOSE USER DETAILS
-  // ===================================================
+  // =====================================================
+  // BACK TO USERS
+  // =====================================================
 
-  const handleCloseDetails = () => {
+  const handleBack = () => {
     setSelectedUser(null);
+    fetchAllData(false);
   };
 
-  // ===================================================
-  // RENDER
-  // ===================================================
+  // =====================================================
+  // LOADING
+  // =====================================================
+
+  if (
+    loading &&
+    users.length === 0
+  ) {
+    return (
+      <div className="admin-users-page">
+        <div className="users-loading">
+          <div className="loading-spinner"></div>
+
+          <h3>
+            Loading users
+          </h3>
+
+          <p>
+            Please wait while we load
+            the user data.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // =====================================================
+  // USER DETAILS PAGE
+  // =====================================================
+
+  if (selectedUser) {
+    return (
+      <AdminUserDetails
+        user={selectedUser}
+        loginHistory={loginHistory}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // =====================================================
+  // MAIN PAGE
+  // =====================================================
 
   return (
     <div className="admin-users-page">
@@ -366,454 +471,544 @@ const AdminUsersPage = () => {
           HEADER
       ================================================= */}
 
-      <div className="admin-users-header">
+      <div className="users-header">
 
-        <div>
-          <h1>Users</h1>
+        <div className="users-heading">
 
-          <p>
-            Manage users and view login history
+          <span className="users-small-title">
+            ADMIN PANEL
+          </span>
+
+          <h1>
+            User Management
+          </h1>
+
+          <p className="users-subtitle">
+            Manage and monitor all
+            registered users
           </p>
+
         </div>
 
         <button
+          type="button"
           className="refresh-btn"
-          onClick={handleRefresh}
-          disabled={refreshing}
+          onClick={() =>
+            fetchAllData(true)
+          }
+          disabled={loading}
         >
-          {refreshing
-            ? "Refreshing..."
+          <span
+            className={
+              loading
+                ? "refresh-icon spinning"
+                : "refresh-icon"
+            }
+          >
+            ↻
+          </span>
+
+          {loading
+            ? "Refreshing"
             : "Refresh"}
         </button>
 
       </div>
 
       {/* =================================================
-          STATISTICS
+          STATS
       ================================================= */}
 
-      <div className="users-stats">
+      <div className="user-stats">
+
+        {/* TOTAL USERS */}
 
         <div className="stat-card">
-          <div className="stat-card-content">
-            <span className="stat-title">
+
+          <div className="stat-icon total-icon">
+            <span>♟</span>
+          </div>
+
+          <div className="stat-content">
+
+            <span className="stat-label">
               Total Users
             </span>
 
-            <strong>
+            <strong className="stat-number">
               {totalUsers}
             </strong>
+
           </div>
+
         </div>
 
+        {/* ONLINE USERS */}
+
         <div className="stat-card">
-          <div className="stat-card-content">
-            <span className="stat-title">
-              Active Users
+
+          <div className="stat-icon online-icon">
+            <span className="status-circle"></span>
+          </div>
+
+          <div className="stat-content">
+
+            <span className="stat-label">
+              Online Users
             </span>
 
-            <strong>
-              {activeUsers}
+            <strong className="stat-number">
+              {onlineUsers}
             </strong>
+
           </div>
+
         </div>
 
-        <div className="stat-card">
-          <div className="stat-card-content">
-            <span className="stat-title">
-              Logged Out
-            </span>
-
-            <strong>
-              {loggedOutUsers}
-            </strong>
-          </div>
-        </div>
+        {/* OFFLINE USERS */}
 
         <div className="stat-card">
-          <div className="stat-card-content">
-            <span className="stat-title">
-              Login Records
+
+          <div className="stat-icon offline-icon">
+            <span className="status-circle"></span>
+          </div>
+
+          <div className="stat-content">
+
+            <span className="stat-label">
+              Offline Users
             </span>
 
-            <strong>
-              {loginHistory.length}
+            <strong className="stat-number">
+              {offlineUsers}
             </strong>
+
           </div>
+
         </div>
 
       </div>
 
       {/* =================================================
-          TABS
+          SEARCH + FILTER
       ================================================= */}
 
-      <div className="admin-users-tabs">
-
-        <button
-          className={
-            activeTab === "users"
-              ? "active"
-              : ""
-          }
-          onClick={() => {
-            setActiveTab("users");
-            setSelectedUser(null);
-          }}
-        >
-          Users
-        </button>
-
-        <button
-          className={
-            activeTab === "history"
-              ? "active"
-              : ""
-          }
-          onClick={() => {
-            setActiveTab("history");
-            setSelectedUser(null);
-          }}
-        >
-          Login History
-        </button>
-
-      </div>
-
-      {/* =================================================
-          FILTER SECTION
-      ================================================= */}
-
-      <div className="users-filter-section">
-
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          className="users-search"
-        />
-
-        <select
-          value={statusFilter}
-          onChange={(e) =>
-            setStatusFilter(e.target.value)
-          }
-          className="users-status-filter"
-        >
-          <option value="All">
-            All Status
-          </option>
-
-          <option value="Active">
-            Active
-          </option>
-
-          <option value="Logged Out">
-            Logged Out
-          </option>
-        </select>
-
-      </div>
-
-      {/* =================================================
-          USERS TAB
-      ================================================= */}
-
-      {activeTab === "users" && (
-        <div className="users-section">
-
-          {loadingUsers ? (
-            <div className="loading-message">
-              Loading users...
-            </div>
-          ) : error ? (
-            <div className="error-message">
-              <p>{error}</p>
-
-              <button
-                onClick={fetchUsers}
-              >
-                Try Again
-              </button>
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="empty-message">
-              No users found.
-            </div>
-          ) : (
-            <div className="users-grid">
-
-              {filteredUsers.map((user, index) => {
-
-                const userName =
-                  user.name ||
-                  user.username ||
-                  "Unknown User";
-
-                const userEmail =
-                  user.email ||
-                  "No email";
-
-                const userRole =
-                  user.role ||
-                  "user";
-
-                const userStatus =
-                  getUserStatus(user);
-
-                return (
-                  <div
-                    className="user-card"
-                    key={
-                      user._id ||
-                      user.id ||
-                      index
-                    }
-                  >
-
-                    {/* AVATAR */}
-
-                    <div className="user-avatar">
-                      {user.profileImage ? (
-                        <img
-                          src={user.profileImage}
-                          alt={userName}
-                        />
-                      ) : (
-                        getInitials(userName)
-                      )}
-                    </div>
-
-                    {/* USER INFO */}
-
-                    <div className="user-card-info">
-
-                      <h3>
-                        {userName}
-                      </h3>
-
-                      <p>
-                        {userEmail}
-                      </p>
-
-                      <span className="user-role">
-                        {userRole}
-                      </span>
-
-                      <span
-                        className={
-                          userStatus
-                            .toLowerCase()
-                            .replace(/\s+/g, "-") +
-                          " user-status"
-                        }
-                      >
-                        {userStatus}
-                      </span>
-
-                    </div>
-
-                    {/* VIEW BUTTON */}
-
-                    <button
-                      className="view-user-btn"
-                      onClick={() =>
-                        handleViewUser(user)
-                      }
-                    >
-                      View
-                    </button>
-
-                  </div>
-                );
-              })}
-
-            </div>
-          )}
-
-        </div>
-      )}
-
-      {/* =================================================
-          LOGIN HISTORY TAB
-      ================================================= */}
-
-      {activeTab === "history" && (
-        <div className="login-history-section">
-
-          {loadingHistory ? (
-            <div className="loading-message">
-              Loading login history...
-            </div>
-          ) : historyError ? (
-            <div className="error-message">
-              <p>{historyError}</p>
-
-              <button
-                onClick={fetchLoginHistory}
-              >
-                Try Again
-              </button>
-            </div>
-          ) : filteredHistory.length === 0 ? (
-            <div className="empty-message">
-              No login history found.
-            </div>
-          ) : (
-            <div className="login-history-table-wrapper">
-
-              <table className="login-history-table">
-
-                <thead>
-                  <tr>
-                    <th>
-                      User
-                    </th>
-
-                    <th>
-                      Email
-                    </th>
-
-                    <th>
-                      Login Time
-                    </th>
-
-                    <th>
-                      Logout Time
-                    </th>
-
-                    <th>
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-
-                <tbody>
-
-                  {filteredHistory.map(
-                    (item, index) => {
-
-                      const userName =
-                        item.name ||
-                        "Unknown User";
-
-                      const email =
-                        item.email ||
-                        "No email";
-
-                      const status =
-                        item.status ||
-                        "Active";
-
-                      return (
-                        <tr
-                          key={
-                            item._id ||
-                            item.id ||
-                            index
-                          }
-                        >
-
-                          <td>
-                            <div className="history-user">
-
-                              <div className="history-avatar">
-                                {getInitials(
-                                  userName
-                                )}
-                              </div>
-
-                              <span>
-                                {userName}
-                              </span>
-
-                            </div>
-                          </td>
-
-                          <td>
-                            {email}
-                          </td>
-
-                          <td>
-                            {formatDateTime(
-                              item.loginTime
-                            )}
-                          </td>
-
-                          <td>
-                            {formatDateTime(
-                              item.logoutTime
-                            )}
-                          </td>
-
-                          <td>
-
-                            <span
-                              className={
-                                status
-                                  .toLowerCase()
-                                  .replace(
-                                    /\s+/g,
-                                    "-"
-                                  ) +
-                                " history-status"
-                              }
-                            >
-                              {status}
-                            </span>
-
-                          </td>
-
-                        </tr>
-                      );
-                    }
-                  )}
-
-                </tbody>
-
-              </table>
-
-            </div>
-          )}
-
-        </div>
-      )}
-
-      {/* =================================================
-          USER DETAILS MODAL
-      ================================================= */}
-
-      {selectedUser && (
-        <div className="user-details-overlay">
-
-          <div className="user-details-modal">
-
+      <div className="user-controls">
+
+        <div className="search-box">
+
+          <span className="search-icon">
+            ⌕
+          </span>
+
+          <input
+            type="text"
+            value={search}
+            placeholder="Search user by name, email or phone..."
+            onChange={(e) =>
+              setSearch(
+                e.target.value
+              )
+            }
+          />
+
+          {search && (
             <button
-              className="close-details-btn"
-              onClick={
-                handleCloseDetails
+              type="button"
+              className="clear-search"
+              onClick={() =>
+                setSearch("")
               }
             >
               ×
             </button>
+          )}
 
-            <AdminUserDetails
-              user={selectedUser}
-              onClose={
-                handleCloseDetails
-              }
-            />
+        </div>
 
+        <div className="filter-buttons">
+
+          {/* ALL */}
+
+          <button
+            type="button"
+            className={
+              activeFilter === "all"
+                ? "filter-btn active"
+                : "filter-btn"
+            }
+            onClick={() =>
+              setActiveFilter("all")
+            }
+          >
+            <span>
+              All Users
+            </span>
+
+            <small>
+              {totalUsers}
+            </small>
+          </button>
+
+          {/* ONLINE */}
+
+          <button
+            type="button"
+            className={
+              activeFilter === "online"
+                ? "filter-btn active online-filter"
+                : "filter-btn online-filter"
+            }
+            onClick={() =>
+              setActiveFilter("online")
+            }
+          >
+            <span className="mini-status online"></span>
+
+            <span>
+              Online
+            </span>
+
+            <small>
+              {onlineUsers}
+            </small>
+          </button>
+
+          {/* OFFLINE */}
+
+          <button
+            type="button"
+            className={
+              activeFilter === "offline"
+                ? "filter-btn active offline-filter"
+                : "filter-btn offline-filter"
+            }
+            onClick={() =>
+              setActiveFilter("offline")
+            }
+          >
+            <span className="mini-status offline"></span>
+
+            <span>
+              Offline
+            </span>
+
+            <small>
+              {offlineUsers}
+            </small>
+          </button>
+
+        </div>
+
+      </div>
+
+      {/* =================================================
+          ERROR
+      ================================================= */}
+
+      {error && (
+        <div className="users-error">
+
+          <span>
+            {error}
+          </span>
+
+          <button
+            type="button"
+            onClick={() =>
+              fetchAllData(true)
+            }
+          >
+            Try again
+          </button>
+
+        </div>
+      )}
+
+      {/* =================================================
+          RESULT INFO
+      ================================================= */}
+
+      <div className="result-info">
+
+        <span>
+          Showing{" "}
+          <strong>
+            {filteredUsers.length}
+          </strong>{" "}
+          {filteredUsers.length === 1
+            ? "user"
+            : "users"}
+        </span>
+
+        {(search ||
+          activeFilter !== "all") && (
+          <button
+            type="button"
+            className="reset-filter"
+            onClick={() => {
+              setSearch("");
+              setActiveFilter("all");
+            }}
+          >
+            Clear filters
+          </button>
+        )}
+
+      </div>
+
+      {/* =================================================
+          USERS
+      ================================================= */}
+
+      {filteredUsers.length > 0 ? (
+
+        <div className="users-grid">
+
+          {filteredUsers.map(
+            (user) => {
+
+              const status =
+                getUserStatus(
+                  user._id
+                );
+
+              const latestHistory =
+                getLastLogin(
+                  user._id
+                );
+
+              const isOnline =
+                status === "Online";
+
+              const firstLetter =
+                user.name
+                  ?.charAt(0)
+                  .toUpperCase() ||
+                "U";
+
+              return (
+
+                <article
+                  className="admin-user-card"
+                  key={user._id}
+                  onClick={() =>
+                    handleUserClick(user)
+                  }
+                >
+
+                  {/* CARD TOP */}
+
+                  <div className="card-top">
+
+                    <div className="profile-wrapper">
+
+                      {user.profileImage ? (
+
+                        <img
+                          src={
+                            user.profileImage
+                          }
+                          alt={
+                            user.name ||
+                            "User"
+                          }
+                          className="user-avatar"
+                        />
+
+                      ) : (
+
+                        <div className="user-avatar default-avatar">
+                          {firstLetter}
+                        </div>
+
+                      )}
+
+                      <span
+                        className={
+                          isOnline
+                            ? "online-dot"
+                            : "offline-dot"
+                        }
+                      />
+
+                    </div>
+
+                    <span
+                      className={
+                        isOnline
+                          ? "status-badge online"
+                          : "status-badge offline"
+                      }
+                    >
+                      <span className="badge-dot"></span>
+
+                      {status}
+                    </span>
+
+                  </div>
+
+                  {/* USER NAME */}
+
+                  <div className="user-main-info">
+
+                    <div className="name-row">
+
+                      <h2>
+                        {user.name ||
+                          "Unnamed User"}
+                      </h2>
+
+                      <span className="role-badge">
+                        {user.role ||
+                          "user"}
+                      </span>
+
+                    </div>
+
+                  </div>
+
+                  {/* USER DETAILS */}
+
+                  <div className="user-card-details">
+
+                    {/* EMAIL */}
+
+                    <div className="detail-row">
+
+                      <div className="detail-icon">
+                        @
+                      </div>
+
+                      <div className="detail-content">
+
+                        <small>
+                          EMAIL
+                        </small>
+
+                        <p>
+                          {user.email ||
+                            "Not available"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {/* PHONE */}
+
+                    <div className="detail-row">
+
+                      <div className="detail-icon">
+                        ☎
+                      </div>
+
+                      <div className="detail-content">
+
+                        <small>
+                          PHONE
+                        </small>
+
+                        <p
+                          className={
+                            !user.phone
+                              ? "muted-detail"
+                              : ""
+                          }
+                        >
+                          {user.phone ||
+                            "Not available"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                    {/* LAST LOGIN */}
+
+                    <div className="detail-row">
+
+                      <div className="detail-icon">
+                        ◷
+                      </div>
+
+                      <div className="detail-content">
+
+                        <small>
+                          LAST LOGIN
+                        </small>
+
+                        <p>
+                          {latestHistory
+                            ? formatDate(
+                                latestHistory.loginTime
+                              )
+                            : "Never logged in"}
+                        </p>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  {/* VIEW DETAILS */}
+
+                  <div className="view-user">
+
+                    <span>
+                      View Full Details
+                    </span>
+
+                    <span className="arrow">
+                      →
+                    </span>
+
+                  </div>
+
+                </article>
+              );
+            }
+          )}
+
+        </div>
+
+      ) : (
+
+        /* =================================================
+           NO USERS
+        ================================================= */
+
+        <div className="no-users">
+
+          <div className="no-users-icon">
+            ⌕
           </div>
+
+          <h2>
+            No Users Found
+          </h2>
+
+          <p>
+            Try changing your search
+            or filter.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSearch("");
+              setActiveFilter("all");
+            }}
+          >
+            Show All Users
+          </button>
 
         </div>
       )}
 
     </div>
   );
-};
+}
 
 export default AdminUsersPage;
