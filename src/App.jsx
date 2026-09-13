@@ -10,7 +10,7 @@ import AdminLogin from "./components/AdminLogin";
 import AdminNavbar from "./components/Admin_navbar";
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
-import AdminUsers from "./components/AdminUsersPage";
+import AdminUsers from "./components/AdminUsers.jsx";
 
 import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";

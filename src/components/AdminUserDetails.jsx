@@ -1,127 +1,95 @@
 import React from "react";
-import "../styles/AdminUserDetails.css";
+import "./AdminUserDetails.css";
 
 function AdminUserDetails({
   user,
-  loginHistory = [],
+  loginHistory,
   onBack,
 }) {
-  // =====================================================
-  // GET USER ID SAFELY
-  // =====================================================
 
-  const getUserId = (item) => {
-    if (!item?.userId) {
-      return "";
-    }
-
-    if (typeof item.userId === "object") {
-      return String(item.userId._id || "");
-    }
-
-    return String(item.userId);
-  };
-
-  // =====================================================
-  // USER HISTORY
-  // =====================================================
-
-  const userHistory = [...loginHistory]
+  // ==========================================
+  // USER LOGIN HISTORY
+  // ==========================================
+  const userHistory = loginHistory
     .filter(
       (item) =>
-        getUserId(item) === String(user?._id || "")
+        String(item.userId) ===
+        String(user._id)
     )
     .sort(
       (a, b) =>
-        new Date(b.loginTime || 0) -
-        new Date(a.loginTime || 0)
+        new Date(b.loginTime) -
+        new Date(a.loginTime)
     );
 
-  // =====================================================
-  // LATEST HISTORY
-  // =====================================================
-
+  // ==========================================
+  // CURRENT STATUS
+  // ==========================================
   const latestHistory =
     userHistory.length > 0
       ? userHistory[0]
       : null;
 
-  // =====================================================
-  // STATUS
-  // =====================================================
-
   const isOnline =
     latestHistory?.status === "Active";
 
-  // =====================================================
+  // ==========================================
   // DATE FORMAT
-  // =====================================================
-
+  // ==========================================
   const formatDate = (date) => {
     if (!date) {
       return "Not available";
     }
 
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "Not available";
-    }
-
-    return parsedDate.toLocaleString("en-IN", {
-      dateStyle: "full",
-      timeStyle: "short",
-    });
+    return new Date(date).toLocaleString(
+      "en-IN",
+      {
+        dateStyle: "full",
+        timeStyle: "short",
+      }
+    );
   };
 
-  // =====================================================
+  // ==========================================
   // JOINED DATE
-  // =====================================================
+  // ==========================================
+  const joinedDate =
+    user.createdAt
+      ? formatDate(user.createdAt)
+      : "Not available";
 
-  const joinedDate = user?.createdAt
-    ? formatDate(user.createdAt)
-    : "Not available";
-
-  // =====================================================
+  // ==========================================
   // LAST LOGIN
-  // =====================================================
-
+  // ==========================================
   const lastLogin =
     latestHistory?.loginTime
-      ? formatDate(latestHistory.loginTime)
+      ? formatDate(
+          latestHistory.loginTime
+        )
       : "Never logged in";
 
-  // =====================================================
+  // ==========================================
   // LAST LOGOUT
-  // =====================================================
-
+  // ==========================================
   const lastLogout =
     latestHistory?.logoutTime
-      ? formatDate(latestHistory.logoutTime)
+      ? formatDate(
+          latestHistory.logoutTime
+        )
       : isOnline
       ? "Currently online"
       : "Not available";
 
-  // =====================================================
-  // AVATAR
-  // =====================================================
-
-  const firstLetter =
-    user?.name?.charAt(0).toUpperCase() || "U";
-
-  // =====================================================
-  // RENDER
-  // =====================================================
-
   return (
     <div className="user-details-page">
 
-      {/* HEADER */}
+      {/* =====================================
+          TOP HEADER
+      ===================================== */}
 
       <div className="details-header">
 
         <button
-          type="button"
           className="back-button"
           onClick={onBack}
         >
@@ -129,30 +97,33 @@ function AdminUserDetails({
         </button>
 
         <div className="details-heading">
-
           <p>USER PROFILE</p>
-
-          <h1>User Details</h1>
-
+          <h1>
+            User Details
+          </h1>
         </div>
 
       </div>
 
-      {/* PROFILE HERO */}
+      {/* =====================================
+          PROFILE HERO
+      ===================================== */}
 
       <div className="profile-hero">
 
         <div className="large-profile-wrapper">
 
-          {user?.profileImage ? (
+          {user.profileImage ? (
             <img
               src={user.profileImage}
-              alt={user?.name || "User"}
+              alt={user.name}
               className="large-profile-image"
             />
           ) : (
             <div className="large-default-avatar">
-              {firstLetter}
+              {user.name
+                ?.charAt(0)
+                .toUpperCase()}
             </div>
           )}
 
@@ -162,7 +133,7 @@ function AdminUserDetails({
                 ? "large-status-dot online"
                 : "large-status-dot offline"
             }
-          />
+          ></span>
 
         </div>
 
@@ -171,7 +142,7 @@ function AdminUserDetails({
           <div className="name-line">
 
             <h2>
-              {user?.name || "Unnamed User"}
+              {user.name}
             </h2>
 
             <span
@@ -181,170 +152,191 @@ function AdminUserDetails({
                   : "large-status-badge offline"
               }
             >
-              {isOnline ? "● Online" : "● Offline"}
+              {isOnline
+                ? "● Online"
+                : "● Offline"}
             </span>
 
           </div>
 
           <p className="profile-email">
-            {user?.email || "No email available"}
+            {user.email}
           </p>
 
           <span className="profile-role">
-            {user?.role || "user"}
+            {user.role || "user"}
           </span>
 
         </div>
 
       </div>
 
-      {/* PERSONAL INFORMATION */}
+      {/* =====================================
+          INFORMATION GRID
+      ===================================== */}
 
       <div className="details-section">
 
         <div className="section-title">
           <span></span>
-
-          <h2>Personal Information</h2>
+          <h2>
+            Personal Information
+          </h2>
         </div>
 
         <div className="details-grid">
 
+          {/* NAME */}
           <div className="info-box">
-
             <span className="info-icon">
               👤
             </span>
 
             <div>
-              <small>Full Name</small>
+              <small>
+                Full Name
+              </small>
 
               <strong>
-                {user?.name || "Not available"}
+                {user.name ||
+                  "Not available"}
               </strong>
             </div>
-
           </div>
 
+          {/* EMAIL */}
           <div className="info-box">
-
             <span className="info-icon">
               ✉
             </span>
 
             <div>
-              <small>Email Address</small>
+              <small>
+                Email Address
+              </small>
 
               <strong>
-                {user?.email || "Not available"}
+                {user.email ||
+                  "Not available"}
               </strong>
             </div>
-
           </div>
 
+          {/* PHONE */}
           <div className="info-box">
-
             <span className="info-icon">
               ☎
             </span>
 
             <div>
-              <small>Phone Number</small>
+              <small>
+                Phone Number
+              </small>
 
               <strong>
-                {user?.phone || "Not available"}
+                {user.phone ||
+                  "Not available"}
               </strong>
             </div>
-
           </div>
 
+          {/* ROLE */}
           <div className="info-box">
-
             <span className="info-icon">
               🛡
             </span>
 
             <div>
-              <small>Account Role</small>
+              <small>
+                Account Role
+              </small>
 
               <strong>
-                {user?.role || "user"}
+                {user.role ||
+                  "user"}
               </strong>
             </div>
-
           </div>
 
+          {/* JOINED DATE */}
           <div className="info-box">
-
             <span className="info-icon">
               📅
             </span>
 
             <div>
-              <small>Joined Date</small>
+              <small>
+                Joined Date
+              </small>
 
               <strong>
                 {joinedDate}
               </strong>
             </div>
-
           </div>
 
+          {/* USER ID */}
           <div className="info-box">
-
             <span className="info-icon">
               🆔
             </span>
 
             <div>
-              <small>User ID</small>
+              <small>
+                User ID
+              </small>
 
               <strong className="user-id">
-                {user?._id || "Not available"}
+                {user._id}
               </strong>
             </div>
-
           </div>
 
         </div>
 
       </div>
 
-      {/* ABOUT USER */}
+      {/* =====================================
+          BIO
+      ===================================== */}
 
       <div className="details-section">
 
         <div className="section-title">
           <span></span>
-
-          <h2>About User</h2>
+          <h2>
+            About User
+          </h2>
         </div>
 
         <div className="bio-box">
 
           <p>
-            {user?.bio ||
-              "This user has not added a bio yet."}
+            {user.bio
+              ? user.bio
+              : "This user has not added a bio yet."}
           </p>
 
         </div>
 
       </div>
 
-      {/* LOGIN INFORMATION */}
+      {/* =====================================
+          LOGIN INFORMATION
+      ===================================== */}
 
       <div className="details-section">
 
         <div className="section-title">
           <span></span>
-
-          <h2>Login Information</h2>
+          <h2>
+            Login Information
+          </h2>
         </div>
 
         <div className="login-summary">
 
           <div className="login-box">
-
             <span>Current Status</span>
 
             <strong
@@ -354,53 +346,51 @@ function AdminUserDetails({
                   : "text-offline"
               }
             >
-              {isOnline ? "Online" : "Offline"}
+              {isOnline
+                ? "Online"
+                : "Offline"}
             </strong>
-
           </div>
 
           <div className="login-box">
-
             <span>Last Login</span>
 
             <strong>
               {lastLogin}
             </strong>
-
           </div>
 
           <div className="login-box">
-
             <span>Last Logout</span>
 
             <strong>
               {lastLogout}
             </strong>
-
           </div>
 
           <div className="login-box">
-
             <span>Total Sessions</span>
 
             <strong>
               {userHistory.length}
             </strong>
-
           </div>
 
         </div>
 
       </div>
 
-      {/* LOGIN HISTORY */}
+      {/* =====================================
+          LOGIN HISTORY
+      ===================================== */}
 
       <div className="details-section">
 
         <div className="section-title">
           <span></span>
-
-          <h2>Login History</h2>
+          <h2>
+            Login History
+          </h2>
         </div>
 
         {userHistory.length > 0 ? (
@@ -410,14 +400,12 @@ function AdminUserDetails({
             <table className="history-table">
 
               <thead>
-
                 <tr>
                   <th>#</th>
                   <th>Login Time</th>
                   <th>Logout Time</th>
                   <th>Status</th>
                 </tr>
-
               </thead>
 
               <tbody>
@@ -425,12 +413,7 @@ function AdminUserDetails({
                 {userHistory.map(
                   (history, index) => (
 
-                    <tr
-                      key={
-                        history._id ||
-                        `${history.loginTime}-${index}`
-                      }
-                    >
+                    <tr key={history._id}>
 
                       <td>
                         {index + 1}
@@ -454,13 +437,13 @@ function AdminUserDetails({
 
                         <span
                           className={
-                            history.status === "Active"
+                            history.status ===
+                            "Active"
                               ? "history-status active"
                               : "history-status logged-out"
                           }
                         >
-                          {history.status ||
-                            "Unknown"}
+                          {history.status}
                         </span>
 
                       </td>
@@ -479,13 +462,10 @@ function AdminUserDetails({
         ) : (
 
           <div className="no-history">
-
             <span>🕒</span>
-
             <p>
               No login history available
             </p>
-
           </div>
 
         )}

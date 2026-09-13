@@ -1,496 +1,565 @@
 import React, { useEffect, useState } from "react";
-import {
-  useNavigate,
-  useParams,
-  useLocation
-} from "react-router-dom";
+import axios from "axios";
+import AdminUserDetails from "../AdminUserDetails/AdminUserDetails";
+import "./AdminUsers.css";
 
-import "../styles/EventDetails.css";
+const API_BASE_URL = "https://user-api-iota-six.vercel.app";
 
-const API_URL = (
-  import.meta.env.VITE_API_URL ||
-  "https://api-admin-rouge.vercel.app"
-).replace(/\/+$/, "");
+function AdminUsers() {
+  const [users, setUsers] = useState([]);
+  const [loginHistory, setLoginHistory] = useState([]);
 
-function EventDetails() {
+  const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
 
-  const { id } = useParams();
+  const [selectedUser, setSelectedUser] = useState(null);
 
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const location = useLocation();
+  // ==========================================
+  // FETCH USERS
+  // ==========================================
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
+      const response = await axios.get(
+        `${API_BASE_URL}/login/getusers`
+      );
 
-  // =====================================================
-  // GET EVENT FROM EVENTS PAGE
-  // =====================================================
-
-  const eventFromPage =
-    location.state?.event || null;
-
-
-  const [event, setEvent] =
-    useState(eventFromPage);
-
-  const [error, setError] =
-    useState("");
-
-
-  // =====================================================
-  // IMAGE URL
-  // =====================================================
-
-  const getImageUrl = (image) => {
-
-    if (!image) {
-      return "";
+      if (response.data.success) {
+        setUsers(response.data.users || []);
+      } else {
+        setError("Unable to fetch users");
+      }
+    } catch (error) {
+      console.error("Fetch users error:", error);
+      setError("Failed to load users");
+    } finally {
+      setLoading(false);
     }
-
-    if (image.startsWith("data:image/")) {
-      return image;
-    }
-
-    if (
-      image.startsWith("http://") ||
-      image.startsWith("https://")
-    ) {
-      return image;
-    }
-
-    if (image.startsWith("/")) {
-      return `${API_URL}${image}`;
-    }
-
-    return `${API_URL}/${image}`;
   };
 
+  // ==========================================
+  // FETCH LOGIN HISTORY
+  // ==========================================
+  const fetchLoginHistory = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/loginhistory/gethistory`
+      );
 
-  // =====================================================
-  // GET LATEST EVENT IN BACKGROUND
-  // =====================================================
+      if (response.data.success) {
+        setLoginHistory(response.data.history || []);
+      }
+    } catch (error) {
+      console.error("Login history error:", error);
+    }
+  };
+
+  // ==========================================
+  // FETCH BOTH
+  // ==========================================
+  const fetchAllData = async () => {
+    await Promise.all([
+      fetchUsers(),
+      fetchLoginHistory(),
+    ]);
+  };
 
   useEffect(() => {
+    fetchAllData();
 
-    const fetchEvent = async () => {
+    // Auto refresh every 10 seconds
+    const interval = setInterval(() => {
+      fetchAllData();
+    }, 10000);
 
-      if (!id) {
-        return;
+    return () => clearInterval(interval);
+  }, []);
+
+  // ==========================================
+  // GET USER STATUS
+  // ==========================================
+  const getUserStatus = (userId) => {
+    const userHistory = loginHistory
+      .filter(
+        (item) =>
+          String(item.userId) === String(userId)
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.loginTime) -
+          new Date(a.loginTime)
+      );
+
+    if (userHistory.length === 0) {
+      return "Offline";
+    }
+
+    const latestLogin = userHistory[0];
+
+    return latestLogin.status === "Active"
+      ? "Online"
+      : "Offline";
+  };
+
+  // ==========================================
+  // GET LAST LOGIN
+  // ==========================================
+  const getLastLogin = (userId) => {
+    const userHistory = loginHistory
+      .filter(
+        (item) =>
+          String(item.userId) === String(userId)
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.loginTime) -
+          new Date(a.loginTime)
+      );
+
+    if (userHistory.length === 0) {
+      return null;
+    }
+
+    return userHistory[0];
+  };
+
+  // ==========================================
+  // SEARCH + FILTER
+  // ==========================================
+  const filteredUsers = users.filter((user) => {
+    const userStatus = getUserStatus(user._id);
+
+    const searchValue = search
+      .toLowerCase()
+      .trim();
+
+    const matchesSearch =
+      user.name
+        ?.toLowerCase()
+        .includes(searchValue) ||
+      user.email
+        ?.toLowerCase()
+        .includes(searchValue) ||
+      user.phone
+        ?.toLowerCase()
+        .includes(searchValue);
+
+    const matchesFilter =
+      activeFilter === "all" ||
+      (activeFilter === "online" &&
+        userStatus === "Online") ||
+      (activeFilter === "offline" &&
+        userStatus === "Offline");
+
+    return matchesSearch && matchesFilter;
+  });
+
+  // ==========================================
+  // COUNTS
+  // ==========================================
+  const totalUsers = users.length;
+
+  const onlineUsers = users.filter(
+    (user) =>
+      getUserStatus(user._id) === "Online"
+  ).length;
+
+  const offlineUsers =
+    totalUsers - onlineUsers;
+
+  // ==========================================
+  // FORMAT DATE
+  // ==========================================
+  const formatDate = (date) => {
+    if (!date) return "Not available";
+
+    return new Date(date).toLocaleString(
+      "en-IN",
+      {
+        dateStyle: "medium",
+        timeStyle: "short",
       }
-
-      try {
-
-        const response = await fetch(
-          `${API_URL}/events/get/${id}`
-        );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-
-          throw new Error(
-            data.message ||
-            "Failed to fetch event"
-          );
-
-        }
-
-        const eventData =
-          data.event ||
-          data.data ||
-          data;
-
-        if (eventData) {
-          setEvent(eventData);
-        }
-
-      } catch (err) {
-
-        console.error(
-          "Error fetching event:",
-          err
-        );
-
-        /*
-          If event data was already received
-          from Events page, keep showing it.
-        */
-
-        if (!eventFromPage) {
-
-          setError(
-            err.message ||
-            "Unable to load event details"
-          );
-
-        }
-
-      }
-
-    };
-
-    fetchEvent();
-
-  }, [id]);
-
-
-  // =====================================================
-  // EVENT NOT FOUND
-  // =====================================================
-
-  if (!event) {
-
-    return (
-
-      <div className="event-not-found">
-
-        <div className="not-found-icon">
-          😕
-        </div>
-
-        <h2>
-          Event Not Found
-        </h2>
-
-        <p>
-          {error ||
-            "The event you are looking for does not exist."}
-        </p>
-
-        <button
-          type="button"
-          className="details-back-btn"
-          onClick={() =>
-            navigate("/events")
-          }
-        >
-          ← Back to Events
-        </button>
-
-      </div>
-
     );
+  };
 
+  // ==========================================
+  // OPEN SINGLE USER
+  // ==========================================
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+  };
+
+  // ==========================================
+  // CLOSE SINGLE USER
+  // ==========================================
+  const handleBack = () => {
+    setSelectedUser(null);
+
+    // Refresh after returning
+    fetchAllData();
+  };
+
+  // ==========================================
+  // SINGLE USER VIEW
+  // ==========================================
+  if (selectedUser) {
+    return (
+      <AdminUserDetails
+        user={selectedUser}
+        loginHistory={loginHistory}
+        onBack={handleBack}
+      />
+    );
   }
 
+  // ==========================================
+  // LOADING
+  // ==========================================
+  if (loading && users.length === 0) {
+    return (
+      <div className="admin-users-page">
+        <div className="users-loading">
+          <div className="loading-spinner"></div>
+          <h3>Loading users...</h3>
+        </div>
+      </div>
+    );
+  }
 
-  // =====================================================
+  // ==========================================
   // MAIN PAGE
-  // =====================================================
-
+  // ==========================================
   return (
-
-    <div className="event-details-page">
-
-
-      {/* BACK */}
-
-      <button
-        type="button"
-        className="back-events-btn"
-        onClick={() =>
-          navigate("/events")
-        }
-      >
-        ← Back to Events
-      </button>
-
+    <div className="admin-users-page">
 
       {/* HEADER */}
-
-      <div className="event-details-header">
-
-        <span className="details-label">
-          EVENT DETAILS
-        </span>
-
-        <h1>
-          {event.name || "Event Details"}
-        </h1>
-
-        <p>
-          View complete information about this event.
-        </p>
-
-      </div>
-
-
-      {/* EVENT CARD */}
-
-      <div className="event-details-card">
-
-
-        {/* IMAGE */}
-
-        <div className="event-details-image">
-
-          {event.image ? (
-
-            <img
-              src={getImageUrl(event.image)}
-              alt={event.name || "Event"}
-              onError={(e) => {
-                e.currentTarget.style.display =
-                  "none";
-              }}
-            />
-
-          ) : (
-
-            <div className="details-no-image">
-
-              🖼️
-
-              <span>
-                No Image Available
-              </span>
-
-            </div>
-
-          )}
-
-
-          {event.category && (
-
-            <div className="details-category">
-              {event.category}
-            </div>
-
-          )}
-
-        </div>
-
-
-        {/* CONTENT */}
-
-        <div className="event-details-content">
-
-          <h2>
-            {event.name || "Untitled Event"}
-          </h2>
-
-
-          <p className="details-organizer">
-
-            Organized by{" "}
-
-            <strong>
-              {event.organizer ||
-                "Not specified"}
-            </strong>
-
+      <div className="users-header">
+        <div>
+          <p className="users-small-title">
+            ADMIN PANEL
           </p>
 
+          <h1>
+            User Management
+          </h1>
 
-          {/* INFORMATION */}
+          <p className="users-subtitle">
+            Manage and monitor all registered users
+          </p>
+        </div>
 
-          <div className="details-info-grid">
+        <button
+          className="refresh-btn"
+          onClick={fetchAllData}
+        >
+          ↻ Refresh
+        </button>
+      </div>
 
+      {/* STATS */}
+      <div className="user-stats">
 
-            {/* DATE */}
-
-            <div className="details-info-box">
-
-              <div className="details-icon">
-                📅
-              </div>
-
-              <div>
-
-                <small>
-                  DATE
-                </small>
-
-                <strong>
-                  {event.date ||
-                    "Not specified"}
-                </strong>
-
-              </div>
-
-            </div>
-
-
-            {/* TIME */}
-
-            <div className="details-info-box">
-
-              <div className="details-icon">
-                ⏰
-              </div>
-
-              <div>
-
-                <small>
-                  TIME
-                </small>
-
-                <strong>
-                  {event.time ||
-                    "Not specified"}
-                </strong>
-
-              </div>
-
-            </div>
-
-
-            {/* LOCATION */}
-
-            <div className="details-info-box">
-
-              <div className="details-icon">
-                📍
-              </div>
-
-              <div>
-
-                <small>
-                  LOCATION
-                </small>
-
-                <strong>
-                  {event.location ||
-                    "Not specified"}
-                </strong>
-
-              </div>
-
-            </div>
-
-
-            {/* CATEGORY */}
-
-            <div className="details-info-box">
-
-              <div className="details-icon">
-                🎫
-              </div>
-
-              <div>
-
-                <small>
-                  CATEGORY
-                </small>
-
-                <strong>
-                  {event.category ||
-                    "Not specified"}
-                </strong>
-
-              </div>
-
-            </div>
-
-
-            {/* TICKETS */}
-
-            <div className="details-info-box">
-
-              <div className="details-icon">
-                👥
-              </div>
-
-              <div>
-
-                <small>
-                  AVAILABLE TICKETS
-                </small>
-
-                <strong>
-                  {event.tickets !== undefined &&
-                  event.tickets !== null
-                    ? event.tickets
-                    : "Not specified"}
-                </strong>
-
-              </div>
-
-            </div>
-
-
-            {/* PRICE */}
-
-            <div className="details-info-box">
-
-              <div className="details-icon">
-                💰
-              </div>
-
-              <div>
-
-                <small>
-                  TICKET PRICE
-                </small>
-
-                <strong>
-
-                  {event.ticketPrice !== undefined &&
-                  event.ticketPrice !== null
-                    ? `₹${event.ticketPrice}`
-                    : "Not specified"}
-
-                </strong>
-
-              </div>
-
-            </div>
-
+        <div className="stat-card">
+          <div className="stat-icon">
+            👥
           </div>
 
+          <div>
+            <span>Total Users</span>
+            <h2>{totalUsers}</h2>
+          </div>
+        </div>
 
-          {/* DESCRIPTION */}
-
-          <div className="details-description">
-
-            <h3>
-              Description
-            </h3>
-
-            <p>
-              {event.description ||
-                "No description available for this event."}
-            </p>
-
+        <div className="stat-card online-stat">
+          <div className="stat-icon">
+            🟢
           </div>
 
+          <div>
+            <span>Online Users</span>
+            <h2>{onlineUsers}</h2>
+          </div>
+        </div>
 
-          {/* BUTTONS */}
-
-          <div className="details-actions">
-
-            <button
-              type="button"
-              className="details-back-btn"
-              onClick={() =>
-                navigate("/events")
-              }
-            >
-              ← Back to Events
-            </button>
-
-
-            <button
-              type="button"
-              className="details-edit-btn"
-              onClick={() =>
-                navigate(
-                  `/events/edit/${event._id}`
-                )
-              }
-            >
-              ✏️ Edit Event
-            </button>
-
+        <div className="stat-card offline-stat">
+          <div className="stat-icon">
+            ⚫
           </div>
 
+          <div>
+            <span>Offline Users</span>
+            <h2>{offlineUsers}</h2>
+          </div>
         </div>
 
       </div>
 
-    </div>
+      {/* SEARCH + FILTER */}
+      <div className="user-controls">
 
+        <div className="search-box">
+          <span>🔍</span>
+
+          <input
+            type="text"
+            placeholder="Search user by name, email or phone..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+          />
+
+          {search && (
+            <button
+              className="clear-search"
+              onClick={() => setSearch("")}
+            >
+              ×
+            </button>
+          )}
+        </div>
+
+        <div className="filter-buttons">
+
+          <button
+            className={
+              activeFilter === "all"
+                ? "filter-btn active"
+                : "filter-btn"
+            }
+            onClick={() =>
+              setActiveFilter("all")
+            }
+          >
+            All Users
+            <span>{totalUsers}</span>
+          </button>
+
+          <button
+            className={
+              activeFilter === "online"
+                ? "filter-btn online active"
+                : "filter-btn online"
+            }
+            onClick={() =>
+              setActiveFilter("online")
+            }
+          >
+            🟢 Online
+            <span>{onlineUsers}</span>
+          </button>
+
+          <button
+            className={
+              activeFilter === "offline"
+                ? "filter-btn offline active"
+                : "filter-btn offline"
+            }
+            onClick={() =>
+              setActiveFilter("offline")
+            }
+          >
+            ⚫ Offline
+            <span>{offlineUsers}</span>
+          </button>
+
+        </div>
+      </div>
+
+      {/* ERROR */}
+      {error && (
+        <div className="users-error">
+          {error}
+        </div>
+      )}
+
+      {/* RESULT COUNT */}
+      <div className="result-info">
+        Showing{" "}
+        <strong>
+          {filteredUsers.length}
+        </strong>{" "}
+        users
+      </div>
+
+      {/* USER CARDS */}
+      {filteredUsers.length > 0 ? (
+
+        <div className="users-grid">
+
+          {filteredUsers.map((user) => {
+
+            const status = getUserStatus(
+              user._id
+            );
+
+            const latestHistory =
+              getLastLogin(user._id);
+
+            return (
+              <div
+                className="admin-user-card"
+                key={user._id}
+                onClick={() =>
+                  handleUserClick(user)
+                }
+              >
+
+                {/* CARD TOP */}
+                <div className="card-top">
+
+                  <div className="profile-wrapper">
+
+                    {user.profileImage ? (
+                      <img
+                        src={user.profileImage}
+                        alt={user.name}
+                        className="user-avatar"
+                      />
+                    ) : (
+                      <div className="user-avatar default-avatar">
+                        {user.name
+                          ?.charAt(0)
+                          .toUpperCase()}
+                      </div>
+                    )}
+
+                    <span
+                      className={
+                        status === "Online"
+                          ? "online-dot"
+                          : "offline-dot"
+                      }
+                    ></span>
+
+                  </div>
+
+                  <span
+                    className={
+                      status === "Online"
+                        ? "status-badge online"
+                        : "status-badge offline"
+                    }
+                  >
+                    {status}
+                  </span>
+
+                </div>
+
+                {/* NAME */}
+                <div className="user-main-info">
+
+                  <h2>
+                    {user.name}
+                  </h2>
+
+                  <span className="role-badge">
+                    {user.role || "user"}
+                  </span>
+
+                </div>
+
+                {/* DETAILS */}
+                <div className="user-card-details">
+
+                  <div className="detail-row">
+                    <span className="detail-icon">
+                      ✉
+                    </span>
+
+                    <div>
+                      <small>Email</small>
+                      <p>
+                        {user.email ||
+                          "Not available"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="detail-row">
+                    <span className="detail-icon">
+                      ☎
+                    </span>
+
+                    <div>
+                      <small>Phone</small>
+                      <p>
+                        {user.phone ||
+                          "Not available"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="detail-row">
+                    <span className="detail-icon">
+                      🕒
+                    </span>
+
+                    <div>
+                      <small>Last Login</small>
+                      <p>
+                        {latestHistory
+                          ? formatDate(
+                              latestHistory.loginTime
+                            )
+                          : "Never logged in"}
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* VIEW BUTTON */}
+                <div className="view-user">
+                  <span>
+                    View Full Details
+                  </span>
+
+                  <span className="arrow">
+                    →
+                  </span>
+                </div>
+
+              </div>
+            );
+          })}
+
+        </div>
+
+      ) : (
+
+        <div className="no-users">
+          <div className="no-users-icon">
+            🔍
+          </div>
+
+          <h2>
+            No Users Found
+          </h2>
+
+          <p>
+            Try changing your search or filter.
+          </p>
+
+          <button
+            onClick={() => {
+              setSearch("");
+              setActiveFilter("all");
+            }}
+          >
+            Show All Users
+          </button>
+        </div>
+
+      )}
+
+    </div>
   );
 }
 
-export default EventDetails;
+export default AdminUsers;
