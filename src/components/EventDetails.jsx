@@ -1,133 +1,171 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
-
+import React, { useEffect, useState } from "react";
 import {
   useNavigate,
   useParams,
+  useLocation
 } from "react-router-dom";
 
-import axios from "axios";
-
-import "../styles/UserViewDetails.css";
-
+import "../styles/EventDetails.css";
 
 const API_URL = (
   import.meta.env.VITE_API_URL ||
   "https://api-admin-rouge.vercel.app"
 ).replace(/\/+$/, "");
 
+function EventDetails() {
 
-const UserViewDetails = () => {
+  const { id } = useParams();
 
-  const { id } =
-    useParams();
+  const navigate = useNavigate();
 
-  const navigate =
-    useNavigate();
+  const location = useLocation();
 
 
-  const [user, setUser] =
-    useState(null);
+  // =====================================================
+  // GET EVENT FROM EVENTS PAGE
+  // =====================================================
 
-  const [loading, setLoading] =
-    useState(true);
+  const eventFromPage =
+    location.state?.event || null;
+
+
+  const [event, setEvent] =
+    useState(eventFromPage);
 
   const [error, setError] =
     useState("");
 
 
+  // =====================================================
+  // IMAGE URL
+  // =====================================================
+
+  const getImageUrl = (image) => {
+
+    if (!image) {
+      return "";
+    }
+
+    if (image.startsWith("data:image/")) {
+      return image;
+    }
+
+    if (
+      image.startsWith("http://") ||
+      image.startsWith("https://")
+    ) {
+      return image;
+    }
+
+    if (image.startsWith("/")) {
+      return `${API_URL}${image}`;
+    }
+
+    return `${API_URL}/${image}`;
+  };
+
+
+  // =====================================================
+  // GET LATEST EVENT IN BACKGROUND
+  // =====================================================
+
   useEffect(() => {
 
-    const fetchUser = async () => {
+    const fetchEvent = async () => {
+
+      if (!id) {
+        return;
+      }
 
       try {
 
-        setLoading(true);
-
-        setError("");
-
-
-        const response =
-          await axios.get(
-            `${API_URL}/admin/users/${id}`
-          );
-
-
-        console.log(
-          "USER DETAILS:",
-          response.data
+        const response = await fetch(
+          `${API_URL}/events/get/${id}`
         );
 
+        const data =
+          await response.json();
 
-        if (
-          response.data?.success
-        ) {
+        if (!response.ok) {
 
-          setUser(
-            response.data.user
+          throw new Error(
+            data.message ||
+            "Failed to fetch event"
           );
 
-        } else {
+        }
 
-          setError(
-            response.data?.message ||
-            "User not found"
-          );
+        const eventData =
+          data.event ||
+          data.data ||
+          data;
 
+        if (eventData) {
+          setEvent(eventData);
         }
 
       } catch (err) {
 
         console.error(
-          "FETCH USER DETAILS ERROR:",
+          "Error fetching event:",
           err
         );
 
+        /*
+          If event data was already received
+          from Events page, keep showing it.
+        */
 
-        setError(
-          err.response?.data?.message ||
-          "Failed to fetch user details"
-        );
+        if (!eventFromPage) {
 
-      } finally {
+          setError(
+            err.message ||
+            "Unable to load event details"
+          );
 
-        setLoading(false);
+        }
 
       }
 
     };
 
-
-    if (id) {
-
-      fetchUser();
-
-    }
+    fetchEvent();
 
   }, [id]);
 
 
   // =====================================================
-  // LOADING
+  // EVENT NOT FOUND
   // =====================================================
 
-  if (loading) {
+  if (!event) {
 
     return (
 
-      <div className="user-details-page">
+      <div className="event-not-found">
 
-        <div className="users-loading">
-
-          <div className="loading-spinner"></div>
-
-          <p>
-            Loading user details...
-          </p>
-
+        <div className="not-found-icon">
+          😕
         </div>
+
+        <h2>
+          Event Not Found
+        </h2>
+
+        <p>
+          {error ||
+            "The event you are looking for does not exist."}
+        </p>
+
+        <button
+          type="button"
+          className="details-back-btn"
+          onClick={() =>
+            navigate("/events")
+          }
+        >
+          ← Back to Events
+        </button>
 
       </div>
 
@@ -137,278 +175,322 @@ const UserViewDetails = () => {
 
 
   // =====================================================
-  // ERROR
-  // =====================================================
-
-  if (error || !user) {
-
-    return (
-
-      <div className="user-details-page">
-
-        <div className="no-users">
-
-          <div className="no-users-icon">
-            👤
-          </div>
-
-          <h2>
-            User Not Found
-          </h2>
-
-          <p>
-            {error ||
-              "The user does not exist."}
-          </p>
-
-
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/users")
-            }
-          >
-            ← Back to Users
-          </button>
-
-        </div>
-
-      </div>
-
-    );
-
-  }
-
-
-  // =====================================================
-  // MAIN
+  // MAIN PAGE
   // =====================================================
 
   return (
 
-    <div className="user-details-page">
+    <div className="event-details-page">
 
 
       {/* BACK */}
 
       <button
         type="button"
-        className="details-back-btn"
+        className="back-events-btn"
         onClick={() =>
-          navigate("/users")
+          navigate("/events")
         }
       >
-        ← Back to Users
+        ← Back to Events
       </button>
 
 
       {/* HEADER */}
 
-      <div className="user-details-header">
+      <div className="event-details-header">
 
         <span className="details-label">
-          USER DETAILS
+          EVENT DETAILS
         </span>
 
         <h1>
-          {user.name ||
-            "Unknown User"}
+          {event.name || "Event Details"}
         </h1>
 
         <p>
-          View complete information about this user.
+          View complete information about this event.
         </p>
 
       </div>
 
 
-      {/* CARD */}
+      {/* EVENT CARD */}
 
-      <div className="user-details-card">
+      <div className="event-details-card">
 
 
-        {/* PROFILE */}
+        {/* IMAGE */}
 
-        <div className="user-details-profile">
+        <div className="event-details-image">
 
-          <div className="user-details-avatar">
+          {event.image ? (
 
-            {user.profileImage ? (
+            <img
+              src={getImageUrl(event.image)}
+              alt={event.name || "Event"}
+              onError={(e) => {
+                e.currentTarget.style.display =
+                  "none";
+              }}
+            />
 
-              <img
-                src={
-                  user.profileImage
-                }
-                alt={
-                  user.name ||
-                  "User"
-                }
-              />
+          ) : (
 
-            ) : (
+            <div className="details-no-image">
+
+              🖼️
 
               <span>
-
-                {user.name
-                  ?.charAt(0)
-                  ?.toUpperCase() ||
-                  "U"}
-
+                No Image Available
               </span>
 
-            )}
+            </div>
 
-          </div>
+          )}
 
+
+          {event.category && (
+
+            <div className="details-category">
+              {event.category}
+            </div>
+
+          )}
+
+        </div>
+
+
+        {/* CONTENT */}
+
+        <div className="event-details-content">
 
           <h2>
-            {user.name ||
-              "Unknown User"}
+            {event.name || "Untitled Event"}
           </h2>
 
 
-          <span
-            className={
-              user.status ===
-              "Online"
-                ? "status-badge online"
-                : "status-badge offline"
-            }
-          >
-            {user.status ===
-            "Online"
-              ? "Online"
-              : "Offline"}
-          </span>
+          <p className="details-organizer">
 
-        </div>
-
-
-        {/* INFORMATION */}
-
-        <div className="user-details-info">
-
-
-          <div className="user-info-box">
-
-            <small>
-              NAME
-            </small>
+            Organized by{" "}
 
             <strong>
-              {user.name || "-"}
+              {event.organizer ||
+                "Not specified"}
             </strong>
 
-          </div>
-
-
-          <div className="user-info-box">
-
-            <small>
-              EMAIL
-            </small>
-
-            <strong>
-              {user.email || "-"}
-            </strong>
-
-          </div>
-
-
-          <div className="user-info-box">
-
-            <small>
-              PHONE
-            </small>
-
-            <strong>
-              {user.phone || "-"}
-            </strong>
-
-          </div>
-
-
-          <div className="user-info-box">
-
-            <small>
-              ROLE
-            </small>
-
-            <strong>
-              {user.role || "user"}
-            </strong>
-
-          </div>
-
-
-          <div className="user-info-box">
-
-            <small>
-              STATUS
-            </small>
-
-            <strong>
-              {user.status || "Offline"}
-            </strong>
-
-          </div>
-
-
-          <div className="user-info-box">
-
-            <small>
-              SOURCE
-            </small>
-
-            <strong>
-              {user.source || "user-project"}
-            </strong>
-
-          </div>
-
-
-        </div>
-
-
-        {/* BIO */}
-
-        <div className="user-details-bio">
-
-          <h3>
-            Bio
-          </h3>
-
-          <p>
-            {user.bio ||
-              "No bio available."}
           </p>
 
+
+          {/* INFORMATION */}
+
+          <div className="details-info-grid">
+
+
+            {/* DATE */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                📅
+              </div>
+
+              <div>
+
+                <small>
+                  DATE
+                </small>
+
+                <strong>
+                  {event.date ||
+                    "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* TIME */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                ⏰
+              </div>
+
+              <div>
+
+                <small>
+                  TIME
+                </small>
+
+                <strong>
+                  {event.time ||
+                    "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* LOCATION */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                📍
+              </div>
+
+              <div>
+
+                <small>
+                  LOCATION
+                </small>
+
+                <strong>
+                  {event.location ||
+                    "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* CATEGORY */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                🎫
+              </div>
+
+              <div>
+
+                <small>
+                  CATEGORY
+                </small>
+
+                <strong>
+                  {event.category ||
+                    "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* TICKETS */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                👥
+              </div>
+
+              <div>
+
+                <small>
+                  AVAILABLE TICKETS
+                </small>
+
+                <strong>
+                  {event.tickets !== undefined &&
+                  event.tickets !== null
+                    ? event.tickets
+                    : "Not specified"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            {/* PRICE */}
+
+            <div className="details-info-box">
+
+              <div className="details-icon">
+                💰
+              </div>
+
+              <div>
+
+                <small>
+                  TICKET PRICE
+                </small>
+
+                <strong>
+
+                  {event.ticketPrice !== undefined &&
+                  event.ticketPrice !== null
+                    ? `₹${event.ticketPrice}`
+                    : "Not specified"}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          {/* DESCRIPTION */}
+
+          <div className="details-description">
+
+            <h3>
+              Description
+            </h3>
+
+            <p>
+              {event.description ||
+                "No description available for this event."}
+            </p>
+
+          </div>
+
+
+          {/* BUTTONS */}
+
+          <div className="details-actions">
+
+            <button
+              type="button"
+              className="details-back-btn"
+              onClick={() =>
+                navigate("/events")
+              }
+            >
+              ← Back to Events
+            </button>
+
+
+            <button
+              type="button"
+              className="details-edit-btn"
+              onClick={() =>
+                navigate(
+                  `/events/edit/${event._id}`
+                )
+              }
+            >
+              ✏️ Edit Event
+            </button>
+
+          </div>
+
         </div>
-
-
-        {/* BUTTON */}
-
-        <div className="user-details-actions">
-
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/users")
-            }
-          >
-            ← Back to Users
-          </button>
-
-        </div>
-
 
       </div>
 
     </div>
 
   );
+}
 
-};
-
-
-export default UserViewDetails;
+export default EventDetails;
