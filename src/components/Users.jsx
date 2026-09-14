@@ -1,20 +1,6 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useEffect, useState } from "react";
 import axios from "axios";
-
-import {
-  useNavigate,
-} from "react-router-dom";
-
 import "../styles/Users.css";
-
-
-const API_URL =
-  import.meta.env.VITE_ADMIN_API_URL ||
-  "http://localhost:3000";
 
 
 function Users() {
@@ -22,66 +8,151 @@ function Users() {
   const [users, setUsers] =
     useState([]);
 
-  const [search, setSearch] =
+  const [loading, setLoading] =
+    useState(false);
+
+  const [syncing, setSyncing] =
+    useState(false);
+
+  const [error, setError] =
     useState("");
 
-  const [filter, setFilter] =
-    useState("all");
 
-  const [loading, setLoading] =
-    useState(true);
+  // =====================================================
+  // GET USERS FROM ADMIN DATABASE
+  // =====================================================
 
+  const fetchUsers = async () => {
 
-  const navigate =
-    useNavigate();
+    try {
 
+      setLoading(true);
 
-  // ==================================================
-  // GET USERS
-  // ==================================================
-
-  const fetchUsers =
-    async () => {
-
-      try {
-
-        const response =
-          await axios.get(
-            `${API_URL}/admin/users`
-          );
+      setError("");
 
 
-        if (
-          response.data.success
-        ) {
-
-          setUsers(
-            response.data.users || []
-          );
-
-        }
-
-
-      } catch (error) {
-
-        console.error(
-          "FETCH USERS ERROR:",
-          error
+      const response =
+        await axios.get(
+          "http://localhost:3000/admin/users"
         );
 
 
-      } finally {
+      console.log(
+        "Admin Users:",
+        response.data
+      );
 
-        setLoading(false);
+
+      if (
+        response.data.success
+      ) {
+
+        setUsers(
+          response.data.users || []
+        );
+
+      } else {
+
+        setError(
+          response.data.message ||
+          "Unable to get users"
+        );
 
       }
 
-    };
+    } catch (error) {
+
+      console.error(
+        "Fetch Users Error:",
+        error
+      );
 
 
-  // ==================================================
-  // LOAD IMMEDIATELY
-  // ==================================================
+      setError(
+        error.response?.data?.message ||
+        "Unable to connect to admin server"
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
+
+
+  // =====================================================
+  // SYNC USERS
+  // =====================================================
+
+  const syncUsers = async () => {
+
+    try {
+
+      setSyncing(true);
+
+      setError("");
+
+
+      const response =
+        await axios.post(
+          "http://localhost:3000/admin/sync-users"
+        );
+
+
+      console.log(
+        "Sync Response:",
+        response.data
+      );
+
+
+      if (
+        response.data.success
+      ) {
+
+        alert(
+          `Users synchronized successfully!\n\nTotal: ${response.data.total}\nNew: ${response.data.inserted}\nUpdated: ${response.data.updated}`
+        );
+
+
+        // Refresh admin DB users
+        await fetchUsers();
+
+      } else {
+
+        alert(
+          response.data.message ||
+          "Sync failed"
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Sync Error:",
+        error
+      );
+
+
+      alert(
+        error.response?.data?.message ||
+        "Unable to synchronize users"
+      );
+
+    } finally {
+
+      setSyncing(false);
+
+    }
+
+  };
+
+
+  // =====================================================
+  // INITIAL LOAD
+  // =====================================================
 
   useEffect(() => {
 
@@ -89,79 +160,6 @@ function Users() {
 
   }, []);
 
-
-  // ==================================================
-  // FILTER
-  // ==================================================
-
-  const filteredUsers =
-    users.filter((user) => {
-
-      const value =
-        search
-          .toLowerCase()
-          .trim();
-
-
-      const matchesSearch =
-
-        user.name
-          ?.toLowerCase()
-          .includes(value)
-
-        ||
-
-        user.email
-          ?.toLowerCase()
-          .includes(value)
-
-        ||
-
-        user.phone
-          ?.toLowerCase()
-          .includes(value);
-
-
-      const matchesFilter =
-
-        filter === "all"
-
-        ||
-
-        user.loginStatus ===
-          filter;
-
-
-      return (
-        matchesSearch &&
-        matchesFilter
-      );
-
-    });
-
-
-  // ==================================================
-  // FORMAT DATE
-  // ==================================================
-
-  const formatDate =
-    (date) => {
-
-      if (!date) {
-        return "Never";
-      }
-
-
-      return new Date(
-        date
-      ).toLocaleString();
-
-    };
-
-
-  // ==================================================
-  // UI
-  // ==================================================
 
   return (
 
@@ -172,94 +170,88 @@ function Users() {
         <div>
 
           <h1>
-            Users
+            All Users
           </h1>
 
           <p>
-            Total Users: {users.length}
+            Manage Event Management users
           </p>
 
         </div>
 
 
-        <input
-
-          type="text"
-
-          placeholder="Search name, email, phone..."
-
-          value={search}
-
-          onChange={(e) =>
-            setSearch(
-              e.target.value
-            )
-          }
-
-        />
-
-      </div>
-
-
-      <div className="user-filters">
-
         <button
-          onClick={() =>
-            setFilter("all")
-          }
+          className="sync-btn"
+          onClick={syncUsers}
+          disabled={syncing}
         >
-          All
-        </button>
 
+          {syncing
+            ? "Syncing..."
+            : "Sync Users"}
 
-        <button
-          onClick={() =>
-            setFilter("online")
-          }
-        >
-          🟢 Online
-        </button>
-
-
-        <button
-          onClick={() =>
-            setFilter("offline")
-          }
-        >
-          ⚪ Offline
-        </button>
-
-
-        <button
-          onClick={() =>
-            setFilter("logout")
-          }
-        >
-          🔴 Logout
         </button>
 
       </div>
 
+
+      {/* =================================================
+          ERROR
+      ================================================= */}
+
+      {error && (
+
+        <div className="error-box">
+
+          {error}
+
+        </div>
+
+      )}
+
+
+      {/* =================================================
+          LOADING
+      ================================================= */}
 
       {loading ? (
 
-        <h2>
-          Loading Users...
-        </h2>
+        <div className="loading">
+
+          Loading users...
+
+        </div>
+
+      ) : users.length === 0 ? (
+
+        <div className="empty-box">
+
+          <h2>
+            No Users Found
+          </h2>
+
+          <p>
+            Click "Sync Users" to get
+            users from the User Project.
+          </p>
+
+        </div>
 
       ) : (
 
         <div className="users-grid">
 
-          {filteredUsers.map(
-            (user) => (
+          {users.map(
+            (user, index) => (
 
               <div
                 className="user-card"
-                key={user._id}
+                key={
+                  user._id || index
+                }
               >
 
-                <div className="user-image">
+                <div className="user-avatar">
 
                   {user.profileImage ? (
 
@@ -274,66 +266,64 @@ function Users() {
 
                   ) : (
 
-                    <div className="avatar">
+                    <span>
 
                       {user.name
                         ?.charAt(0)
-                        ?.toUpperCase()}
+                        ?.toUpperCase() || "U"}
 
-                    </div>
+                    </span>
 
                   )}
 
                 </div>
 
 
-                <h2>
-                  {user.name}
-                </h2>
+                <div className="user-info">
 
+                  <h2>
+                    {user.name}
+                  </h2>
 
-                <p>
-                  {user.email}
-                </p>
+                  <p>
+                    {user.email}
+                  </p>
 
+                  {user.phone && (
 
-                <span>
-                  Type: {user.role}
-                </span>
+                    <p>
+                      📱 {user.phone}
+                    </p>
 
-
-                <p>
-                  Phone:{" "}
-                  {user.phone || "N/A"}
-                </p>
-
-
-                <p>
-                  Status:{" "}
-                  {user.loginStatus}
-                </p>
-
-
-                <p>
-                  Last Login:
-                  <br />
-
-                  {formatDate(
-                    user.lastLogin
                   )}
 
-                </p>
+
+                  <span
+                    className={`role ${
+                      user.role ||
+                      "user"
+                    }`}
+                  >
+
+                    {user.role ||
+                      "user"}
+
+                  </span>
+
+                </div>
 
 
-                <button
-                  onClick={() =>
-                    navigate(
-                      `/users/view/${user._id}`
-                    )
-                  }
-                >
-                  View Details
-                </button>
+                <div className="user-date">
+
+                  Joined:{" "}
+
+                  {user.createdAt
+                    ? new Date(
+                        user.createdAt
+                      ).toLocaleDateString()
+                    : "N/A"}
+
+                </div>
 
               </div>
 
