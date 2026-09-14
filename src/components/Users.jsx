@@ -1,600 +1,275 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
-import "../styles/Users.css";
+const ADMIN_API_URL =
+  "https://api-admin-rouge.vercel.app";
 
-function Users() {
-  const navigate = useNavigate();
-
+const Users = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState("");
 
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-
-  // =====================================================
-  // GET USERS
-  // =====================================================
-
+  // =========================
+  // GET USERS FROM ADMIN DB
+  // =========================
   const fetchUsers = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const response = await axios.get(
-        "http://localhost:3000/admin/users"
+        `${ADMIN_API_URL}/admin/users`
       );
 
-      console.log("ADMIN USERS:", response.data);
+      console.log(
+        "ADMIN USERS:",
+        response.data
+      );
 
       if (response.data.success) {
         setUsers(response.data.users || []);
       } else {
         setUsers([]);
+        setError(
+          response.data.message ||
+            "Users not found"
+        );
       }
     } catch (error) {
-      console.error("FETCH USERS ERROR:", error);
+      console.error(
+        "FETCH USERS ERROR:",
+        error
+      );
+
+      setError(
+        error.response?.data?.message ||
+          "Failed to fetch users"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  // =====================================================
-  // SYNC USERS
-  // =====================================================
-
-  const handleSync = async () => {
+  // =========================
+  // MANUAL SYNC USERS
+  // =========================
+  const syncUsers = async () => {
     try {
+      setSyncing(true);
+      setError("");
+
       const response = await axios.post(
-        "http://localhost:3000/admin/sync-users"
+        `${ADMIN_API_URL}/admin/sync-users`
       );
 
-      console.log("SYNC RESPONSE:", response.data);
+      console.log(
+        "SYNC USERS:",
+        response.data
+      );
 
       if (response.data.success) {
-        alert(
-          `Users Synced Successfully!\n\n` +
-            `Total Users: ${response.data.total}\n` +
-            `New Users: ${response.data.inserted}\n` +
-            `Updated Users: ${response.data.updated}`
-        );
-
+        // Fetch latest users after sync
         await fetchUsers();
       } else {
-        alert(
-          response.data.message || "Sync failed"
+        setError(
+          response.data.message ||
+            "User sync failed"
         );
       }
     } catch (error) {
-      console.error("SYNC ERROR:", error);
-
-      alert(
-        error.response?.data?.message ||
-          "Unable to sync users"
+      console.error(
+        "SYNC USERS ERROR:",
+        error
       );
+
+      setError(
+        error.response?.data?.message ||
+          "Failed to sync users"
+      );
+    } finally {
+      setSyncing(false);
     }
   };
 
-  // =====================================================
-  // LOAD USERS + AUTO REFRESH
-  // =====================================================
-
+  // =========================
+  // FETCH ONLY ON PAGE LOAD
+  // =========================
   useEffect(() => {
-    // First load
     fetchUsers();
-
-    // Automatically refresh every 2 seconds
-    const interval = setInterval(() => {
-      fetchUsers();
-    }, 2000);
-
-    // Stop refresh when leaving this page
-    return () => {
-      clearInterval(interval);
-    };
   }, []);
 
-  // =====================================================
-  // SEARCH + STATUS FILTER
-  // =====================================================
-
-  const filteredUsers = useMemo(() => {
-    const searchText = search
-      .trim()
-      .toLowerCase();
-
-    return users.filter((user) => {
-      const name =
-        user.name?.toLowerCase() || "";
-
-      const email =
-        user.email?.toLowerCase() || "";
-
-      const phone =
-        user.phone?.toLowerCase() || "";
-
-      const matchesSearch =
-        !searchText ||
-        name.includes(searchText) ||
-        email.includes(searchText) ||
-        phone.includes(searchText);
-
-      const userStatus =
-        user.status?.toLowerCase() || "offline";
-
-      const matchesStatus =
-        statusFilter === "all" ||
-        userStatus === statusFilter;
-
-      return (
-        matchesSearch &&
-        matchesStatus
-      );
-    });
-  }, [users, search, statusFilter]);
-
-  // =====================================================
-  // COUNTS
-  // =====================================================
-
-  const totalUsers = users.length;
-
-  const onlineUsers = users.filter(
-    (user) =>
-      user.status?.toLowerCase() === "online"
-  ).length;
-
-  const offlineUsers = users.filter(
-    (user) =>
-      !user.status ||
-      user.status?.toLowerCase() === "offline"
-  ).length;
-
-  const loggedOutUsers = users.filter(
-    (user) =>
-      user.status?.toLowerCase() === "logged out"
-  ).length;
-
-  // =====================================================
-  // STATUS CLASS
-  // =====================================================
-
-  const getStatusClass = (status) => {
-    if (status === "Online") {
-      return "online";
-    }
-
-    if (status === "Logged Out") {
-      return "logged-out";
-    }
-
-    return "offline";
-  };
-
-  // =====================================================
-  // JSX
-  // =====================================================
-
   return (
-    <div className="users-page">
-
-      {/* =================================================
-          TOP HEADER
-      ================================================= */}
-
-      <div className="users-top">
-
-        <div className="users-heading">
-
-          <span className="heading-small">
-            USER MANAGEMENT
-          </span>
-
-          <h1>
-            All Users
-          </h1>
-
-          <p>
-            Manage and view all registered users
-          </p>
-
-        </div>
+    <div
+      style={{
+        padding: "30px",
+        width: "100%",
+      }}
+    >
+      {/* =========================
+          HEADER
+      ========================= */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "25px",
+        }}
+      >
+        <h2>Users</h2>
 
         <button
-          className="sync-button"
-          onClick={handleSync}
+          onClick={syncUsers}
+          disabled={syncing}
+          style={{
+            padding: "10px 18px",
+            border: "none",
+            borderRadius: "6px",
+            cursor: syncing
+              ? "not-allowed"
+              : "pointer",
+          }}
         >
-          <span className="sync-icon">
-            ↻
-          </span>
-
-          Sync Users
+          {syncing
+            ? "Syncing..."
+            : "Sync Users"}
         </button>
-
       </div>
 
-      {/* =================================================
-          STATISTICS
-      ================================================= */}
-
-      <div className="user-statistics">
-
-        {/* TOTAL */}
-
-        <div className="stat-card total-stat">
-
-          <div className="stat-icon">
-            👥
-          </div>
-
-          <div>
-            <span>Total Users</span>
-            <strong>{totalUsers}</strong>
-          </div>
-
-        </div>
-
-        {/* ONLINE */}
-
+      {/* =========================
+          ERROR
+      ========================= */}
+      {error && (
         <div
-          className={`stat-card status-stat ${
-            statusFilter === "online"
-              ? "active-stat"
-              : ""
-          }`}
-          onClick={() =>
-            setStatusFilter(
-              statusFilter === "online"
-                ? "all"
-                : "online"
-            )
-          }
+          style={{
+            padding: "12px",
+            marginBottom: "20px",
+            borderRadius: "6px",
+          }}
         >
-
-          <div className="stat-icon online-icon">
-            ●
-          </div>
-
-          <div>
-            <span>Online</span>
-            <strong>{onlineUsers}</strong>
-          </div>
-
+          {error}
         </div>
-
-        {/* OFFLINE */}
-
-        <div
-          className={`stat-card status-stat ${
-            statusFilter === "offline"
-              ? "active-stat"
-              : ""
-          }`}
-          onClick={() =>
-            setStatusFilter(
-              statusFilter === "offline"
-                ? "all"
-                : "offline"
-            )
-          }
-        >
-
-          <div className="stat-icon offline-icon">
-            ●
-          </div>
-
-          <div>
-            <span>Offline</span>
-            <strong>{offlineUsers}</strong>
-          </div>
-
-        </div>
-
-        {/* LOGGED OUT */}
-
-        <div
-          className={`stat-card status-stat ${
-            statusFilter === "logged out"
-              ? "active-stat"
-              : ""
-          }`}
-          onClick={() =>
-            setStatusFilter(
-              statusFilter === "logged out"
-                ? "all"
-                : "logged out"
-            )
-          }
-        >
-
-          <div className="stat-icon logout-icon">
-            ↪
-          </div>
-
-          <div>
-            <span>Logged Out</span>
-            <strong>{loggedOutUsers}</strong>
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* =================================================
-          SEARCH + FILTER
-      ================================================= */}
-
-      <div className="users-toolbar">
-
-        <div className="search-box">
-
-          <span className="search-icon">
-            🔍
-          </span>
-
-          <input
-            type="text"
-            placeholder="Search by name, email or phone number..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-          />
-
-          {search && (
-            <button
-              className="clear-search"
-              onClick={() => setSearch("")}
-            >
-              ×
-            </button>
-          )}
-
-        </div>
-
-        <div className="status-filter">
-
-          <label>
-            Status
-          </label>
-
-          <select
-            value={statusFilter}
-            onChange={(e) =>
-              setStatusFilter(
-                e.target.value
-              )
-            }
-          >
-
-            <option value="all">
-              All Users
-            </option>
-
-            <option value="online">
-              Online
-            </option>
-
-            <option value="offline">
-              Offline
-            </option>
-
-            <option value="logged out">
-              Logged Out
-            </option>
-
-          </select>
-
-        </div>
-
-      </div>
-
-      {/* =================================================
-          RESULT INFO
-      ================================================= */}
-
-      <div className="result-info">
-
-        <span>
-          Showing{" "}
-          <strong>
-            {filteredUsers.length}
-          </strong>{" "}
-          of{" "}
-          <strong>
-            {totalUsers}
-          </strong>{" "}
-          users
-        </span>
-
-        {search && (
-          <span>
-            Search result for{" "}
-            <strong>
-              "{search}"
-            </strong>
-          </span>
-        )}
-
-      </div>
-
-      {/* =================================================
-          NO USERS
-      ================================================= */}
-
-      {filteredUsers.length === 0 ? (
-
-        <div className="no-users">
-
-          <div className="no-users-icon">
-            👤
-          </div>
-
-          <h2>
-            No Users Found
-          </h2>
-
-          <p>
-            Try changing your search or status filter.
-          </p>
-
-          <button
-            onClick={() => {
-              setSearch("");
-              setStatusFilter("all");
-            }}
-          >
-            Clear Filters
-          </button>
-
-        </div>
-
-      ) : (
-
-        /* =================================================
-           USER CARDS
-        ================================================= */
-
-        <div className="users-grid">
-
-          {filteredUsers.map(
-            (user, index) => {
-
-              const status =
-                user.status ||
-                "Offline";
-
-              return (
-
-                <div
-                  className="user-card"
-                  key={
-                    user._id || index
-                  }
-                >
-
-                  {/* CARD TOP */}
-
-                  <div className="card-top">
-
-                    <div className="user-avatar">
-
-                      {user.profileImage ? (
-
-                        <img
-                          src={
-                            user.profileImage
-                          }
-                          alt={
-                            user.name
-                          }
-                        />
-
-                      ) : (
-
-                        <span>
-                          {user.name
-                            ?.charAt(0)
-                            ?.toUpperCase() ||
-                            "U"}
-                        </span>
-
-                      )}
-
-                      <span
-                        className={`online-dot ${getStatusClass(
-                          status
-                        )}`}
-                      ></span>
-
-                    </div>
-
-                    <span
-                      className={`status-badge ${getStatusClass(
-                        status
-                      )}`}
-                    >
-                      {status}
-                    </span>
-
-                  </div>
-
-                  {/* USER DETAILS */}
-
-                  <div className="user-card-content">
-
-                    <h2>
-                      {user.name ||
-                        "Unknown User"}
-                    </h2>
-
-                    <p className="user-email">
-                      ✉ {user.email}
-                    </p>
-
-                    {user.phone && (
-                      <p className="user-phone">
-                        ☎ {user.phone}
-                      </p>
-                    )}
-
-                    <div className="user-meta">
-
-                      <span>
-                        Role
-                      </span>
-
-                      <strong>
-                        {user.role ||
-                          "user"}
-                      </strong>
-
-                    </div>
-
-                    <div className="user-meta">
-
-                      <span>
-                        Joined
-                      </span>
-
-                      <strong>
-                        {user.createdAt
-                          ? new Date(
-                              user.createdAt
-                            ).toLocaleDateString()
-                          : "N/A"}
-                      </strong>
-
-                    </div>
-
-                  </div>
-
-                  {/* VIEW DETAILS */}
-
-                  <button
-                    className="view-details-button"
-                    onClick={() =>
-                      navigate(
-                        `/users/view/${user._id}`
-                      )
-                    }
-                  >
-
-                    View Details
-
-                    <span>
-                      →
-                    </span>
-
-                  </button>
-
-                </div>
-
-              );
-            }
-          )}
-
-        </div>
-
       )}
 
+      {/* =========================
+          LOADING
+      ========================= */}
+      {loading ? (
+        <div>Loading users...</div>
+      ) : users.length === 0 ? (
+        <div>No users found.</div>
+      ) : (
+        <div
+          style={{
+            overflowX: "auto",
+          }}
+        >
+          <table
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+            }}
+          >
+            <thead>
+              <tr>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "12px",
+                  }}
+                >
+                  Name
+                </th>
+
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "12px",
+                  }}
+                >
+                  Email
+                </th>
+
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "12px",
+                  }}
+                >
+                  Phone
+                </th>
+
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "12px",
+                  }}
+                >
+                  Role
+                </th>
+
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "12px",
+                  }}
+                >
+                  Status
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {users.map((user) => (
+                <tr key={user._id}>
+                  <td
+                    style={{
+                      padding: "12px",
+                    }}
+                  >
+                    {user.name || "-"}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: "12px",
+                    }}
+                  >
+                    {user.email || "-"}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: "12px",
+                    }}
+                  >
+                    {user.phone || "-"}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: "12px",
+                    }}
+                  >
+                    {user.role || "user"}
+                  </td>
+
+                  <td
+                    style={{
+                      padding: "12px",
+                    }}
+                  >
+                    {user.status || "Offline"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default Users;
