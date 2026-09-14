@@ -31,7 +31,6 @@ function Users() {
       }
     } catch (error) {
       console.error("FETCH USERS ERROR:", error);
-      setUsers([]);
     }
   };
 
@@ -72,11 +71,22 @@ function Users() {
   };
 
   // =====================================================
-  // LOAD USERS
+  // LOAD USERS + AUTO REFRESH
   // =====================================================
 
   useEffect(() => {
+    // First load
     fetchUsers();
+
+    // Automatically refresh every 2 seconds
+    const interval = setInterval(() => {
+      fetchUsers();
+    }, 2000);
+
+    // Stop refresh when leaving this page
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   // =====================================================
@@ -198,7 +208,6 @@ function Users() {
 
       </div>
 
-
       {/* =================================================
           STATISTICS
       ================================================= */}
@@ -219,7 +228,6 @@ function Users() {
           </div>
 
         </div>
-
 
         {/* ONLINE */}
 
@@ -249,7 +257,6 @@ function Users() {
 
         </div>
 
-
         {/* OFFLINE */}
 
         <div
@@ -277,7 +284,6 @@ function Users() {
           </div>
 
         </div>
-
 
         {/* LOGGED OUT */}
 
@@ -308,7 +314,6 @@ function Users() {
         </div>
 
       </div>
-
 
       {/* =================================================
           SEARCH + FILTER
@@ -341,7 +346,6 @@ function Users() {
           )}
 
         </div>
-
 
         <div className="status-filter">
 
@@ -380,7 +384,6 @@ function Users() {
 
       </div>
 
-
       {/* =================================================
           RESULT INFO
       ================================================= */}
@@ -409,7 +412,6 @@ function Users() {
         )}
 
       </div>
-
 
       {/* =================================================
           NO USERS
@@ -502,7 +504,6 @@ function Users() {
 
                     </div>
 
-
                     <span
                       className={`status-badge ${getStatusClass(
                         status
@@ -512,7 +513,6 @@ function Users() {
                     </span>
 
                   </div>
-
 
                   {/* USER DETAILS */}
 
@@ -533,7 +533,6 @@ function Users() {
                       </p>
                     )}
 
-
                     <div className="user-meta">
 
                       <span>
@@ -546,7 +545,6 @@ function Users() {
                       </strong>
 
                     </div>
-
 
                     <div className="user-meta">
 
@@ -565,7 +563,6 @@ function Users() {
                     </div>
 
                   </div>
-
 
                   {/* VIEW DETAILS */}
 
