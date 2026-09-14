@@ -15,7 +15,7 @@ import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails"
-import UserViewDetails from "./components/UserViewDetails";
+import UserViewDetails from "./components/AdminUserDetails";
 import AdminMessages from "./components/AdminMessages";
 
 // =====================================================
