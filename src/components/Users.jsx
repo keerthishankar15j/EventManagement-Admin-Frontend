@@ -8,8 +8,6 @@ function Users() {
   const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -20,8 +18,6 @@ function Users() {
 
   const fetchUsers = async () => {
     try {
-      setLoading(true);
-
       const response = await axios.get(
         "http://localhost:3000/admin/users"
       );
@@ -36,8 +32,6 @@ function Users() {
     } catch (error) {
       console.error("FETCH USERS ERROR:", error);
       setUsers([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -47,8 +41,6 @@ function Users() {
 
   const handleSync = async () => {
     try {
-      setSyncing(true);
-
       const response = await axios.post(
         "http://localhost:3000/admin/sync-users"
       );
@@ -76,13 +68,11 @@ function Users() {
         error.response?.data?.message ||
           "Unable to sync users"
       );
-    } finally {
-      setSyncing(false);
     }
   };
 
   // =====================================================
-  // LOAD
+  // LOAD USERS
   // =====================================================
 
   useEffect(() => {
@@ -198,24 +188,24 @@ function Users() {
         <button
           className="sync-button"
           onClick={handleSync}
-          disabled={syncing}
         >
           <span className="sync-icon">
             ↻
           </span>
 
-          {syncing
-            ? "Syncing..."
-            : "Sync Users"}
+          Sync Users
         </button>
 
       </div>
+
 
       {/* =================================================
           STATISTICS
       ================================================= */}
 
       <div className="user-statistics">
+
+        {/* TOTAL */}
 
         <div className="stat-card total-stat">
 
@@ -230,6 +220,8 @@ function Users() {
 
         </div>
 
+
+        {/* ONLINE */}
 
         <div
           className={`stat-card status-stat ${
@@ -258,6 +250,8 @@ function Users() {
         </div>
 
 
+        {/* OFFLINE */}
+
         <div
           className={`stat-card status-stat ${
             statusFilter === "offline"
@@ -284,6 +278,8 @@ function Users() {
 
         </div>
 
+
+        {/* LOGGED OUT */}
 
         <div
           className={`stat-card status-stat ${
@@ -312,6 +308,7 @@ function Users() {
         </div>
 
       </div>
+
 
       {/* =================================================
           SEARCH + FILTER
@@ -360,6 +357,7 @@ function Users() {
               )
             }
           >
+
             <option value="all">
               All Users
             </option>
@@ -375,60 +373,49 @@ function Users() {
             <option value="logged out">
               Logged Out
             </option>
+
           </select>
 
         </div>
 
       </div>
 
+
       {/* =================================================
           RESULT INFO
       ================================================= */}
 
-      {!loading && (
-        <div className="result-info">
+      <div className="result-info">
 
+        <span>
+          Showing{" "}
+          <strong>
+            {filteredUsers.length}
+          </strong>{" "}
+          of{" "}
+          <strong>
+            {totalUsers}
+          </strong>{" "}
+          users
+        </span>
+
+        {search && (
           <span>
-            Showing{" "}
+            Search result for{" "}
             <strong>
-              {filteredUsers.length}
-            </strong>{" "}
-            of{" "}
-            <strong>
-              {totalUsers}
-            </strong>{" "}
-            users
+              "{search}"
+            </strong>
           </span>
+        )}
 
-          {search && (
-            <span>
-              Search result for{" "}
-              <strong>
-                "{search}"
-              </strong>
-            </span>
-          )}
+      </div>
 
-        </div>
-      )}
 
       {/* =================================================
-          LOADING
+          NO USERS
       ================================================= */}
 
-      {loading ? (
-
-        <div className="users-loading">
-
-          <div className="loading-spinner"></div>
-
-          <p>
-            Loading users...
-          </p>
-
-        </div>
-
-      ) : filteredUsers.length === 0 ? (
+      {filteredUsers.length === 0 ? (
 
         <div className="no-users">
 
@@ -471,6 +458,7 @@ function Users() {
                 "Offline";
 
               return (
+
                 <div
                   className="user-card"
                   key={
@@ -545,6 +533,7 @@ function Users() {
                       </p>
                     )}
 
+
                     <div className="user-meta">
 
                       <span>
@@ -557,6 +546,7 @@ function Users() {
                       </strong>
 
                     </div>
+
 
                     <div className="user-meta">
 
@@ -587,13 +577,17 @@ function Users() {
                       )
                     }
                   >
+
                     View Details
+
                     <span>
                       →
                     </span>
+
                   </button>
 
                 </div>
+
               );
             }
           )}
