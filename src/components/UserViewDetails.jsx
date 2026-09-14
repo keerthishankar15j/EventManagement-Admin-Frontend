@@ -1,20 +1,56 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 
 import "../styles/UserViewDetails.css";
 
+
+// =====================================================
+// ADMIN API
+// =====================================================
+
+const ADMIN_API_URL =
+  "https://api-admin-rouge.vercel.app";
+
+
+// =====================================================
+// USER DETAILS
+// =====================================================
+
 function UserViewDetails() {
 
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } =
+    useParams();
 
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const navigate =
+    useNavigate();
 
-  // =====================================================
+
+  // ===================================================
+  // STATES
+  // ===================================================
+
+  const [user, setUser] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
+
+  // ===================================================
   // GET SINGLE USER
-  // =====================================================
+  // ===================================================
 
   const fetchUser = async () => {
 
@@ -22,20 +58,37 @@ function UserViewDetails() {
 
       setLoading(true);
 
+      setError("");
+
+
       const response =
         await axios.get(
-          `http://localhost:3000/admin/users/${id}`
+          `${ADMIN_API_URL}/admin/users/${id}`
         );
+
 
       console.log(
         "USER DETAILS:",
         response.data
       );
 
-      if (response.data.success) {
+
+      if (
+        response.data &&
+        response.data.success
+      ) {
 
         setUser(
           response.data.user
+        );
+
+      } else {
+
+        setUser(null);
+
+        setError(
+          response.data?.message ||
+            "User not found"
         );
 
       }
@@ -47,6 +100,15 @@ function UserViewDetails() {
         error
       );
 
+
+      setUser(null);
+
+
+      setError(
+        error.response?.data?.message ||
+          "Failed to load user details"
+      );
+
     } finally {
 
       setLoading(false);
@@ -55,15 +117,25 @@ function UserViewDetails() {
 
   };
 
+
+  // ===================================================
+  // FETCH WHEN ID CHANGES
+  // ===================================================
+
   useEffect(() => {
 
-    fetchUser();
+    if (id) {
+
+      fetchUser();
+
+    }
 
   }, [id]);
 
-  // =====================================================
+
+  // ===================================================
   // LOADING
-  // =====================================================
+  // ===================================================
 
   if (loading) {
 
@@ -72,6 +144,7 @@ function UserViewDetails() {
       <div className="details-loading">
 
         <div className="details-spinner"></div>
+
 
         <p>
           Loading user details...
@@ -83,9 +156,10 @@ function UserViewDetails() {
 
   }
 
-  // =====================================================
+
+  // ===================================================
   // USER NOT FOUND
-  // =====================================================
+  // ===================================================
 
   if (!user) {
 
@@ -93,24 +167,32 @@ function UserViewDetails() {
 
       <div className="details-not-found">
 
+
         <div className="not-found-icon">
           👤
         </div>
+
 
         <h2>
           User Not Found
         </h2>
 
+
         <p>
-          The requested user could not be found.
+          {error ||
+            "The requested user could not be found."}
         </p>
 
+
         <button
+          type="button"
           onClick={() =>
             navigate("/users")
           }
         >
+
           ← Back to Users
+
         </button>
 
       </div>
@@ -119,28 +201,33 @@ function UserViewDetails() {
 
   }
 
-  // =====================================================
+
+  // ===================================================
   // STATUS
-  // =====================================================
+  // ===================================================
 
   const status =
-    user.status || "Offline";
+    user.status ||
+    "Offline";
+
 
   const statusClass =
-    status.toLowerCase() === "online"
+    status === "Online"
       ? "online"
-      : status.toLowerCase() ===
-        "logged out"
+      : status ===
+        "Logged Out"
       ? "logged-out"
       : "offline";
 
-  // =====================================================
-  // JSX
-  // =====================================================
+
+  // ===================================================
+  // RENDER
+  // ===================================================
 
   return (
 
     <div className="user-details-page">
+
 
       {/* =================================================
           TOP
@@ -148,14 +235,19 @@ function UserViewDetails() {
 
       <div className="details-top">
 
+
         <button
+          type="button"
           className="back-button"
           onClick={() =>
             navigate("/users")
           }
         >
+
           ← Back to Users
+
         </button>
+
 
         <span>
           User Details
@@ -170,25 +262,37 @@ function UserViewDetails() {
 
       <div className="profile-header">
 
+
+        {/* AVATAR */}
+
         <div className="profile-avatar">
+
 
           {user.profileImage ? (
 
             <img
-              src={user.profileImage}
-              alt={user.name}
+              src={
+                user.profileImage
+              }
+              alt={
+                user.name ||
+                "User"
+              }
             />
 
           ) : (
 
             <span>
+
               {user.name
                 ?.charAt(0)
                 ?.toUpperCase() ||
                 "U"}
+
             </span>
 
           )}
+
 
           <div
             className={`profile-status-dot ${statusClass}`}
@@ -197,29 +301,42 @@ function UserViewDetails() {
         </div>
 
 
+        {/* PROFILE INFORMATION */}
+
         <div className="profile-main">
 
+
           <div className="profile-name-row">
+
 
             <h1>
               {user.name ||
                 "Unknown User"}
             </h1>
 
+
             <span
               className={`profile-status ${statusClass}`}
             >
+
               {status}
+
             </span>
 
           </div>
 
+
           <p>
-            {user.email}
+            {user.email ||
+              "No email"}
           </p>
 
+
           <span className="profile-role">
-            {user.role || "user"}
+
+            {user.role ||
+              "user"}
+
           </span>
 
         </div>
@@ -228,26 +345,36 @@ function UserViewDetails() {
 
 
       {/* =================================================
-          INFORMATION GRID
+          DETAILS GRID
       ================================================= */}
 
       <div className="details-grid">
 
-        {/* PERSONAL INFORMATION */}
+
+        {/* =================================================
+            PERSONAL INFORMATION
+        ================================================= */}
 
         <div className="details-card">
 
+
           <div className="details-card-title">
+
+
             <span>
               👤
             </span>
 
+
             <h2>
               Personal Information
             </h2>
+
           </div>
 
+
           <div className="information-list">
+
 
             <div className="information-row">
 
@@ -255,8 +382,10 @@ function UserViewDetails() {
                 Full Name
               </span>
 
+
               <strong>
-                {user.name || "N/A"}
+                {user.name ||
+                  "N/A"}
               </strong>
 
             </div>
@@ -268,8 +397,10 @@ function UserViewDetails() {
                 Email Address
               </span>
 
+
               <strong>
-                {user.email || "N/A"}
+                {user.email ||
+                  "N/A"}
               </strong>
 
             </div>
@@ -281,8 +412,10 @@ function UserViewDetails() {
                 Phone Number
               </span>
 
+
               <strong>
-                {user.phone || "Not Provided"}
+                {user.phone ||
+                  "Not Provided"}
               </strong>
 
             </div>
@@ -294,26 +427,36 @@ function UserViewDetails() {
                 Role
               </span>
 
+
               <strong className="capitalize">
-                {user.role || "user"}
+
+                {user.role ||
+                  "user"}
+
               </strong>
 
             </div>
+
 
           </div>
 
         </div>
 
 
-        {/* ACCOUNT INFORMATION */}
+        {/* =================================================
+            ACCOUNT INFORMATION
+        ================================================= */}
 
         <div className="details-card">
 
+
           <div className="details-card-title">
+
 
             <span>
               🔐
             </span>
+
 
             <h2>
               Account Information
@@ -324,16 +467,20 @@ function UserViewDetails() {
 
           <div className="information-list">
 
+
             <div className="information-row">
 
               <span>
                 Account Status
               </span>
 
+
               <strong
                 className={`account-status ${statusClass}`}
               >
+
                 {status}
+
               </strong>
 
             </div>
@@ -345,10 +492,13 @@ function UserViewDetails() {
                 User ID
               </span>
 
+
               <strong className="user-id">
+
                 {user.sourceUserId ||
                   user._id ||
                   "N/A"}
+
               </strong>
 
             </div>
@@ -360,12 +510,15 @@ function UserViewDetails() {
                 Registered On
               </span>
 
+
               <strong>
+
                 {user.createdAt
                   ? new Date(
                       user.createdAt
                     ).toLocaleString()
                   : "N/A"}
+
               </strong>
 
             </div>
@@ -377,30 +530,39 @@ function UserViewDetails() {
                 Last Updated
               </span>
 
+
               <strong>
+
                 {user.updatedAt
                   ? new Date(
                       user.updatedAt
                     ).toLocaleString()
                   : "N/A"}
+
               </strong>
 
             </div>
+
 
           </div>
 
         </div>
 
 
-        {/* BIO */}
+        {/* =================================================
+            BIO
+        ================================================= */}
 
         <div className="details-card bio-card">
 
+
           <div className="details-card-title">
+
 
             <span>
               📝
             </span>
+
 
             <h2>
               About User
@@ -411,14 +573,22 @@ function UserViewDetails() {
 
           <div className="bio-content">
 
+
             {user.bio ? (
+
               <p>
                 {user.bio}
               </p>
+
             ) : (
+
               <p className="no-bio">
-                No bio has been provided by this user.
+
+                No bio has been provided
+                by this user.
+
               </p>
+
             )}
 
           </div>
@@ -426,17 +596,22 @@ function UserViewDetails() {
         </div>
 
 
-        {/* PROFILE IMAGE */}
+        {/* =================================================
+            PROFILE IMAGE
+        ================================================= */}
 
         {user.profileImage && (
 
           <div className="details-card">
 
+
             <div className="details-card-title">
+
 
               <span>
                 🖼
               </span>
+
 
               <h2>
                 Profile Image
@@ -444,12 +619,20 @@ function UserViewDetails() {
 
             </div>
 
+
             <div className="large-profile-image">
 
+
               <img
-                src={user.profileImage}
-                alt={user.name}
+                src={
+                  user.profileImage
+                }
+                alt={
+                  user.name ||
+                  "User"
+                }
               />
+
 
             </div>
 
@@ -457,29 +640,38 @@ function UserViewDetails() {
 
         )}
 
+
       </div>
 
 
       {/* =================================================
-          BOTTOM BUTTON
+          FOOTER
       ================================================= */}
 
       <div className="details-footer">
 
+
         <button
+          type="button"
           className="footer-back-button"
           onClick={() =>
             navigate("/users")
           }
         >
+
           ← Back to All Users
+
         </button>
 
+
       </div>
+
 
     </div>
 
   );
+
 }
+
 
 export default UserViewDetails;
