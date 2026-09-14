@@ -1,20 +1,18 @@
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export const syncUsers = async () => {
-  try {
-    const response = await axios.post(
-      `${API_URL}/admin/sync-users`
-    );
+  const response = await axios.post(`${API_URL}/admin/sync-users`);
+  return response.data;
+};
 
-    return response.data;
-  } catch (error) {
-    console.error(
-      "Sync Error:",
-      error.response?.data || error
-    );
+export const getAllUsers = async () => {
+  const response = await axios.get(`${API_URL}/admin/users`);
+  return response.data;
+};
 
-    throw error;
-  }
+export const getUserById = async (id) => {
+  const response = await axios.get(`${API_URL}/admin/users/${id}`);
+  return response.data;
 };
