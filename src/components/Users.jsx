@@ -1,11 +1,18 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../styles/Users.css";
 
 const ADMIN_API_URL =
   "https://api-admin-rouge.vercel.app";
 
 const Users = () => {
+  const navigate = useNavigate();
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -63,7 +70,7 @@ const Users = () => {
   };
 
   // =====================================================
-  // SYNC USERS
+  // MANUAL SYNC
   // =====================================================
 
   const syncUsers = async () => {
@@ -104,7 +111,8 @@ const Users = () => {
   };
 
   // =====================================================
-  // LOAD USERS ONLY ONCE
+  // FETCH ONLY ON PAGE LOAD
+  // NO SETINTERVAL
   // =====================================================
 
   useEffect(() => {
@@ -112,28 +120,7 @@ const Users = () => {
   }, []);
 
   // =====================================================
-  // STATISTICS
-  // =====================================================
-
-  const totalUsers = users.length;
-
-  const onlineUsers = users.filter(
-    (user) =>
-      user.status === "Online"
-  ).length;
-
-  const offlineUsers = users.filter(
-    (user) =>
-      user.status === "Offline"
-  ).length;
-
-  const loggedOutUsers = users.filter(
-    (user) =>
-      user.status === "Logged Out"
-  ).length;
-
-  // =====================================================
-  // SEARCH + FILTER
+  // SEARCH + ONLINE/OFFLINE FILTER
   // =====================================================
 
   const filteredUsers = useMemo(() => {
@@ -172,29 +159,11 @@ const Users = () => {
   ]);
 
   // =====================================================
-  // STATUS CLASS
-  // =====================================================
-
-  const getStatusClass = (status) => {
-    if (status === "Online") {
-      return "online";
-    }
-
-    if (status === "Logged Out") {
-      return "logged-out";
-    }
-
-    return "offline";
-  };
-
-  // =====================================================
-  // AVATAR LETTER
+  // INITIAL
   // =====================================================
 
   const getInitial = (name) => {
-    if (!name) {
-      return "U";
-    }
+    if (!name) return "U";
 
     return name
       .charAt(0)
@@ -202,16 +171,22 @@ const Users = () => {
   };
 
   // =====================================================
+  // STATUS CLASS
+  // =====================================================
+
+  const getStatusClass = (status) => {
+    return status === "Online"
+      ? "online"
+      : "offline";
+  };
+
+  // =====================================================
   // VIEW DETAILS
   // =====================================================
 
-  const handleViewDetails = (user) => {
-    alert(
-      `Name: ${user.name || "-"}\n` +
-      `Email: ${user.email || "-"}\n` +
-      `Phone: ${user.phone || "-"}\n` +
-      `Role: ${user.role || "user"}\n` +
-      `Status: ${user.status || "Offline"}`
+  const viewDetails = (user) => {
+    navigate(
+      `/users/${user._id}`
     );
   };
 
@@ -235,7 +210,7 @@ const Users = () => {
           </h1>
 
           <p>
-            Manage and monitor all registered users
+            View and manage all registered users
           </p>
 
         </div>
@@ -269,144 +244,12 @@ const Users = () => {
 
 
       {/* =================================================
-          STATISTICS
-      ================================================= */}
-
-      {!loading && (
-        <div className="user-statistics">
-
-          {/* TOTAL */}
-
-          <div
-            className={`stat-card ${
-              statusFilter === "All"
-                ? "active-stat"
-                : ""
-            }`}
-            onClick={() =>
-              setStatusFilter("All")
-            }
-          >
-
-            <div className="stat-icon">
-              👥
-            </div>
-
-            <div>
-              <span>
-                Total Users
-              </span>
-
-              <strong>
-                {totalUsers}
-              </strong>
-            </div>
-
-          </div>
-
-
-          {/* ONLINE */}
-
-          <div
-            className={`stat-card ${
-              statusFilter === "Online"
-                ? "active-stat"
-                : ""
-            }`}
-            onClick={() =>
-              setStatusFilter("Online")
-            }
-          >
-
-            <div className="stat-icon online-icon">
-              ●
-            </div>
-
-            <div>
-              <span>
-                Online
-              </span>
-
-              <strong>
-                {onlineUsers}
-              </strong>
-            </div>
-
-          </div>
-
-
-          {/* OFFLINE */}
-
-          <div
-            className={`stat-card ${
-              statusFilter === "Offline"
-                ? "active-stat"
-                : ""
-            }`}
-            onClick={() =>
-              setStatusFilter("Offline")
-            }
-          >
-
-            <div className="stat-icon offline-icon">
-              ○
-            </div>
-
-            <div>
-              <span>
-                Offline
-              </span>
-
-              <strong>
-                {offlineUsers}
-              </strong>
-            </div>
-
-          </div>
-
-
-          {/* LOGGED OUT */}
-
-          <div
-            className={`stat-card ${
-              statusFilter === "Logged Out"
-                ? "active-stat"
-                : ""
-            }`}
-            onClick={() =>
-              setStatusFilter("Logged Out")
-            }
-          >
-
-            <div className="stat-icon logout-icon">
-              ↪
-            </div>
-
-            <div>
-              <span>
-                Logged Out
-              </span>
-
-              <strong>
-                {loggedOutUsers}
-              </strong>
-            </div>
-
-          </div>
-
-        </div>
-      )}
-
-
-      {/* =================================================
-          TOOLBAR
+          SEARCH + STATUS
       ================================================= */}
 
       {!loading &&
         users.length > 0 && (
           <div className="users-toolbar">
-
-            {/* SEARCH */}
 
             <div className="search-box">
 
@@ -416,20 +259,22 @@ const Users = () => {
 
               <input
                 type="text"
-                placeholder="Search users by name, email or phone..."
+                placeholder="Search by name, email or phone number..."
                 value={search}
                 onChange={(e) =>
-                  setSearch(e.target.value)
+                  setSearch(
+                    e.target.value
+                  )
                 }
               />
 
               {search && (
                 <button
+                  type="button"
                   className="clear-search"
                   onClick={() =>
                     setSearch("")
                   }
-                  type="button"
                 >
                   ×
                 </button>
@@ -437,8 +282,6 @@ const Users = () => {
 
             </div>
 
-
-            {/* STATUS FILTER */}
 
             <div className="status-filter">
 
@@ -455,7 +298,7 @@ const Users = () => {
                 }
               >
                 <option value="All">
-                  All
+                  All Users
                 </option>
 
                 <option value="Online">
@@ -465,13 +308,33 @@ const Users = () => {
                 <option value="Offline">
                   Offline
                 </option>
-
-                <option value="Logged Out">
-                  Logged Out
-                </option>
               </select>
 
             </div>
+
+          </div>
+        )}
+
+
+      {/* =================================================
+          RESULT INFO
+      ================================================= */}
+
+      {!loading &&
+        users.length > 0 && (
+          <div className="result-info">
+
+            <span>
+              Showing{" "}
+              <strong>
+                {filteredUsers.length}
+              </strong>{" "}
+              of{" "}
+              <strong>
+                {users.length}
+              </strong>{" "}
+              users
+            </span>
 
           </div>
         )}
@@ -495,10 +358,6 @@ const Users = () => {
 
       ) : users.length === 0 ? (
 
-        /* =================================================
-           NO USERS
-        ================================================= */
-
         <div className="no-users">
 
           <div className="no-users-icon">
@@ -510,7 +369,7 @@ const Users = () => {
           </h2>
 
           <p>
-            There are no users available yet.
+            No users are available yet.
           </p>
 
           <button
@@ -526,10 +385,6 @@ const Users = () => {
 
       ) : filteredUsers.length === 0 ? (
 
-        /* =================================================
-           NO SEARCH RESULT
-        ================================================= */
-
         <div className="no-users">
 
           <div className="no-users-icon">
@@ -541,7 +396,7 @@ const Users = () => {
           </h2>
 
           <p>
-            Try a different search or status filter.
+            Try another name, email or phone number.
           </p>
 
           <button
@@ -550,7 +405,7 @@ const Users = () => {
               setStatusFilter("All");
             }}
           >
-            Clear Filters
+            Clear Search
           </button>
 
         </div>
@@ -558,168 +413,124 @@ const Users = () => {
       ) : (
 
         /* =================================================
-           RESULT INFO + USER GRID
+           USER CARDS
         ================================================= */
 
-        <>
+        <div className="users-grid">
 
-          <div className="result-info">
+          {filteredUsers.map((user) => {
 
-            <span>
-              Showing{" "}
-              <strong>
-                {filteredUsers.length}
-              </strong>{" "}
-              of{" "}
-              <strong>
-                {totalUsers}
-              </strong>{" "}
-              users
-            </span>
+            const statusClass =
+              getStatusClass(
+                user.status
+              );
 
-            {search && (
-              <span>
-                Search:{" "}
-                <strong>
-                  {search}
-                </strong>
-              </span>
-            )}
+            return (
+              <div
+                className="user-card"
+                key={user._id}
+              >
 
-          </div>
+                {/* CARD TOP */}
 
+                <div className="card-top">
 
-          <div className="users-grid">
+                  <div className="user-avatar">
 
-            {filteredUsers.map((user) => {
-
-              const statusClass =
-                getStatusClass(
-                  user.status
-                );
-
-              return (
-                <div
-                  className="user-card"
-                  key={user._id}
-                >
-
-                  {/* =================================================
-                     CARD TOP
-                  ================================================= */}
-
-                  <div className="card-top">
-
-                    <div className="user-avatar">
-
-                      {user.profileImage ? (
-                        <img
-                          src={
-                            user.profileImage
-                          }
-                          alt={
-                            user.name ||
-                            "User"
-                          }
-                        />
-                      ) : (
-                        <span>
-                          {getInitial(
-                            user.name
-                          )}
-                        </span>
-                      )}
-
-                      <span
-                        className={`online-dot ${statusClass}`}
-                      ></span>
-
-                    </div>
-
-
-                    {/* STATUS */}
+                    {user.profileImage ? (
+                      <img
+                        src={
+                          user.profileImage
+                        }
+                        alt={
+                          user.name ||
+                          "User"
+                        }
+                      />
+                    ) : (
+                      <span>
+                        {getInitial(
+                          user.name
+                        )}
+                      </span>
+                    )}
 
                     <span
-                      className={`status-badge ${statusClass}`}
-                    >
-                      {user.status ||
-                        "Offline"}
-                    </span>
+                      className={`online-dot ${statusClass}`}
+                    ></span>
 
                   </div>
 
 
-                  {/* =================================================
-                     USER CONTENT
-                  ================================================= */}
-
-                  <div className="user-card-content">
-
-                    <h2>
-                      {user.name ||
-                        "Unknown User"}
-                    </h2>
-
-                    <p className="user-email">
-                      ✉{" "}
-                      {user.email ||
-                        "-"}
-                    </p>
-
-                    <p className="user-phone">
-                      ☎{" "}
-                      {user.phone ||
-                        "-"}
-                    </p>
-
-
-                    {/* USER META */}
-
-                    <div className="user-meta">
-
-                      <span>
-                        Role
-                      </span>
-
-                      <strong>
-                        {user.role ||
-                          "user"}
-                      </strong>
-
-                    </div>
-
-
-                    {/* VIEW DETAILS */}
-
-                    <button
-                      className="view-details-button"
-                      onClick={() =>
-                        handleViewDetails(
-                          user
-                        )
-                      }
-                      type="button"
-                    >
-
-                      <span>
-                        View Details
-                      </span>
-
-                      <span>
-                        →
-                      </span>
-
-                    </button>
-
-                  </div>
+                  <span
+                    className={`status-badge ${statusClass}`}
+                  >
+                    {user.status === "Online"
+                      ? "Online"
+                      : "Offline"}
+                  </span>
 
                 </div>
-              );
-            })}
 
-          </div>
 
-        </>
+                {/* USER CONTENT */}
+
+                <div className="user-card-content">
+
+                  <h2>
+                    {user.name ||
+                      "Unknown User"}
+                  </h2>
+
+                  <p className="user-email">
+                    ✉{" "}
+                    {user.email || "-"}
+                  </p>
+
+                  <p className="user-phone">
+                    ☎{" "}
+                    {user.phone || "-"}
+                  </p>
+
+
+                  <div className="user-meta">
+
+                    <span>
+                      Role
+                    </span>
+
+                    <strong>
+                      {user.role ||
+                        "user"}
+                    </strong>
+
+                  </div>
+
+
+                  <button
+                    type="button"
+                    className="view-details-button"
+                    onClick={() =>
+                      viewDetails(user)
+                    }
+                  >
+                    <span>
+                      View Details
+                    </span>
+
+                    <span>
+                      →
+                    </span>
+
+                  </button>
+
+                </div>
+
+              </div>
+            );
+          })}
+
+        </div>
       )}
 
     </div>
