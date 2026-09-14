@@ -10,11 +10,13 @@ import AdminLogin from "./components/AdminLogin";
 import AdminNavbar from "./components/Admin_navbar";
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
-import AdminUsers from "./components/AdminUsers.jsx";
+import Users from "./components/Users";
 import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
+
+import UserViewDetails from "./components/UserViewDetails";
 import AdminMessages from "./components/AdminMessages";
 
 // =====================================================
@@ -105,11 +107,15 @@ function App() {
 
           {/* USERS */}
 
-          <Route
-            path="/users"
-            element={<AdminUsers />}
-          />
+         <Route
+  path="/users"
+  element={<Users />}
+/>
 
+<Route
+  path="/users/view/:id"
+  element={<UserViewDetails />}
+/>
           {/* GALLERY */}
 
           <Route
