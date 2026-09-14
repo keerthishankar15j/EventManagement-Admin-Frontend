@@ -1,437 +1,354 @@
-import React, { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+
+import {
+  useNavigate,
+} from "react-router-dom";
+
 import "../styles/Users.css";
 
+
+const API_URL =
+  import.meta.env.VITE_ADMIN_API_URL ||
+  "http://localhost:3000";
+
+
 function Users() {
-  const [users, setUsers] = useState([]);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  const navigate = useNavigate();
+  const [users, setUsers] =
+    useState([]);
 
-  const ADMIN_API_URL =
-    import.meta.env.VITE_ADMIN_API_URL ||
-    "http://localhost:3000";
+  const [search, setSearch] =
+    useState("");
 
-  // ==============================
+  const [filter, setFilter] =
+    useState("all");
+
+  const [loading, setLoading] =
+    useState(true);
+
+
+  const navigate =
+    useNavigate();
+
+
+  // ==================================================
   // GET USERS
-  // ==============================
-  const getUsers = async () => {
-    try {
-      setLoading(true);
-      setError("");
+  // ==================================================
 
-      const response = await axios.get(
-        `${ADMIN_API_URL}/admin/users`
-      );
+  const fetchUsers =
+    async () => {
 
-      if (response.data.success) {
-        setUsers(response.data.users || []);
-      } else {
-        setUsers([]);
-        setError("Unable to load users");
+      try {
+
+        const response =
+          await axios.get(
+            `${API_URL}/admin/users`
+          );
+
+
+        if (
+          response.data.success
+        ) {
+
+          setUsers(
+            response.data.users || []
+          );
+
+        }
+
+
+      } catch (error) {
+
+        console.error(
+          "FETCH USERS ERROR:",
+          error
+        );
+
+
+      } finally {
+
+        setLoading(false);
+
       }
-    } catch (error) {
-      console.error("GET USERS ERROR:", error);
 
-      setError(
-        error.response?.data?.message ||
-          "Failed to load users"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  // ==============================
-  // LOAD USERS ON PAGE OPEN
-  // ==============================
+
+  // ==================================================
+  // LOAD IMMEDIATELY
+  // ==================================================
+
   useEffect(() => {
-    getUsers();
+
+    fetchUsers();
+
   }, []);
 
-  // ==============================
-  // SEARCH + FILTER
-  // ==============================
-  const filteredUsers = useMemo(() => {
-    const searchValue = search
-      .trim()
-      .toLowerCase();
 
-    return users.filter((user) => {
+  // ==================================================
+  // FILTER
+  // ==================================================
+
+  const filteredUsers =
+    users.filter((user) => {
+
+      const value =
+        search
+          .toLowerCase()
+          .trim();
+
+
       const matchesSearch =
+
         user.name
           ?.toLowerCase()
-          .includes(searchValue) ||
+          .includes(value)
+
+        ||
+
         user.email
           ?.toLowerCase()
-          .includes(searchValue) ||
+          .includes(value)
+
+        ||
+
         user.phone
           ?.toLowerCase()
-          .includes(searchValue);
+          .includes(value);
 
-      const isOnline =
-        user.status === "online";
 
       const matchesFilter =
+
         filter === "all"
-          ? true
-          : filter === "online"
-          ? isOnline
-          : !isOnline;
 
-      return matchesSearch && matchesFilter;
+        ||
+
+        user.loginStatus ===
+          filter;
+
+
+      return (
+        matchesSearch &&
+        matchesFilter
+      );
+
     });
-  }, [users, search, filter]);
 
-  // ==============================
-  // COUNTS
-  // ==============================
-  const onlineUsers = users.filter(
-    (user) => user.status === "online"
-  ).length;
 
-  const offlineUsers =
-    users.length - onlineUsers;
+  // ==================================================
+  // FORMAT DATE
+  // ==================================================
 
-  // ==============================
-  // VIEW DETAILS
-  // ==============================
-  const viewDetails = (id) => {
-    navigate(`/users/view/${id}`);
-  };
+  const formatDate =
+    (date) => {
+
+      if (!date) {
+        return "Never";
+      }
+
+
+      return new Date(
+        date
+      ).toLocaleString();
+
+    };
+
+
+  // ==================================================
+  // UI
+  // ==================================================
 
   return (
+
     <div className="users-page">
 
-      {/* =================================
-          HEADER
-      ================================= */}
       <div className="users-header">
 
-        <div className="users-heading">
-          <span className="users-small-title">
-            ADMIN PANEL
-          </span>
+        <div>
 
-          <h1>Users</h1>
+          <h1>
+            Users
+          </h1>
 
           <p>
-            Manage and view all registered users
+            Total Users: {users.length}
           </p>
-        </div>
 
-        {/* SEARCH */}
-        <div className="users-search-box">
-          <span className="search-icon">
-            🔍
-          </span>
-
-          <input
-            type="text"
-            placeholder="Search name, email or phone..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-          />
-
-          {search && (
-            <button
-              className="clear-search"
-              onClick={() => setSearch("")}
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
-
-
-      {/* =================================
-          USER SUMMARY
-      ================================= */}
-      <div className="users-summary">
-
-        <div className="summary-card">
-          <div className="summary-icon">
-            👥
-          </div>
-
-          <div>
-            <span>Total Users</span>
-            <strong>{users.length}</strong>
-          </div>
         </div>
 
 
-        <div className="summary-card">
-          <div className="summary-icon online-icon">
-            ●
-          </div>
+        <input
 
-          <div>
-            <span>Online</span>
-            <strong>{onlineUsers}</strong>
-          </div>
-        </div>
+          type="text"
 
+          placeholder="Search name, email, phone..."
 
-        <div className="summary-card">
-          <div className="summary-icon offline-icon">
-            ●
-          </div>
+          value={search}
 
-          <div>
-            <span>Offline</span>
-            <strong>{offlineUsers}</strong>
-          </div>
-        </div>
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+
+        />
 
       </div>
 
 
-      {/* =================================
-          FILTER BUTTONS
-      ================================= */}
-      <div className="users-filter">
+      <div className="user-filters">
 
         <button
-          className={
-            filter === "all"
-              ? "filter-btn active"
-              : "filter-btn"
+          onClick={() =>
+            setFilter("all")
           }
-          onClick={() => setFilter("all")}
         >
-          All Users
-          <span>{users.length}</span>
+          All
         </button>
 
 
         <button
-          className={
-            filter === "online"
-              ? "filter-btn active online-filter"
-              : "filter-btn"
+          onClick={() =>
+            setFilter("online")
           }
-          onClick={() => setFilter("online")}
         >
-          <i className="online-dot"></i>
-          Online
-          <span>{onlineUsers}</span>
+          🟢 Online
         </button>
 
 
         <button
-          className={
-            filter === "offline"
-              ? "filter-btn active offline-filter"
-              : "filter-btn"
+          onClick={() =>
+            setFilter("offline")
           }
-          onClick={() => setFilter("offline")}
         >
-          <i className="offline-dot"></i>
-          Offline
-          <span>{offlineUsers}</span>
+          ⚪ Offline
+        </button>
+
+
+        <button
+          onClick={() =>
+            setFilter("logout")
+          }
+        >
+          🔴 Logout
         </button>
 
       </div>
 
 
-      {/* =================================
-          LOADING
-      ================================= */}
-      {loading && (
-        <div className="users-loading">
-          <div className="loader"></div>
-          <p>Loading users...</p>
-        </div>
-      )}
+      {loading ? (
 
+        <h2>
+          Loading Users...
+        </h2>
 
-      {/* =================================
-          ERROR
-      ================================= */}
-      {!loading && error && (
-        <div className="users-error">
-          <div>⚠️</div>
-          <h3>Something went wrong</h3>
-          <p>{error}</p>
+      ) : (
 
-          <button onClick={getUsers}>
-            Try Again
-          </button>
-        </div>
-      )}
+        <div className="users-grid">
 
+          {filteredUsers.map(
+            (user) => (
 
-      {/* =================================
-          NO USERS
-      ================================= */}
-      {!loading &&
-        !error &&
-        filteredUsers.length === 0 && (
-          <div className="no-users">
-            <div className="no-users-icon">
-              🔎
-            </div>
+              <div
+                className="user-card"
+                key={user._id}
+              >
 
-            <h3>No users found</h3>
+                <div className="user-image">
 
-            <p>
-              Try changing your search or filter.
-            </p>
-          </div>
-        )}
+                  {user.profileImage ? (
 
+                    <img
+                      src={
+                        user.profileImage
+                      }
+                      alt={
+                        user.name
+                      }
+                    />
 
-      {/* =================================
-          USERS CARDS
-      ================================= */}
-      {!loading &&
-        !error &&
-        filteredUsers.length > 0 && (
-          <div className="users-grid">
+                  ) : (
 
-            {filteredUsers.map((user) => {
+                    <div className="avatar">
 
-              const isOnline =
-                user.status === "online";
-
-              const firstLetter =
-                user.name
-                  ?.charAt(0)
-                  .toUpperCase() || "U";
-
-              return (
-                <div
-                  className="user-card"
-                  key={user._id}
-                >
-
-                  {/* CARD TOP */}
-                  <div className="card-top">
-
-                    <div className="user-avatar">
-
-                      {user.profileImage ? (
-                        <img
-                          src={user.profileImage}
-                          alt={user.name}
-                        />
-                      ) : (
-                        <span>
-                          {firstLetter}
-                        </span>
-                      )}
-
-                      <i
-                        className={
-                          isOnline
-                            ? "status-dot online"
-                            : "status-dot offline"
-                        }
-                      ></i>
+                      {user.name
+                        ?.charAt(0)
+                        ?.toUpperCase()}
 
                     </div>
 
-
-                    <div className="user-main-info">
-
-                      <h2>
-                        {user.name || "Unknown User"}
-                      </h2>
-
-                      <span className="user-role">
-                        {user.role || "user"}
-                      </span>
-
-                    </div>
-
-                  </div>
-
-
-                  {/* USER DETAILS */}
-                  <div className="card-details">
-
-                    <div className="card-detail-row">
-                      <span className="detail-label">
-                        EMAIL
-                      </span>
-
-                      <p>
-                        {user.email || "Not provided"}
-                      </p>
-                    </div>
-
-
-                    <div className="card-detail-row">
-                      <span className="detail-label">
-                        PHONE
-                      </span>
-
-                      <p>
-                        {user.phone || "Not provided"}
-                      </p>
-                    </div>
-
-
-                    <div className="card-detail-row">
-                      <span className="detail-label">
-                        STATUS
-                      </span>
-
-                      <p
-                        className={
-                          isOnline
-                            ? "status-text online-text"
-                            : "status-text offline-text"
-                        }
-                      >
-                        <i
-                          className={
-                            isOnline
-                              ? "mini-dot online"
-                              : "mini-dot offline"
-                          }
-                        ></i>
-
-                        {isOnline
-                          ? "Online"
-                          : "Offline"}
-                      </p>
-                    </div>
-
-                  </div>
-
-
-                  {/* VIEW DETAILS */}
-                  <button
-                    className="view-details-btn"
-                    onClick={() =>
-                      viewDetails(user._id)
-                    }
-                  >
-                    <span>
-                      View Details
-                    </span>
-
-                    <b>→</b>
-                  </button>
+                  )}
 
                 </div>
-              );
-            })}
 
-          </div>
-        )}
+
+                <h2>
+                  {user.name}
+                </h2>
+
+
+                <p>
+                  {user.email}
+                </p>
+
+
+                <span>
+                  Type: {user.role}
+                </span>
+
+
+                <p>
+                  Phone:{" "}
+                  {user.phone || "N/A"}
+                </p>
+
+
+                <p>
+                  Status:{" "}
+                  {user.loginStatus}
+                </p>
+
+
+                <p>
+                  Last Login:
+                  <br />
+
+                  {formatDate(
+                    user.lastLogin
+                  )}
+
+                </p>
+
+
+                <button
+                  onClick={() =>
+                    navigate(
+                      `/users/view/${user._id}`
+                    )
+                  }
+                >
+                  View Details
+                </button>
+
+              </div>
+
+            )
+          )}
+
+        </div>
+
+      )}
 
     </div>
+
   );
+
 }
+
 
 export default Users;

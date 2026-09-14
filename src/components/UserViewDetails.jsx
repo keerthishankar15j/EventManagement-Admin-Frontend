@@ -1,251 +1,211 @@
-import React, { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
+
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
-import "../styles/UserViewDetails.css";
+
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
+
+const API_URL =
+  import.meta.env.VITE_ADMIN_API_URL ||
+  "http://localhost:3000";
+
 
 function UserViewDetails() {
-  const { id } = useParams();
-  const navigate = useNavigate();
 
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const { id } =
+    useParams();
 
-  const ADMIN_API_URL =
-    import.meta.env.VITE_ADMIN_API_URL ||
-    "http://localhost:3000";
+  const navigate =
+    useNavigate();
 
-  const getUser = async () => {
-    try {
-      setLoading(true);
-      setError("");
 
-      const response = await axios.get(
-        `${ADMIN_API_URL}/admin/users/${id}`
-      );
+  const [user, setUser] =
+    useState(null);
 
-      if (response.data.success) {
-        setUser(response.data.user);
-      } else {
-        setError("User not found");
-      }
-    } catch (error) {
-      console.error(
-        "GET USER DETAILS ERROR:",
-        error
-      );
+  const [loading, setLoading] =
+    useState(true);
 
-      setError(
-        error.response?.data?.message ||
-          "Unable to load user details"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    getUser();
+
+    const fetchUser =
+      async () => {
+
+        try {
+
+          const response =
+            await axios.get(
+              `${API_URL}/admin/users/${id}`
+            );
+
+
+          if (
+            response.data.success
+          ) {
+
+            setUser(
+              response.data.user
+            );
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            "USER DETAILS ERROR:",
+            error
+          );
+
+        } finally {
+
+          setLoading(false);
+
+        }
+
+      };
+
+
+    fetchUser();
+
   }, [id]);
 
+
   if (loading) {
+
     return (
-      <div className="user-details-loading">
-        <div className="loader"></div>
-        <p>Loading user details...</p>
-      </div>
+      <h2>
+        Loading...
+      </h2>
     );
+
   }
 
-  if (error || !user) {
+
+  if (!user) {
+
     return (
-      <div className="user-details-error">
-        <h2>User Not Found</h2>
-
-        <p>
-          {error || "This user does not exist."}
-        </p>
-
-        <button
-          onClick={() => navigate("/users")}
-        >
-          ← Back to Users
-        </button>
-      </div>
+      <h2>
+        User Not Found
+      </h2>
     );
+
   }
 
-  const isOnline =
-    user.status === "online";
-
-  const firstLetter =
-    user.name?.charAt(0).toUpperCase() || "U";
 
   return (
-    <div className="user-view-page">
 
-      {/* BACK */}
+    <div className="user-details">
+
       <button
-        className="back-users-btn"
-        onClick={() => navigate("/users")}
+        onClick={() =>
+          navigate("/users")
+        }
       >
-        ← Back to Users
+        ← Back
       </button>
 
 
-      {/* HEADER */}
-      <div className="user-view-header">
+      <div className="details-card">
 
-        <div>
-          <span>User Profile</span>
+        {user.profileImage ? (
 
-          <h1>User Details</h1>
-        </div>
+          <img
+            src={
+              user.profileImage
+            }
+            alt={
+              user.name
+            }
+          />
 
-        <div
-          className={
-            isOnline
-              ? "large-status online-status"
-              : "large-status offline-status"
-          }
-        >
-          <i></i>
+        ) : (
 
-          {isOnline
-            ? "Online"
-            : "Offline"}
-        </div>
+          <div className="big-avatar">
 
-      </div>
-
-
-      {/* PROFILE CARD */}
-      <div className="profile-card">
-
-        {/* PROFILE */}
-        <div className="profile-top">
-
-          <div className="large-avatar">
-
-            {user.profileImage ? (
-              <img
-                src={user.profileImage}
-                alt={user.name}
-              />
-            ) : (
-              firstLetter
-            )}
+            {user.name
+              ?.charAt(0)
+              ?.toUpperCase()}
 
           </div>
 
-          <div className="profile-name">
-
-            <h2>
-              {user.name}
-            </h2>
-
-            <span>
-              {user.role || "user"}
-            </span>
-
-            <p>
-              {user.email}
-            </p>
-
-          </div>
-
-        </div>
+        )}
 
 
-        {/* DETAILS */}
-        <div className="profile-details">
-
-          <div className="profile-detail">
-            <span>FULL NAME</span>
-            <strong>
-              {user.name || "-"}
-            </strong>
-          </div>
+        <h1>
+          {user.name}
+        </h1>
 
 
-          <div className="profile-detail">
-            <span>EMAIL ADDRESS</span>
-            <strong>
-              {user.email || "-"}
-            </strong>
-          </div>
+        <p>
+          <b>Email:</b>{" "}
+          {user.email}
+        </p>
 
 
-          <div className="profile-detail">
-            <span>PHONE NUMBER</span>
-            <strong>
-              {user.phone || "Not provided"}
-            </strong>
-          </div>
+        <p>
+          <b>Type:</b>{" "}
+          {user.role}
+        </p>
 
 
-          <div className="profile-detail">
-            <span>ROLE</span>
-            <strong>
-              {user.role || "user"}
-            </strong>
-          </div>
+        <p>
+          <b>Phone:</b>{" "}
+          {user.phone || "N/A"}
+        </p>
 
 
-          <div className="profile-detail">
-            <span>STATUS</span>
-            <strong
-              className={
-                isOnline
-                  ? "detail-online"
-                  : "detail-offline"
-              }
-            >
-              {isOnline
-                ? "Online"
-                : "Offline"}
-            </strong>
-          </div>
+        <p>
+          <b>Bio:</b>{" "}
+          {user.bio || "No bio"}
+        </p>
 
 
-          <div className="profile-detail">
-            <span>JOINED DATE</span>
-
-            <strong>
-              {user.createdAt
-                ? new Date(
-                    user.createdAt
-                  ).toLocaleDateString(
-                    "en-IN",
-                    {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )
-                : "-"}
-            </strong>
-          </div>
-
-        </div>
+        <p>
+          <b>Joined:</b>{" "}
+          {user.joinedAt
+            ? new Date(
+                user.joinedAt
+              ).toLocaleString()
+            : "N/A"}
+        </p>
 
 
-        {/* BIO */}
-        <div className="profile-bio">
+        <p>
+          <b>Last Login:</b>{" "}
 
-          <span>BIO</span>
+          {user.lastLogin
+            ? new Date(
+                user.lastLogin
+              ).toLocaleString()
+            : "Never"}
 
-          <p>
-            {user.bio ||
-              "No bio information available."}
-          </p>
+        </p>
 
-        </div>
+
+        <p>
+          <b>Status:</b>{" "}
+          {user.loginStatus}
+        </p>
+
+
+        <p>
+          <b>Login Type:</b>{" "}
+          {user.loginType}
+        </p>
 
       </div>
 
     </div>
+
   );
+
 }
+
 
 export default UserViewDetails;
