@@ -5,7 +5,7 @@ import React, {
 
 import {
   getLoginHistory,
-} from "../api/loginHistoryApi";
+} from "../api/adminUserApi.js";
 
 import "./LoginHistory.css";
 
