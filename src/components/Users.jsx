@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
+import "../styles/Users.css"
 const ADMIN_API_URL =
   "https://api-admin-rouge.vercel.app";
 
