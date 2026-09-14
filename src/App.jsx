@@ -10,13 +10,16 @@ import AdminLogin from "./components/AdminLogin";
 import AdminNavbar from "./components/Admin_navbar";
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
-import Users from "./components/AdminUsers";
+import AdminUsers from "./components/Users.jsx";
 import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
 import Admin_Gallery from "./components/Admin_Gallery";
-import EventDetails from "./components/EventDetails"
-import UserViewDetails from "./components/AdminUserDetails";
+import EventDetails from "./components/EventDetails";
 import AdminMessages from "./components/AdminMessages";
+
+// NEW
+import UserViewDetails from "./components/UserViewDetails.jsx";
+
 
 // =====================================================
 // ADMIN LAYOUT
@@ -38,6 +41,7 @@ const AdminLayout = () => {
   );
 };
 
+
 // =====================================================
 // APP
 // =====================================================
@@ -45,6 +49,7 @@ const AdminLayout = () => {
 function App() {
   return (
     <BrowserRouter>
+
       <Routes>
 
         {/* =================================================
@@ -55,6 +60,7 @@ function App() {
           path="/admin-login"
           element={<AdminLogin />}
         />
+
 
         {/* =================================================
             ADMIN LAYOUT
@@ -69,12 +75,14 @@ function App() {
             element={<AdminDashboard />}
           />
 
+
           {/* ADMIN DASHBOARD */}
 
           <Route
             path="/admin-dashboard"
             element={<AdminDashboard />}
           />
+
 
           {/* EVENTS */}
 
@@ -83,12 +91,14 @@ function App() {
             element={<AdminEvents />}
           />
 
+
           {/* ADD EVENT */}
 
           <Route
             path="/events/add"
             element={<AddEvent />}
           />
+
 
           {/* EVENT DETAILS */}
 
@@ -97,6 +107,7 @@ function App() {
             element={<EventDetails />}
           />
 
+
           {/* EDIT EVENT */}
 
           <Route
@@ -104,23 +115,34 @@ function App() {
             element={<EditEvent />}
           />
 
-          {/* USERS */}
 
-         <Route
-  path="/users"
-  element={<Users />}
-/>
+          {/* =================================================
+              USERS
+          ================================================= */}
 
-<Route
-  path="/users/view/:id"
-  element={<UserViewDetails />}
-/>
+          <Route
+            path="/users"
+            element={<AdminUsers />}
+          />
+
+
+          {/* =================================================
+              SINGLE USER DETAILS
+          ================================================= */}
+
+          <Route
+            path="/users/view/:id"
+            element={<UserViewDetails />}
+          />
+
+
           {/* GALLERY */}
 
           <Route
             path="/gallery"
             element={<Admin_Gallery />}
           />
+
 
           {/* MESSAGES */}
 
@@ -130,6 +152,7 @@ function App() {
           />
 
         </Route>
+
 
         {/* =================================================
             FIRST OPEN → LOGIN
@@ -144,6 +167,7 @@ function App() {
             />
           }
         />
+
 
         {/* =================================================
             UNKNOWN URL → LOGIN
@@ -160,6 +184,7 @@ function App() {
         />
 
       </Routes>
+
     </BrowserRouter>
   );
 }
