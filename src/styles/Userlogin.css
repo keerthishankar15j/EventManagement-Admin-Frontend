@@ -1,0 +1,428 @@
+/* =====================================================
+   USERS PAGE
+===================================================== */
+
+.users-page {
+  min-height: 100vh;
+  padding: 35px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(108, 59, 255, 0.16),
+      transparent 35%
+    ),
+    #0b1020;
+  color: #f7f5f0;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.users-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.users-label {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #9b8cff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.users-header h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
+}
+
+.users-header p {
+  margin-top: 10px;
+  color: #9ca3b5;
+  font-size: 15px;
+}
+
+
+/* =====================================================
+   REFRESH BUTTON
+===================================================== */
+
+.refresh-btn {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.25s;
+}
+
+.refresh-btn:hover {
+  background: #6c3bff;
+  transform: translateY(-2px);
+}
+
+
+/* =====================================================
+   ERROR
+===================================================== */
+
+.users-error {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  padding: 18px 20px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(255, 101, 79, 0.3);
+  background: rgba(255, 101, 79, 0.08);
+  border-radius: 15px;
+}
+
+.users-error > span {
+  font-size: 25px;
+}
+
+.users-error strong {
+  color: #ff8b78;
+}
+
+.users-error p {
+  margin: 5px 0 0;
+  color: #b5b9c7;
+}
+
+
+/* =====================================================
+   STATISTICS
+===================================================== */
+
+.users-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 23px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.055);
+  backdrop-filter: blur(15px);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(108,59,255,0.18);
+  color: #a996ff;
+  font-size: 21px;
+}
+
+.stat-card span {
+  display: block;
+  color: #9299ac;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.stat-card strong {
+  font-size: 25px;
+}
+
+
+/* =====================================================
+   TOOLBAR
+===================================================== */
+
+.users-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.search-box {
+  width: 450px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 17px;
+  border-radius: 13px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.09);
+}
+
+.search-box span {
+  color: #8f96a9;
+}
+
+.search-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: white;
+  font-size: 14px;
+}
+
+.search-box input::placeholder {
+  color: #747b8e;
+}
+
+.record-count {
+  color: #8e95a8;
+  font-size: 13px;
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+.users-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.045);
+  backdrop-filter: blur(15px);
+}
+
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1300px;
+}
+
+.users-table th {
+  padding: 17px;
+  text-align: left;
+  background: rgba(255,255,255,0.06);
+  color: #a9afbf;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+
+.users-table td {
+  padding: 18px 17px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  color: #d7dae3;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.users-table tbody tr {
+  transition: 0.2s;
+}
+
+.users-table tbody tr:hover {
+  background: rgba(108,59,255,0.07);
+}
+
+
+/* =====================================================
+   USER INFO
+===================================================== */
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 190px;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    #6c3bff,
+    #ff654f
+  );
+  color: white;
+  font-weight: 800;
+}
+
+.user-info strong {
+  display: block;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.user-info span {
+  color: #8c93a5;
+  font-size: 12px;
+}
+
+
+/* =====================================================
+   IDS
+===================================================== */
+
+.id-text {
+  display: block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #aaa0ff;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+
+/* =====================================================
+   DATE
+===================================================== */
+
+.date-text {
+  white-space: nowrap;
+  color: #c4c8d4;
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.status-badge.active {
+  background: rgba(40, 200, 120, 0.12);
+  color: #64e6a1;
+}
+
+.status-badge.inactive {
+  background: rgba(255, 101, 79, 0.12);
+  color: #ff927f;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.empty-table {
+  text-align: center;
+  padding: 70px !important;
+}
+
+.empty-table div {
+  font-size: 35px;
+  margin-bottom: 12px;
+}
+
+.empty-table strong {
+  display: block;
+  color: white;
+  font-size: 16px;
+}
+
+.empty-table p {
+  color: #7f8799;
+}
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.users-loading {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.users-loading h3 {
+  margin: 20px 0 5px;
+}
+
+.users-loading p {
+  color: #858c9f;
+}
+
+.loading-spinner {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.1);
+  border-top-color: #6c3bff;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 900px) {
+
+  .users-page {
+    padding: 20px;
+  }
+
+  .users-header {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .users-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .users-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    width: auto;
+  }
+
+}
