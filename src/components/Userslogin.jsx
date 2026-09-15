@@ -7,7 +7,7 @@ import "../styles/Userlogin.css";
 
 const API_URL = (
   import.meta.env.VITE_API_URL ||
-  "http://localhost:3000"
+  "https://api-admin-rouge.vercel.app"
 ).replace(/\/+$/, "");
 
 // =====================================================
@@ -30,27 +30,17 @@ const Admin_users = () => {
 
     try {
 
-      // -----------------------------------------------
-      // FIRST PAGE LOAD
-      // -----------------------------------------------
-
+      // First page load only
       if (initialLoad) {
         setLoading(true);
       }
 
-      // -----------------------------------------------
-      // MANUAL REFRESH
-      // -----------------------------------------------
-
+      // Manual refresh only
       if (!initialLoad) {
         setRefreshing(true);
       }
 
       setError("");
-
-      // -----------------------------------------------
-      // API REQUEST
-      // -----------------------------------------------
 
       const response = await fetch(
         `${API_URL}/login-activity/users`
@@ -70,43 +60,30 @@ const Admin_users = () => {
       );
 
       // =================================================
-      // API RESPONSE
-      //
-      // {
-      //   success: true,
-      //   data: {
-      //      count: 13,
-      //      message: "...",
-      //      success: true,
-      //      users: [...]
-      //   }
-      // }
+      // GET USERS ARRAY
       // =================================================
 
-      if (result.success) {
+      let userList = [];
 
-        const userList =
-          Array.isArray(result.data?.users)
-            ? result.data.users
-            : Array.isArray(result.data)
-            ? result.data
-            : [];
-
-        console.log(
-          "Users received:",
-          userList
-        );
-
-        setUsers(userList);
-
-      } else {
-
-        setError(
-          result.message ||
-          "Unable to fetch user details"
-        );
-
+      if (
+        result.success &&
+        Array.isArray(result.data?.users)
+      ) {
+        userList = result.data.users;
+      } 
+      else if (
+        result.success &&
+        Array.isArray(result.data)
+      ) {
+        userList = result.data;
       }
+
+      console.log(
+        "Users received:",
+        userList
+      );
+
+      setUsers(userList);
 
     } catch (error) {
 
@@ -121,17 +98,9 @@ const Admin_users = () => {
 
     } finally {
 
-      // -----------------------------------------------
-      // STOP INITIAL LOADING
-      // -----------------------------------------------
-
       if (initialLoad) {
         setLoading(false);
       }
-
-      // -----------------------------------------------
-      // STOP REFRESHING
-      // -----------------------------------------------
 
       setRefreshing(false);
 
@@ -140,12 +109,20 @@ const Admin_users = () => {
   };
 
   // ===================================================
-  // FIRST LOAD ONLY
+  // LOAD USERS ONLY ONCE
   // ===================================================
 
   useEffect(() => {
 
+    console.log(
+      "USERS PAGE: Initial API call"
+    );
+
     fetchUsers(true);
+
+    // IMPORTANT:
+    // NO setInterval()
+    // NO automatic refresh
 
   }, []);
 
@@ -159,25 +136,23 @@ const Admin_users = () => {
       return "Not available";
     }
 
-    try {
+    const parsedDate = new Date(date);
 
-      return new Date(date).toLocaleString(
-        "en-IN",
-        {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }
-      );
-
-    } catch (error) {
-
+    if (isNaN(parsedDate.getTime())) {
       return "Invalid date";
-
     }
+
+    return parsedDate.toLocaleString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }
+    );
 
   };
 
@@ -203,17 +178,6 @@ const Admin_users = () => {
 
         String(
           user.email || ""
-        )
-          .toLowerCase()
-          .includes(searchText)
-
-        ||
-
-        String(
-          user.userId ||
-          user.id ||
-          user._id ||
-          ""
         )
           .toLowerCase()
           .includes(searchText)
@@ -314,11 +278,12 @@ const Admin_users = () => {
 
         </div>
 
-        {/* =============================================
-            REFRESH BUTTON
-        ============================================= */}
+        {/* =================================================
+            MANUAL REFRESH
+        ================================================= */}
 
         <button
+          type="button"
           className="refresh-btn"
           onClick={() => fetchUsers(false)}
           disabled={refreshing}
@@ -366,7 +331,7 @@ const Admin_users = () => {
 
       <div className="users-stats">
 
-        {/* TOTAL RECORDS */}
+        {/* TOTAL */}
 
         <div className="stat-card">
 
@@ -388,7 +353,8 @@ const Admin_users = () => {
 
         </div>
 
-        {/* ACTIVE USERS */}
+
+        {/* ACTIVE */}
 
         <div className="stat-card">
 
@@ -409,6 +375,7 @@ const Admin_users = () => {
           </div>
 
         </div>
+
 
         {/* LOGGED OUT */}
 
@@ -435,7 +402,7 @@ const Admin_users = () => {
       </div>
 
       {/* =================================================
-          SEARCH TOOLBAR
+          SEARCH
       ================================================= */}
 
       <div className="users-toolbar">
@@ -448,7 +415,7 @@ const Admin_users = () => {
 
           <input
             type="text"
-            placeholder="Search name, email, ID or status..."
+            placeholder="Search name, email or status..."
             value={search}
             onChange={(e) =>
               setSearch(e.target.value)
@@ -483,23 +450,17 @@ const Admin_users = () => {
 
         <table className="users-table">
 
-          {/* =================================================
-              TABLE HEADER
-          ================================================= */}
-
           <thead>
 
             <tr>
 
               <th>
-                #
+                S NO
               </th>
 
               <th>
                 User
               </th>
-
-             
 
               <th>
                 Email
@@ -529,10 +490,6 @@ const Admin_users = () => {
 
           </thead>
 
-          {/* =================================================
-              TABLE BODY
-          ================================================= */}
-
           <tbody>
 
             {filteredUsers.length === 0 ? (
@@ -540,7 +497,7 @@ const Admin_users = () => {
               <tr>
 
                 <td
-                  colSpan="9"
+                  colSpan="8"
                   className="empty-table"
                 >
 
@@ -563,180 +520,163 @@ const Admin_users = () => {
             ) : (
 
               filteredUsers.map(
-                (user, index) => {
+                (user, index) => (
 
-                  // =========================================
-                  // SUPPORT id / _id / userId
-                  // =========================================
+                  <tr
+                    key={
+                      user.id ||
+                      user._id ||
+                      index
+                    }
+                  >
 
-                  const currentUserId =
-                    user.userId ||
-                    user.id ||
-                    user._id ||
-                    "N/A";
+                    {/* NUMBER */}
 
-                  return (
+                    <td>
+                      {index + 1}
+                    </td>
 
-                    <tr
-                      key={
-                        user.id ||
-                        user._id ||
-                        index
-                      }
-                    >
 
-                      {/* ===================================
-                          NUMBER
-                      =================================== */}
+                    {/* USER */}
 
-                      <td>
-                        {index + 1}
-                      </td>
+                    <td>
 
-                      {/* ===================================
-                          USER
-                      =================================== */}
+                      <div className="user-info">
 
-                      <td>
+                        <div className="user-avatar">
 
-                        <div className="user-info">
-
-                          <div className="user-avatar">
-
-                            {String(
-                              user.name ||
-                              "U"
-                            )
-                              .charAt(0)
-                              .toUpperCase()}
-
-                          </div>
-
-                          <div>
-
-                            <strong>
-                              {user.name ||
-                                "Unknown User"}
-                            </strong>
-
-                            <span>
-                              {user.email ||
-                                "No email"}
-                            </span>
-
-                          </div>
+                          {String(
+                            user.name ||
+                            "U"
+                          )
+                            .charAt(0)
+                            .toUpperCase()}
 
                         </div>
 
-                      </td>
+                        <div>
 
-                      fix
+                          <strong>
+                            {user.name ||
+                              "Unknown User"}
+                          </strong>
 
-                      {/* ===================================
-                          EMAIL
-                      =================================== */}
-
-                      <td>
-
-                        <span className="date-text">
-
-                          {user.email ||
-                            "No email"}
-
-                        </span>
-
-                      </td>
-
-                      {/* ===================================
-                          LOGIN TIME
-                      =================================== */}
-
-                      <td>
-
-                        <span className="date-text">
-
-                          {formatDate(
-                            user.loginTime
-                          )}
-
-                        </span>
-
-                      </td>
-
-                      {/* ===================================
-                          LOGOUT TIME
-                      =================================== */}
-
-                      <td>
-
-                        <span className="date-text">
-
-                          {user.logoutTime
-                            ? formatDate(
-                                user.logoutTime
-                              )
-                            : "Not logged out"}
-
-                        </span>
-
-                      </td>
-
-                      {/* ===================================
-                          STATUS
-                      =================================== */}
-
-                      <td>
-
-                        <span
-                          className={`status-badge ${
-                            String(
-                              user.status || ""
-                            ).toLowerCase() ===
-                            "active"
-                              ? "active"
-                              : "inactive"
-                          }`}
-                        >
-
-                          <span className="status-dot">
+                          <span>
+                            {user.email ||
+                              "No email"}
                           </span>
 
-                          {user.status ||
-                            "Not available"}
+                        </div>
 
+                      </div>
+
+                    </td>
+
+
+                    {/* EMAIL */}
+
+                    <td>
+
+                      <span className="date-text">
+
+                        {user.email ||
+                          "No email"}
+
+                      </span>
+
+                    </td>
+
+
+                    {/* LOGIN TIME */}
+
+                    <td>
+
+                      <span className="date-text">
+
+                        {formatDate(
+                          user.loginTime
+                        )}
+
+                      </span>
+
+                    </td>
+
+
+                    {/* LOGOUT TIME */}
+
+                    <td>
+
+                      <span className="date-text">
+
+                        {user.logoutTime
+                          ? formatDate(
+                              user.logoutTime
+                            )
+                          : "Not logged out"}
+
+                      </span>
+
+                    </td>
+
+
+                    {/* STATUS */}
+
+                    <td>
+
+                      <span
+                        className={`status-badge ${
+                          String(
+                            user.status || ""
+                          ).toLowerCase() ===
+                          "active"
+                            ? "active"
+                            : "inactive"
+                        }`}
+                      >
+
+                        <span className="status-dot">
                         </span>
 
-                      </td>
+                        {user.status ||
+                          "Not available"}
 
-                      {/* ===================================
-                          CREATED AT
-                      =================================== */}
+                      </span>
 
-                      <td>
+                    </td>
+
+
+                    {/* CREATED */}
+
+                    <td>
+
+                      <span className="date-text">
 
                         {formatDate(
                           user.createdAt
                         )}
 
-                      </td>
+                      </span>
 
-                      {/* ===================================
-                          UPDATED AT
-                      =================================== */}
+                    </td>
 
-                      <td>
+
+                    {/* UPDATED */}
+
+                    <td>
+
+                      <span className="date-text">
 
                         {formatDate(
                           user.updatedAt
                         )}
 
-                      </td>
+                      </span>
 
-                    </tr>
+                    </td>
 
-                  );
+                  </tr>
 
-                }
+                )
 
               )
 
