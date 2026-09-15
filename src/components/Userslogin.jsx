@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../styles/Userlogin.css";
 
 // =====================================================
-// YOUR ADMIN BACKEND API
+// ADMIN BACKEND API
 // =====================================================
 
 const API_URL = (
@@ -18,6 +18,7 @@ const Admin_users = () => {
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
@@ -25,12 +26,31 @@ const Admin_users = () => {
   // GET USER DATA
   // ===================================================
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (initialLoad = false) => {
 
     try {
 
-      setLoading(true);
+      // -----------------------------------------------
+      // FIRST PAGE LOAD
+      // -----------------------------------------------
+
+      if (initialLoad) {
+        setLoading(true);
+      }
+
+      // -----------------------------------------------
+      // MANUAL REFRESH
+      // -----------------------------------------------
+
+      if (!initialLoad) {
+        setRefreshing(true);
+      }
+
       setError("");
+
+      // -----------------------------------------------
+      // API REQUEST
+      // -----------------------------------------------
 
       const response = await fetch(
         `${API_URL}/login-activity/users`
@@ -50,14 +70,17 @@ const Admin_users = () => {
       );
 
       // =================================================
-      // IMPORTANT
-      // API RESPONSE:
+      // API RESPONSE
       //
-      // result.data.users
-      //
-      // NOT:
-      //
-      // result.data
+      // {
+      //   success: true,
+      //   data: {
+      //      count: 13,
+      //      message: "...",
+      //      success: true,
+      //      users: [...]
+      //   }
+      // }
       // =================================================
 
       if (result.success) {
@@ -98,35 +121,31 @@ const Admin_users = () => {
 
     } finally {
 
-      setLoading(false);
+      // -----------------------------------------------
+      // STOP INITIAL LOADING
+      // -----------------------------------------------
+
+      if (initialLoad) {
+        setLoading(false);
+      }
+
+      // -----------------------------------------------
+      // STOP REFRESHING
+      // -----------------------------------------------
+
+      setRefreshing(false);
 
     }
 
   };
 
   // ===================================================
-  // FIRST LOAD
+  // FIRST LOAD ONLY
   // ===================================================
 
   useEffect(() => {
 
-    fetchUsers();
-
-  }, []);
-
-  // ===================================================
-  // AUTO REFRESH EVERY 10 SECONDS
-  // ===================================================
-
-  useEffect(() => {
-
-    const interval = setInterval(() => {
-
-      fetchUsers();
-
-    }, 10000);
-
-    return () => clearInterval(interval);
+    fetchUsers(true);
 
   }, []);
 
@@ -142,20 +161,17 @@ const Admin_users = () => {
 
     try {
 
-      const formattedDate =
-        new Date(date).toLocaleString(
-          "en-IN",
-          {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          }
-        );
-
-      return formattedDate;
+      return new Date(date).toLocaleString(
+        "en-IN",
+        {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        }
+      );
 
     } catch (error) {
 
@@ -196,16 +212,7 @@ const Admin_users = () => {
         String(
           user.userId ||
           user.id ||
-          ""
-        )
-          .toLowerCase()
-          .includes(searchText)
-
-        ||
-
-        String(
           user._id ||
-          user.id ||
           ""
         )
           .toLowerCase()
@@ -246,7 +253,7 @@ const Admin_users = () => {
     ).length;
 
   // ===================================================
-  // LOADING
+  // INITIAL LOADING
   // ===================================================
 
   if (loading) {
@@ -283,9 +290,9 @@ const Admin_users = () => {
 
     <div className="users-page">
 
-      {/* ============================================
+      {/* =================================================
           HEADER
-      ============================================ */}
+      ================================================= */}
 
       <div className="users-header">
 
@@ -307,18 +314,27 @@ const Admin_users = () => {
 
         </div>
 
+        {/* =============================================
+            REFRESH BUTTON
+        ============================================= */}
+
         <button
           className="refresh-btn"
-          onClick={fetchUsers}
+          onClick={() => fetchUsers(false)}
+          disabled={refreshing}
         >
-          ↻ Refresh
+
+          {refreshing
+            ? "↻ Refreshing..."
+            : "↻ Refresh"}
+
         </button>
 
       </div>
 
-      {/* ============================================
+      {/* =================================================
           ERROR
-      ============================================ */}
+      ================================================= */}
 
       {error && (
 
@@ -344,13 +360,13 @@ const Admin_users = () => {
 
       )}
 
-      {/* ============================================
+      {/* =================================================
           STATISTICS
-      ============================================ */}
+      ================================================= */}
 
       <div className="users-stats">
 
-        {/* TOTAL */}
+        {/* TOTAL RECORDS */}
 
         <div className="stat-card">
 
@@ -372,7 +388,7 @@ const Admin_users = () => {
 
         </div>
 
-        {/* ACTIVE */}
+        {/* ACTIVE USERS */}
 
         <div className="stat-card">
 
@@ -418,9 +434,9 @@ const Admin_users = () => {
 
       </div>
 
-      {/* ============================================
-          SEARCH
-      ============================================ */}
+      {/* =================================================
+          SEARCH TOOLBAR
+      ================================================= */}
 
       <div className="users-toolbar">
 
@@ -459,13 +475,17 @@ const Admin_users = () => {
 
       </div>
 
-      {/* ============================================
-          TABLE
-      ============================================ */}
+      {/* =================================================
+          USERS TABLE
+      ================================================= */}
 
       <div className="users-table-container">
 
         <table className="users-table">
+
+          {/* =================================================
+              TABLE HEADER
+          ================================================= */}
 
           <thead>
 
@@ -479,9 +499,7 @@ const Admin_users = () => {
                 User
               </th>
 
-              <th>
-                User ID
-              </th>
+             
 
               <th>
                 Email
@@ -510,6 +528,10 @@ const Admin_users = () => {
             </tr>
 
           </thead>
+
+          {/* =================================================
+              TABLE BODY
+          ================================================= */}
 
           <tbody>
 
@@ -543,11 +565,11 @@ const Admin_users = () => {
               filteredUsers.map(
                 (user, index) => {
 
-                  // =================================
-                  // SUPPORT BOTH id AND _id
-                  // =================================
+                  // =========================================
+                  // SUPPORT id / _id / userId
+                  // =========================================
 
-                  const userId =
+                  const currentUserId =
                     user.userId ||
                     user.id ||
                     user._id ||
@@ -563,13 +585,17 @@ const Admin_users = () => {
                       }
                     >
 
-                      {/* NUMBER */}
+                      {/* ===================================
+                          NUMBER
+                      =================================== */}
 
                       <td>
                         {index + 1}
                       </td>
 
-                      {/* USER */}
+                      {/* ===================================
+                          USER
+                      =================================== */}
 
                       <td>
 
@@ -604,19 +630,11 @@ const Admin_users = () => {
 
                       </td>
 
-                      {/* USER ID */}
+                      fix
 
-                      <td>
-
-                        <span className="id-text">
-
-                          {userId}
-
-                        </span>
-
-                      </td>
-
-                      {/* EMAIL */}
+                      {/* ===================================
+                          EMAIL
+                      =================================== */}
 
                       <td>
 
@@ -629,7 +647,9 @@ const Admin_users = () => {
 
                       </td>
 
-                      {/* LOGIN TIME */}
+                      {/* ===================================
+                          LOGIN TIME
+                      =================================== */}
 
                       <td>
 
@@ -643,7 +663,9 @@ const Admin_users = () => {
 
                       </td>
 
-                      {/* LOGOUT TIME */}
+                      {/* ===================================
+                          LOGOUT TIME
+                      =================================== */}
 
                       <td>
 
@@ -659,7 +681,9 @@ const Admin_users = () => {
 
                       </td>
 
-                      {/* STATUS */}
+                      {/* ===================================
+                          STATUS
+                      =================================== */}
 
                       <td>
 
@@ -684,7 +708,9 @@ const Admin_users = () => {
 
                       </td>
 
-                      {/* CREATED */}
+                      {/* ===================================
+                          CREATED AT
+                      =================================== */}
 
                       <td>
 
@@ -694,7 +720,9 @@ const Admin_users = () => {
 
                       </td>
 
-                      {/* UPDATED */}
+                      {/* ===================================
+                          UPDATED AT
+                      =================================== */}
 
                       <td>
 
