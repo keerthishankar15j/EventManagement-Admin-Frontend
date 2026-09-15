@@ -18,6 +18,12 @@ import EventDetails from "./components/EventDetails";
 import AdminMessages from "./components/AdminMessages";
 
 // =====================================================
+// USERS
+// =====================================================
+
+import Userlogin from "./components/Userslogin";
+
+// =====================================================
 // ADMIN LAYOUT
 // =====================================================
 
@@ -44,6 +50,7 @@ const AdminLayout = () => {
 function App() {
   return (
     <BrowserRouter>
+
       <Routes>
 
         {/* =================================================
@@ -61,58 +68,81 @@ function App() {
 
         <Route element={<AdminLayout />}>
 
-          {/* DASHBOARD */}
+          {/* =================================================
+              DASHBOARD
+          ================================================= */}
 
           <Route
             path="/dashboard"
             element={<AdminDashboard />}
           />
 
-          {/* ADMIN DASHBOARD */}
+          {/* =================================================
+              ADMIN DASHBOARD
+          ================================================= */}
 
           <Route
             path="/admin-dashboard"
             element={<AdminDashboard />}
           />
 
-          {/* EVENTS */}
+          {/* =================================================
+              EVENTS
+          ================================================= */}
 
           <Route
             path="/events"
             element={<AdminEvents />}
           />
 
-          {/* ADD EVENT */}
+          {/* =================================================
+              ADD EVENT
+          ================================================= */}
 
           <Route
             path="/events/add"
             element={<AddEvent />}
           />
 
-          {/* EVENT DETAILS */}
+          {/* =================================================
+              EVENT DETAILS
+          ================================================= */}
 
           <Route
             path="/events/details/:id"
             element={<EventDetails />}
           />
 
-          {/* EDIT EVENT */}
+          {/* =================================================
+              EDIT EVENT
+          ================================================= */}
 
           <Route
             path="/events/edit/:id"
             element={<EditEvent />}
           />
 
-          {/* USERS */}
+          {/* =================================================
+              USERS / LOGIN ACTIVITY
+          ================================================= */}
 
-          {/* GALLERY */}
+          <Route
+            path="/users"
+            element={<Userlogin />}
+          />
+
+          {/* =================================================
+              GALLERY
+          ================================================= */}
 
           <Route
             path="/gallery"
             element={<Admin_Gallery />}
           />
 
-          {/* MESSAGES */}
+          {/* =================================================
+              MESSAGES
+          ================================================= */}
 
           <Route
             path="/admin-messages"
@@ -150,6 +180,7 @@ function App() {
         />
 
       </Routes>
+
     </BrowserRouter>
   );
 }
