@@ -466,13 +466,7 @@ const Admin_users = () => {
                 Email
               </th>
 
-              <th>
-                Login Time
-              </th>
-
-              <th>
-                Logout Time
-              </th>
+              
 
               <th>
                 Status
@@ -587,36 +581,7 @@ const Admin_users = () => {
                     </td>
 
 
-                    {/* LOGIN TIME */}
-
-                    <td>
-
-                      <span className="date-text">
-
-                        {formatDate(
-                          user.loginTime
-                        )}
-
-                      </span>
-
-                    </td>
-
-
-                    {/* LOGOUT TIME */}
-
-                    <td>
-
-                      <span className="date-text">
-
-                        {user.logoutTime
-                          ? formatDate(
-                              user.logoutTime
-                            )
-                          : "Not logged out"}
-
-                      </span>
-
-                    </td>
+                    
 
 
                     {/* STATUS */}
