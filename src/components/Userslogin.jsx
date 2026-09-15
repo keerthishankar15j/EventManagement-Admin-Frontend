@@ -15,17 +15,20 @@ const API_URL = (
 // =====================================================
 
 const Admin_users = () => {
+
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
   // ===================================================
-  // GET USER LOGIN ACTIVITY
+  // GET USER DATA
   // ===================================================
 
   const fetchUsers = async () => {
+
     try {
+
       setLoading(true);
       setError("");
 
@@ -41,21 +44,49 @@ const Admin_users = () => {
 
       const result = await response.json();
 
-      console.log("Login Activity Response:", result);
+      console.log(
+        "Login Activity Response:",
+        result
+      );
+
+      // =================================================
+      // IMPORTANT
+      // API RESPONSE:
+      //
+      // result.data.users
+      //
+      // NOT:
+      //
+      // result.data
+      // =================================================
 
       if (result.success) {
-        setUsers(
-          Array.isArray(result.data)
+
+        const userList =
+          Array.isArray(result.data?.users)
+            ? result.data.users
+            : Array.isArray(result.data)
             ? result.data
-            : []
+            : [];
+
+        console.log(
+          "Users received:",
+          userList
         );
+
+        setUsers(userList);
+
       } else {
+
         setError(
           result.message ||
-            "Unable to fetch user login details"
+          "Unable to fetch user details"
         );
+
       }
+
     } catch (error) {
+
       console.error(
         "Login Activity Error:",
         error
@@ -64,9 +95,13 @@ const Admin_users = () => {
       setError(
         "Unable to connect to the admin server"
       );
+
     } finally {
+
       setLoading(false);
+
     }
+
   };
 
   // ===================================================
@@ -74,7 +109,9 @@ const Admin_users = () => {
   // ===================================================
 
   useEffect(() => {
+
     fetchUsers();
+
   }, []);
 
   // ===================================================
@@ -82,11 +119,15 @@ const Admin_users = () => {
   // ===================================================
 
   useEffect(() => {
+
     const interval = setInterval(() => {
+
       fetchUsers();
+
     }, 10000);
 
     return () => clearInterval(interval);
+
   }, []);
 
   // ===================================================
@@ -94,80 +135,124 @@ const Admin_users = () => {
   // ===================================================
 
   const formatDate = (date) => {
+
     if (!date) {
       return "Not available";
     }
 
     try {
-      return new Date(date).toLocaleString(
-        "en-IN",
-        {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }
-      );
+
+      const formattedDate =
+        new Date(date).toLocaleString(
+          "en-IN",
+          {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          }
+        );
+
+      return formattedDate;
+
     } catch (error) {
+
       return "Invalid date";
+
     }
+
   };
 
   // ===================================================
   // SEARCH
   // ===================================================
 
-  const filteredUsers = users.filter((user) => {
-    const searchText =
-      search.toLowerCase().trim();
+  const filteredUsers = users.filter(
+    (user) => {
 
-    return (
-      String(user.name || "")
-        .toLowerCase()
-        .includes(searchText) ||
+      const searchText =
+        search.toLowerCase().trim();
 
-      String(user.email || "")
-        .toLowerCase()
-        .includes(searchText) ||
+      return (
 
-      String(user.userId || "")
-        .toLowerCase()
-        .includes(searchText) ||
+        String(
+          user.name || ""
+        )
+          .toLowerCase()
+          .includes(searchText)
 
-      String(user._id || "")
-        .toLowerCase()
-        .includes(searchText) ||
+        ||
 
-      String(user.status || "")
-        .toLowerCase()
-        .includes(searchText)
-    );
-  });
+        String(
+          user.email || ""
+        )
+          .toLowerCase()
+          .includes(searchText)
+
+        ||
+
+        String(
+          user.userId ||
+          user.id ||
+          ""
+        )
+          .toLowerCase()
+          .includes(searchText)
+
+        ||
+
+        String(
+          user._id ||
+          user.id ||
+          ""
+        )
+          .toLowerCase()
+          .includes(searchText)
+
+        ||
+
+        String(
+          user.status || ""
+        )
+          .toLowerCase()
+          .includes(searchText)
+
+      );
+
+    }
+  );
 
   // ===================================================
   // STATISTICS
   // ===================================================
 
-  const totalRecords = users.length;
+  const totalRecords =
+    users.length;
 
-  const activeUsers = users.filter(
-    (user) =>
-      String(user.status || "").toLowerCase() ===
-      "active"
-  ).length;
+  const activeUsers =
+    users.filter(
+      (user) =>
+        String(
+          user.status || ""
+        ).toLowerCase() === "active"
+    ).length;
 
-  const loggedOutUsers = users.filter(
-    (user) => user.logoutTime
-  ).length;
+  const loggedOutUsers =
+    users.filter(
+      (user) =>
+        user.logoutTime
+    ).length;
 
   // ===================================================
   // LOADING
   // ===================================================
 
   if (loading) {
+
     return (
+
       <div className="users-page">
 
         <div className="users-loading">
@@ -179,13 +264,15 @@ const Admin_users = () => {
           </h3>
 
           <p>
-            Fetching login details
+            Fetching user details
           </p>
 
         </div>
 
       </div>
+
     );
+
   }
 
   // ===================================================
@@ -193,6 +280,7 @@ const Admin_users = () => {
   // ===================================================
 
   return (
+
     <div className="users-page">
 
       {/* ============================================
@@ -233,9 +321,12 @@ const Admin_users = () => {
       ============================================ */}
 
       {error && (
+
         <div className="users-error">
 
-          <span>⚠</span>
+          <span>
+            ⚠
+          </span>
 
           <div>
 
@@ -250,6 +341,7 @@ const Admin_users = () => {
           </div>
 
         </div>
+
       )}
 
       {/* ============================================
@@ -257,6 +349,8 @@ const Admin_users = () => {
       ============================================ */}
 
       <div className="users-stats">
+
+        {/* TOTAL */}
 
         <div className="stat-card">
 
@@ -278,6 +372,8 @@ const Admin_users = () => {
 
         </div>
 
+        {/* ACTIVE */}
+
         <div className="stat-card">
 
           <div className="stat-icon">
@@ -297,6 +393,8 @@ const Admin_users = () => {
           </div>
 
         </div>
+
+        {/* LOGGED OUT */}
 
         <div className="stat-card">
 
@@ -346,10 +444,13 @@ const Admin_users = () => {
         <div className="record-count">
 
           Showing{" "}
+
           <strong>
             {filteredUsers.length}
-          </strong>{" "}
-          of{" "}
+          </strong>
+
+          {" "}of{" "}
+
           <strong>
             {users.length}
           </strong>
@@ -370,23 +471,41 @@ const Admin_users = () => {
 
             <tr>
 
-              <th>#</th>
+              <th>
+                #
+              </th>
 
-              <th>User</th>
+              <th>
+                User
+              </th>
 
-              <th>Login Record ID</th>
+              <th>
+                User ID
+              </th>
 
-              <th>User ID</th>
+              <th>
+                Email
+              </th>
 
-              <th>Login Time</th>
+              <th>
+                Login Time
+              </th>
 
-              <th>Logout Time</th>
+              <th>
+                Logout Time
+              </th>
 
-              <th>Status</th>
+              <th>
+                Status
+              </th>
 
-              <th>Created At</th>
+              <th>
+                Created At
+              </th>
 
-              <th>Updated At</th>
+              <th>
+                Updated At
+              </th>
 
             </tr>
 
@@ -422,154 +541,175 @@ const Admin_users = () => {
             ) : (
 
               filteredUsers.map(
-                (user, index) => (
+                (user, index) => {
 
-                  <tr
-                    key={
-                      user._id || index
-                    }
-                  >
+                  // =================================
+                  // SUPPORT BOTH id AND _id
+                  // =================================
 
-                    {/* NUMBER */}
+                  const userId =
+                    user.userId ||
+                    user.id ||
+                    user._id ||
+                    "N/A";
 
-                    <td>
-                      {index + 1}
-                    </td>
+                  return (
 
-                    {/* USER */}
+                    <tr
+                      key={
+                        user.id ||
+                        user._id ||
+                        index
+                      }
+                    >
 
-                    <td>
+                      {/* NUMBER */}
 
-                      <div className="user-info">
+                      <td>
+                        {index + 1}
+                      </td>
 
-                        <div className="user-avatar">
+                      {/* USER */}
 
-                          {String(
-                            user.name || "U"
-                          )
-                            .charAt(0)
-                            .toUpperCase()}
+                      <td>
 
-                        </div>
+                        <div className="user-info">
 
-                        <div>
+                          <div className="user-avatar">
 
-                          <strong>
-                            {user.name ||
-                              "Unknown User"}
-                          </strong>
-
-                          <span>
-                            {user.email ||
-                              "No email"}
-                          </span>
-
-                        </div>
-
-                      </div>
-
-                    </td>
-
-                    {/* LOGIN RECORD ID */}
-
-                    <td>
-
-                      <span className="id-text">
-
-                        {user._id ||
-                          "N/A"}
-
-                      </span>
-
-                    </td>
-
-                    {/* USER ID */}
-
-                    <td>
-
-                      <span className="id-text">
-
-                        {user.userId ||
-                          "N/A"}
-
-                      </span>
-
-                    </td>
-
-                    {/* LOGIN TIME */}
-
-                    <td>
-
-                      <span className="date-text">
-
-                        {formatDate(
-                          user.loginTime
-                        )}
-
-                      </span>
-
-                    </td>
-
-                    {/* LOGOUT TIME */}
-
-                    <td>
-
-                      <span className="date-text">
-
-                        {user.logoutTime
-                          ? formatDate(
-                              user.logoutTime
+                            {String(
+                              user.name ||
+                              "U"
                             )
-                          : "Not logged out"}
+                              .charAt(0)
+                              .toUpperCase()}
 
-                      </span>
+                          </div>
 
-                    </td>
+                          <div>
 
-                    {/* STATUS */}
+                            <strong>
+                              {user.name ||
+                                "Unknown User"}
+                            </strong>
 
-                    <td>
+                            <span>
+                              {user.email ||
+                                "No email"}
+                            </span>
 
-                      <span
-                        className={`status-badge ${
-                          String(
-                            user.status || ""
-                          ).toLowerCase() ===
-                          "active"
-                            ? "active"
-                            : "inactive"
-                        }`}
-                      >
+                          </div>
 
-                        <span className="status-dot">
+                        </div>
+
+                      </td>
+
+                      {/* USER ID */}
+
+                      <td>
+
+                        <span className="id-text">
+
+                          {userId}
+
                         </span>
 
-                        {user.status ||
-                          "Unknown"}
+                      </td>
 
-                      </span>
+                      {/* EMAIL */}
 
-                    </td>
+                      <td>
 
-                    {/* CREATED */}
+                        <span className="date-text">
 
-                    <td>
-                      {formatDate(
-                        user.createdAt
-                      )}
-                    </td>
+                          {user.email ||
+                            "No email"}
 
-                    {/* UPDATED */}
+                        </span>
 
-                    <td>
-                      {formatDate(
-                        user.updatedAt
-                      )}
-                    </td>
+                      </td>
 
-                  </tr>
+                      {/* LOGIN TIME */}
 
-                )
+                      <td>
+
+                        <span className="date-text">
+
+                          {formatDate(
+                            user.loginTime
+                          )}
+
+                        </span>
+
+                      </td>
+
+                      {/* LOGOUT TIME */}
+
+                      <td>
+
+                        <span className="date-text">
+
+                          {user.logoutTime
+                            ? formatDate(
+                                user.logoutTime
+                              )
+                            : "Not logged out"}
+
+                        </span>
+
+                      </td>
+
+                      {/* STATUS */}
+
+                      <td>
+
+                        <span
+                          className={`status-badge ${
+                            String(
+                              user.status || ""
+                            ).toLowerCase() ===
+                            "active"
+                              ? "active"
+                              : "inactive"
+                          }`}
+                        >
+
+                          <span className="status-dot">
+                          </span>
+
+                          {user.status ||
+                            "Not available"}
+
+                        </span>
+
+                      </td>
+
+                      {/* CREATED */}
+
+                      <td>
+
+                        {formatDate(
+                          user.createdAt
+                        )}
+
+                      </td>
+
+                      {/* UPDATED */}
+
+                      <td>
+
+                        {formatDate(
+                          user.updatedAt
+                        )}
+
+                      </td>
+
+                    </tr>
+
+                  );
+
+                }
+
               )
 
             )}
@@ -581,9 +721,9 @@ const Admin_users = () => {
       </div>
 
     </div>
+
   );
+
 };
 
 export default Admin_users;
-
-
