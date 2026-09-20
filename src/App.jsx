@@ -13,7 +13,6 @@ import AdminEvents from "./components/Admin_Events";
 
 import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
-import Admin_Gallery from "./components/Admin_Gallery";
 import EventDetails from "./components/EventDetails";
 import AdminMessages from "./components/AdminMessages";
 
