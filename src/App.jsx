@@ -4,7 +4,8 @@ import {
   Route,
   Navigate,
   Outlet,
-} from "react-router-dom";
+} 
+from "react-router-dom";
 
 import AdminLogin from "./components/AdminLogin";
 import AdminNavbar from "./components/Admin_navbar";
