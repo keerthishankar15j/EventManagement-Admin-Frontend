@@ -88,26 +88,6 @@ const AdminNavbar = () => {
         </NavLink>
 
 
-        {/* -------------------------------------------------
-            GALLERY
-        ------------------------------------------------- */}
-
-        <NavLink
-          to="/gallery"
-          className={({ isActive }) =>
-            isActive
-              ? "menu-item active"
-              : "menu-item"
-          }
-        >
-          <span className="menu-icon">
-            ▣
-          </span>
-
-          <span className="menu-text">
-            Gallery
-          </span>
-        </NavLink>
 
 
         {/* -------------------------------------------------
