@@ -88,8 +88,6 @@ const AdminNavbar = () => {
         </NavLink>
 
 
-
-
         {/* -------------------------------------------------
             USERS
         ------------------------------------------------- */}
@@ -112,9 +110,9 @@ const AdminNavbar = () => {
         </NavLink>
 
 
-        {/* =================================================
+        {/* -------------------------------------------------
             MESSAGES
-        ================================================= */}
+        ------------------------------------------------- */}
 
         <NavLink
           to="/admin-messages"
@@ -136,36 +134,11 @@ const AdminNavbar = () => {
 
         </nav>
 
-        {/* =================================================
-            CONTACT REQUESTS
-        ================================================= */}
-
-        <NavLink
-          to="/contacts"
-          className={({ isActive }) =>
-            `admin-nav-link ${
-              isActive ? "active" : ""
-            }`
-          }
-        >
-
-          <span className="nav-icon">
-            ☎
-          </span>
-
-          <span>
-            Contact Requests
-          </span>
-
-        </NavLink>
-
-      
       {/* =====================================================
           BOTTOM SECTION
       ===================================================== */}
 
       <div className="sidebar-bottom">
-
 
         {/* -------------------------------------------------
             ADMIN PROFILE
@@ -176,7 +149,6 @@ const AdminNavbar = () => {
           <div className="profile-avatar">
             A
           </div>
-
 
           <div className="profile-info">
 
@@ -189,7 +161,6 @@ const AdminNavbar = () => {
             </small>
 
           </div>
-
 
           <span className="profile-arrow">
             ⌄

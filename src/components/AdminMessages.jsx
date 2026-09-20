@@ -13,8 +13,10 @@ const AdminMessages = () => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState(null);
   const [error, setError] = useState("");
+
+  const [selectedMessage, setSelectedMessage] = useState(null);
+
 
   // =====================================================
   // FETCH MESSAGES
@@ -24,13 +26,13 @@ const AdminMessages = () => {
 
     try {
 
-      setError("");
-
       if (isRefresh) {
         setRefreshing(true);
       } else {
         setLoading(true);
       }
+
+      setError("");
 
       console.log("MESSAGES PAGE: API CALL");
 
@@ -43,22 +45,14 @@ const AdminMessages = () => {
         response.data
       );
 
+
       const receivedMessages =
-        response.data?.data ||
-        response.data?.data?.messages ||
-        response.data?.messages ||
-        [];
+        Array.isArray(response.data?.data)
+          ? response.data.data
+          : [];
 
-      console.log(
-        "Messages received:",
-        receivedMessages
-      );
 
-      setMessages(
-        Array.isArray(receivedMessages)
-          ? receivedMessages
-          : []
-      );
+      setMessages(receivedMessages);
 
     } catch (error) {
 
@@ -74,8 +68,10 @@ const AdminMessages = () => {
 
       setError(
         error.response?.data?.message ||
-        "Unable to load messages"
+        "Unable to fetch messages"
       );
+
+      setMessages([]);
 
     } finally {
 
@@ -102,47 +98,42 @@ const AdminMessages = () => {
   // SEARCH
   // =====================================================
 
-  const filteredMessages =
-    messages.filter((message) => {
+  const filteredMessages = messages.filter((item) => {
 
-      const searchText =
-        search.toLowerCase();
+    const searchText =
+      search.toLowerCase().trim();
 
-      return (
+    if (!searchText) {
+      return true;
+    }
 
-        String(
-          message.name || ""
-        )
-          .toLowerCase()
-          .includes(searchText)
+    return (
 
-        ||
+      String(item.name || "")
+        .toLowerCase()
+        .includes(searchText)
 
-        String(
-          message.email || ""
-        )
-          .toLowerCase()
-          .includes(searchText)
+      ||
 
-        ||
+      String(item.email || "")
+        .toLowerCase()
+        .includes(searchText)
 
-        String(
-          message.subject || ""
-        )
-          .toLowerCase()
-          .includes(searchText)
+      ||
 
-        ||
+      String(item.subject || "")
+        .toLowerCase()
+        .includes(searchText)
 
-        String(
-          message.message || ""
-        )
-          .toLowerCase()
-          .includes(searchText)
+      ||
 
-      );
+      String(item.message || "")
+        .toLowerCase()
+        .includes(searchText)
 
-    });
+    );
+
+  });
 
 
   // =====================================================
@@ -152,14 +143,21 @@ const AdminMessages = () => {
   const formatDate = (date) => {
 
     if (!date) {
-      return "-";
+      return "—";
     }
 
-    return new Date(date).toLocaleString(
+    const newDate = new Date(date);
+
+    if (isNaN(newDate.getTime())) {
+      return "—";
+    }
+
+    return newDate.toLocaleDateString(
       "en-IN",
       {
-        dateStyle: "medium",
-        timeStyle: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
       }
     );
 
@@ -167,41 +165,27 @@ const AdminMessages = () => {
 
 
   // =====================================================
-  // LOADING
+  // MESSAGE PREVIEW
   // =====================================================
 
-  if (loading) {
+  const getMessagePreview = (message) => {
 
-    return (
-      <div className="messages-page">
+    if (!message) {
+      return "No message";
+    }
 
-        <div className="messages-loading">
+    if (message.length <= 70) {
+      return message;
+    }
 
-          <div className="messages-loader"></div>
+    return message.substring(0, 70) + "...";
 
-          <h3>
-            Loading Messages
-          </h3>
+  };
 
-          <p>
-            Fetching user queries...
-          </p>
-
-        </div>
-
-      </div>
-    );
-
-  }
-
-
-  // =====================================================
-  // PAGE
-  // =====================================================
 
   return (
-
     <div className="messages-page">
+
 
       {/* =================================================
           HEADER
@@ -211,49 +195,37 @@ const AdminMessages = () => {
 
         <div>
 
-          <div className="messages-title-row">
-
-            <div className="messages-icon">
-              💬
-            </div>
-
-            <div>
-
-              <h1>
-                User Messages
-              </h1>
-
-              <p>
-                Manage queries and messages received
-                from event users.
-              </p>
-
-            </div>
-
+          <div className="page-badge">
+            <span>✉</span>
+            INBOX
           </div>
+
+          <h1>
+            User Messages
+          </h1>
+
+          <p>
+            View and manage messages received
+            from your users.
+          </p>
 
         </div>
 
 
         <button
-          className="messages-refresh-btn"
+          className="refresh-btn"
           onClick={() => fetchMessages(true)}
           disabled={refreshing}
         >
 
-          <span
-            className={
-              refreshing
-                ? "refresh-spin"
-                : ""
-            }
-          >
+          <span className={refreshing ? "spin" : ""}>
             ↻
           </span>
 
           {refreshing
             ? "Refreshing..."
-            : "Refresh"}
+            : "Refresh"
+          }
 
         </button>
 
@@ -264,12 +236,12 @@ const AdminMessages = () => {
           STATS
       ================================================= */}
 
-      <div className="messages-stats">
+      <div className="message-stats">
 
-        <div className="message-stat-card">
+        <div className="stat-card">
 
-          <div className="stat-card-icon">
-            💬
+          <div className="stat-icon purple">
+            ✉
           </div>
 
           <div>
@@ -287,9 +259,9 @@ const AdminMessages = () => {
         </div>
 
 
-        <div className="message-stat-card">
+        <div className="stat-card">
 
-          <div className="stat-card-icon unread-icon">
+          <div className="stat-icon orange">
             ●
           </div>
 
@@ -300,12 +272,11 @@ const AdminMessages = () => {
             </span>
 
             <strong>
-              {
-                messages.filter(
-                  (message) =>
-                    message.status === "Unread"
-                ).length
-              }
+              {messages.filter(
+                (item) =>
+                  !item.status ||
+                  item.status === "Unread"
+              ).length}
             </strong>
 
           </div>
@@ -313,9 +284,9 @@ const AdminMessages = () => {
         </div>
 
 
-        <div className="message-stat-card">
+        <div className="stat-card">
 
-          <div className="stat-card-icon query-icon">
+          <div className="stat-icon blue">
             ?
           </div>
 
@@ -326,12 +297,10 @@ const AdminMessages = () => {
             </span>
 
             <strong>
-              {
-                messages.filter(
-                  (message) =>
-                    message.subject
-                ).length
-              }
+              {messages.filter(
+                (item) =>
+                  item.subject
+              ).length}
             </strong>
 
           </div>
@@ -347,15 +316,15 @@ const AdminMessages = () => {
 
       <div className="messages-toolbar">
 
-        <div className="messages-search">
+        <div className="search-box">
 
           <span>
-            🔍
+            ⌕
           </span>
 
           <input
             type="text"
-            placeholder="Search name, email, subject or message..."
+            placeholder="Search by name, email, subject or message..."
             value={search}
             onChange={(e) =>
               setSearch(e.target.value)
@@ -363,25 +332,22 @@ const AdminMessages = () => {
           />
 
           {search && (
-
             <button
               onClick={() => setSearch("")}
               className="clear-search"
             >
               ×
             </button>
-
           )}
 
         </div>
 
-        <div className="message-count">
-
+        <div className="result-count">
           {filteredMessages.length} message
           {filteredMessages.length !== 1
             ? "s"
-            : ""}
-
+            : ""
+          }
         </div>
 
       </div>
@@ -393,9 +359,9 @@ const AdminMessages = () => {
 
       {error && (
 
-        <div className="messages-error">
+        <div className="message-error">
 
-          <span>⚠️</span>
+          <span>⚠</span>
 
           <div>
 
@@ -409,37 +375,65 @@ const AdminMessages = () => {
 
           </div>
 
+          <button
+            onClick={() => fetchMessages()}
+          >
+            Try Again
+          </button>
+
         </div>
 
       )}
 
 
       {/* =================================================
-          TABLE
+          LOADING
       ================================================= */}
 
-      <div className="messages-table-container">
+      {loading ? (
 
-        {filteredMessages.length === 0 ? (
+        <div className="message-loading">
 
-          <div className="messages-empty">
+          <div className="loader"></div>
 
-            <div className="empty-icon">
-              💬
-            </div>
+          <p>
+            Loading messages...
+          </p>
 
-            <h3>
-              No Messages Found
-            </h3>
+        </div>
 
-            <p>
-              No user messages or queries are
-              available right now.
-            </p>
+      ) : filteredMessages.length === 0 ? (
 
+        /* ===============================================
+           EMPTY
+        =============================================== */
+
+        <div className="empty-messages">
+
+          <div className="empty-icon">
+            ✉
           </div>
 
-        ) : (
+          <h2>
+            No Messages Found
+          </h2>
+
+          <p>
+            {search
+              ? "No messages match your search."
+              : "No user messages have been received yet."
+            }
+          </p>
+
+        </div>
+
+      ) : (
+
+        /* ===============================================
+           TABLE
+        =============================================== */
+
+        <div className="messages-table-wrapper">
 
           <table className="messages-table">
 
@@ -475,15 +469,16 @@ const AdminMessages = () => {
 
             </thead>
 
+
             <tbody>
 
               {filteredMessages.map(
-                (message, index) => (
+                (item, index) => (
 
                   <tr
                     key={
-                      message._id ||
-                      message.id ||
+                      item._id ||
+                      item.id ||
                       index
                     }
                   >
@@ -492,32 +487,28 @@ const AdminMessages = () => {
 
                     <td>
 
-                      <div className="message-user">
+                      <div className="user-cell">
 
                         <div className="user-avatar">
-
-                          {
-                            (
-                              message.name ||
-                              "U"
-                            )
-                              .charAt(0)
-                              .toUpperCase()
-                          }
-
+                          {(
+                            item.name ||
+                            "U"
+                          )
+                            .charAt(0)
+                            .toUpperCase()}
                         </div>
 
                         <div>
 
                           <strong>
-                            {message.name ||
+                            {item.name ||
                               "Unknown User"}
                           </strong>
 
-                          <span>
-                            {message.email ||
+                          <small>
+                            {item.email ||
                               "No email"}
-                          </span>
+                          </small>
 
                         </div>
 
@@ -531,10 +522,8 @@ const AdminMessages = () => {
                     <td>
 
                       <span className="subject-text">
-
-                        {message.subject ||
+                        {item.subject ||
                           "General Query"}
-
                       </span>
 
                     </td>
@@ -545,10 +534,9 @@ const AdminMessages = () => {
                     <td>
 
                       <div className="message-preview">
-
-                        {message.message ||
-                          "No message"}
-
+                        {getMessagePreview(
+                          item.message
+                        )}
                       </div>
 
                     </td>
@@ -560,7 +548,7 @@ const AdminMessages = () => {
 
                       <span
                         className={
-                          message.status ===
+                          item.status ===
                           "Read"
                             ? "status-badge read"
                             : "status-badge unread"
@@ -571,7 +559,7 @@ const AdminMessages = () => {
                           ●
                         </span>
 
-                        {message.status ||
+                        {item.status ||
                           "Unread"}
 
                       </span>
@@ -584,11 +572,9 @@ const AdminMessages = () => {
                     <td>
 
                       <span className="date-text">
-
                         {formatDate(
-                          message.createdAt
+                          item.createdAt
                         )}
-
                       </span>
 
                     </td>
@@ -599,10 +585,10 @@ const AdminMessages = () => {
                     <td>
 
                       <button
-                        className="view-message-btn"
+                        className="view-btn"
                         onClick={() =>
                           setSelectedMessage(
-                            message
+                            item
                           )
                         }
                       >
@@ -620,13 +606,13 @@ const AdminMessages = () => {
 
           </table>
 
-        )}
+        </div>
 
-      </div>
+      )}
 
 
       {/* =================================================
-          MESSAGE MODAL
+          VIEW MESSAGE MODAL
       ================================================= */}
 
       {selectedMessage && (
@@ -649,13 +635,13 @@ const AdminMessages = () => {
 
               <div>
 
-                <span>
+                <span className="modal-label">
                   USER MESSAGE
                 </span>
 
                 <h2>
                   {selectedMessage.subject ||
-                    "General Query"}
+                    "Message Details"}
                 </h2>
 
               </div>
@@ -675,16 +661,12 @@ const AdminMessages = () => {
             <div className="modal-user">
 
               <div className="modal-avatar">
-
-                {
-                  (
-                    selectedMessage.name ||
-                    "U"
-                  )
-                    .charAt(0)
-                    .toUpperCase()
-                }
-
+                {(
+                  selectedMessage.name ||
+                  "U"
+                )
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
 
               <div>
@@ -704,15 +686,15 @@ const AdminMessages = () => {
             </div>
 
 
-            <div className="modal-message-box">
+            <div className="modal-message">
 
-              <span>
+              <label>
                 MESSAGE
-              </span>
+              </label>
 
               <p>
                 {selectedMessage.message ||
-                  "No message provided."}
+                  "No message available."}
               </p>
 
             </div>
@@ -734,6 +716,7 @@ const AdminMessages = () => {
 
               </div>
 
+
               <div>
 
                 <span>
@@ -749,6 +732,16 @@ const AdminMessages = () => {
 
             </div>
 
+
+            <button
+              className="modal-done"
+              onClick={() =>
+                setSelectedMessage(null)
+              }
+            >
+              Close
+            </button>
+
           </div>
 
         </div>
@@ -756,9 +749,7 @@ const AdminMessages = () => {
       )}
 
     </div>
-
   );
-
 };
 
 export default AdminMessages;

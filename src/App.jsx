@@ -143,10 +143,7 @@ function App() {
           />
 
         </Route>
-<Route
-  path="/contacts"
-  element={<AdminContacts />}
-/>
+
         {/* =================================================
             FIRST OPEN → LOGIN
         ================================================= */}
