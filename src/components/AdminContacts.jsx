@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/AdminMessages.css";
+import "../styles/AdminContacts.css";
 
 const API_URL = (
   import.meta.env.VITE_API_URL ||
   "https://api-admin-rouge.vercel.app"
 ).replace(/\/+$/, "");
 
-const AdminMessages = () => {
+const AdminContacts = () => {
 
-  const [messages, setMessages] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [selectedContact, setSelectedContact] = useState(null);
   const [error, setError] = useState("");
 
+
   // =====================================================
-  // FETCH MESSAGES
+  // FETCH CONTACTS
   // =====================================================
 
-  const fetchMessages = async (isRefresh = false) => {
+  const fetchContacts = async (isRefresh = false) => {
 
     try {
 
@@ -32,38 +33,40 @@ const AdminMessages = () => {
         setLoading(true);
       }
 
-      console.log("MESSAGES PAGE: API CALL");
+      console.log(
+        "CONTACT PAGE: API CALL"
+      );
 
       const response = await axios.get(
-        `${API_URL}/user-contact/messages`
+        `${API_URL}/user-contact/contacts`
       );
 
       console.log(
-        "Messages API Response:",
+        "Contact API Response:",
         response.data
       );
 
-      const receivedMessages =
+      const receivedContacts =
         response.data?.data ||
-        response.data?.data?.messages ||
-        response.data?.messages ||
+        response.data?.data?.contacts ||
+        response.data?.contacts ||
         [];
 
       console.log(
-        "Messages received:",
-        receivedMessages
+        "Contacts received:",
+        receivedContacts
       );
 
-      setMessages(
-        Array.isArray(receivedMessages)
-          ? receivedMessages
+      setContacts(
+        Array.isArray(receivedContacts)
+          ? receivedContacts
           : []
       );
 
     } catch (error) {
 
       console.error(
-        "Messages Error:",
+        "Contact Error:",
         error
       );
 
@@ -74,7 +77,7 @@ const AdminMessages = () => {
 
       setError(
         error.response?.data?.message ||
-        "Unable to load messages"
+        "Unable to load contact requests"
       );
 
     } finally {
@@ -93,7 +96,7 @@ const AdminMessages = () => {
 
   useEffect(() => {
 
-    fetchMessages();
+    fetchContacts();
 
   }, []);
 
@@ -102,8 +105,8 @@ const AdminMessages = () => {
   // SEARCH
   // =====================================================
 
-  const filteredMessages =
-    messages.filter((message) => {
+  const filteredContacts =
+    contacts.filter((contact) => {
 
       const searchText =
         search.toLowerCase();
@@ -111,7 +114,7 @@ const AdminMessages = () => {
       return (
 
         String(
-          message.name || ""
+          contact.name || ""
         )
           .toLowerCase()
           .includes(searchText)
@@ -119,7 +122,7 @@ const AdminMessages = () => {
         ||
 
         String(
-          message.email || ""
+          contact.email || ""
         )
           .toLowerCase()
           .includes(searchText)
@@ -127,7 +130,9 @@ const AdminMessages = () => {
         ||
 
         String(
-          message.subject || ""
+          contact.phone ||
+          contact.number ||
+          ""
         )
           .toLowerCase()
           .includes(searchText)
@@ -135,7 +140,7 @@ const AdminMessages = () => {
         ||
 
         String(
-          message.message || ""
+          contact.message || ""
         )
           .toLowerCase()
           .includes(searchText)
@@ -146,7 +151,7 @@ const AdminMessages = () => {
 
 
   // =====================================================
-  // DATE FORMAT
+  // DATE
   // =====================================================
 
   const formatDate = (date) => {
@@ -173,18 +178,18 @@ const AdminMessages = () => {
   if (loading) {
 
     return (
-      <div className="messages-page">
+      <div className="contacts-page">
 
-        <div className="messages-loading">
+        <div className="contacts-loading">
 
-          <div className="messages-loader"></div>
+          <div className="contacts-loader"></div>
 
           <h3>
-            Loading Messages
+            Loading Contact Requests
           </h3>
 
           <p>
-            Fetching user queries...
+            Fetching contact details...
           </p>
 
         </div>
@@ -195,40 +200,32 @@ const AdminMessages = () => {
   }
 
 
-  // =====================================================
-  // PAGE
-  // =====================================================
-
   return (
 
-    <div className="messages-page">
+    <div className="contacts-page">
 
       {/* =================================================
           HEADER
       ================================================= */}
 
-      <div className="messages-header">
+      <div className="contacts-header">
 
-        <div>
+        <div className="contacts-title-row">
 
-          <div className="messages-title-row">
+          <div className="contacts-icon">
+            📞
+          </div>
 
-            <div className="messages-icon">
-              💬
-            </div>
+          <div>
 
-            <div>
+            <h1>
+              Contact Requests
+            </h1>
 
-              <h1>
-                User Messages
-              </h1>
-
-              <p>
-                Manage queries and messages received
-                from event users.
-              </p>
-
-            </div>
+            <p>
+              Manage contact requests received
+              from event users.
+            </p>
 
           </div>
 
@@ -236,15 +233,17 @@ const AdminMessages = () => {
 
 
         <button
-          className="messages-refresh-btn"
-          onClick={() => fetchMessages(true)}
+          className="contacts-refresh-btn"
+          onClick={() =>
+            fetchContacts(true)
+          }
           disabled={refreshing}
         >
 
           <span
             className={
               refreshing
-                ? "refresh-spin"
+                ? "contact-refresh-spin"
                 : ""
             }
           >
@@ -264,22 +263,22 @@ const AdminMessages = () => {
           STATS
       ================================================= */}
 
-      <div className="messages-stats">
+      <div className="contacts-stats">
 
-        <div className="message-stat-card">
+        <div className="contact-stat-card">
 
-          <div className="stat-card-icon">
-            💬
+          <div className="contact-stat-icon">
+            📞
           </div>
 
           <div>
 
             <span>
-              Total Messages
+              Total Requests
             </span>
 
             <strong>
-              {messages.length}
+              {contacts.length}
             </strong>
 
           </div>
@@ -287,23 +286,24 @@ const AdminMessages = () => {
         </div>
 
 
-        <div className="message-stat-card">
+        <div className="contact-stat-card">
 
-          <div className="stat-card-icon unread-icon">
-            ●
+          <div className="contact-stat-icon pending">
+            ⏳
           </div>
 
           <div>
 
             <span>
-              Unread
+              Pending
             </span>
 
             <strong>
               {
-                messages.filter(
-                  (message) =>
-                    message.status === "Unread"
+                contacts.filter(
+                  (contact) =>
+                    contact.status ===
+                    "Pending"
                 ).length
               }
             </strong>
@@ -313,23 +313,24 @@ const AdminMessages = () => {
         </div>
 
 
-        <div className="message-stat-card">
+        <div className="contact-stat-card">
 
-          <div className="stat-card-icon query-icon">
-            ?
+          <div className="contact-stat-icon contacted">
+            ✓
           </div>
 
           <div>
 
             <span>
-              Queries
+              Contacted
             </span>
 
             <strong>
               {
-                messages.filter(
-                  (message) =>
-                    message.subject
+                contacts.filter(
+                  (contact) =>
+                    contact.status ===
+                    "Contacted"
                 ).length
               }
             </strong>
@@ -345,9 +346,9 @@ const AdminMessages = () => {
           SEARCH
       ================================================= */}
 
-      <div className="messages-toolbar">
+      <div className="contacts-toolbar">
 
-        <div className="messages-search">
+        <div className="contacts-search">
 
           <span>
             🔍
@@ -355,7 +356,7 @@ const AdminMessages = () => {
 
           <input
             type="text"
-            placeholder="Search name, email, subject or message..."
+            placeholder="Search name, email or phone..."
             value={search}
             onChange={(e) =>
               setSearch(e.target.value)
@@ -366,7 +367,7 @@ const AdminMessages = () => {
 
             <button
               onClick={() => setSearch("")}
-              className="clear-search"
+              className="contact-clear-search"
             >
               ×
             </button>
@@ -375,10 +376,10 @@ const AdminMessages = () => {
 
         </div>
 
-        <div className="message-count">
+        <div className="contact-count">
 
-          {filteredMessages.length} message
-          {filteredMessages.length !== 1
+          {filteredContacts.length} request
+          {filteredContacts.length !== 1
             ? "s"
             : ""}
 
@@ -393,14 +394,16 @@ const AdminMessages = () => {
 
       {error && (
 
-        <div className="messages-error">
+        <div className="contacts-error">
 
-          <span>⚠️</span>
+          <span>
+            ⚠️
+          </span>
 
           <div>
 
             <strong>
-              Unable to load messages
+              Unable to load contacts
             </strong>
 
             <p>
@@ -418,30 +421,30 @@ const AdminMessages = () => {
           TABLE
       ================================================= */}
 
-      <div className="messages-table-container">
+      <div className="contacts-table-container">
 
-        {filteredMessages.length === 0 ? (
+        {filteredContacts.length === 0 ? (
 
-          <div className="messages-empty">
+          <div className="contacts-empty">
 
-            <div className="empty-icon">
-              💬
+            <div className="contact-empty-icon">
+              📞
             </div>
 
             <h3>
-              No Messages Found
+              No Contact Requests
             </h3>
 
             <p>
-              No user messages or queries are
-              available right now.
+              No contact requests are available
+              right now.
             </p>
 
           </div>
 
         ) : (
 
-          <table className="messages-table">
+          <table className="contacts-table">
 
             <thead>
 
@@ -452,7 +455,7 @@ const AdminMessages = () => {
                 </th>
 
                 <th>
-                  SUBJECT
+                  PHONE
                 </th>
 
                 <th>
@@ -477,13 +480,13 @@ const AdminMessages = () => {
 
             <tbody>
 
-              {filteredMessages.map(
-                (message, index) => (
+              {filteredContacts.map(
+                (contact, index) => (
 
                   <tr
                     key={
-                      message._id ||
-                      message.id ||
+                      contact._id ||
+                      contact.id ||
                       index
                     }
                   >
@@ -492,13 +495,13 @@ const AdminMessages = () => {
 
                     <td>
 
-                      <div className="message-user">
+                      <div className="contact-user">
 
-                        <div className="user-avatar">
+                        <div className="contact-avatar">
 
                           {
                             (
-                              message.name ||
+                              contact.name ||
                               "U"
                             )
                               .charAt(0)
@@ -510,12 +513,12 @@ const AdminMessages = () => {
                         <div>
 
                           <strong>
-                            {message.name ||
+                            {contact.name ||
                               "Unknown User"}
                           </strong>
 
                           <span>
-                            {message.email ||
+                            {contact.email ||
                               "No email"}
                           </span>
 
@@ -526,14 +529,15 @@ const AdminMessages = () => {
                     </td>
 
 
-                    {/* SUBJECT */}
+                    {/* PHONE */}
 
                     <td>
 
-                      <span className="subject-text">
+                      <span className="phone-text">
 
-                        {message.subject ||
-                          "General Query"}
+                        {contact.phone ||
+                          contact.number ||
+                          "No phone"}
 
                       </span>
 
@@ -544,9 +548,9 @@ const AdminMessages = () => {
 
                     <td>
 
-                      <div className="message-preview">
+                      <div className="contact-message-preview">
 
-                        {message.message ||
+                        {contact.message ||
                           "No message"}
 
                       </div>
@@ -560,10 +564,10 @@ const AdminMessages = () => {
 
                       <span
                         className={
-                          message.status ===
-                          "Read"
-                            ? "status-badge read"
-                            : "status-badge unread"
+                          contact.status ===
+                          "Contacted"
+                            ? "contact-status contacted-status"
+                            : "contact-status pending-status"
                         }
                       >
 
@@ -571,8 +575,8 @@ const AdminMessages = () => {
                           ●
                         </span>
 
-                        {message.status ||
-                          "Unread"}
+                        {contact.status ||
+                          "Pending"}
 
                       </span>
 
@@ -583,10 +587,10 @@ const AdminMessages = () => {
 
                     <td>
 
-                      <span className="date-text">
+                      <span className="contact-date">
 
                         {formatDate(
-                          message.createdAt
+                          contact.createdAt
                         )}
 
                       </span>
@@ -599,10 +603,10 @@ const AdminMessages = () => {
                     <td>
 
                       <button
-                        className="view-message-btn"
+                        className="view-contact-btn"
                         onClick={() =>
-                          setSelectedMessage(
-                            message
+                          setSelectedContact(
+                            contact
                           )
                         }
                       >
@@ -626,44 +630,43 @@ const AdminMessages = () => {
 
 
       {/* =================================================
-          MESSAGE MODAL
+          CONTACT MODAL
       ================================================= */}
 
-      {selectedMessage && (
+      {selectedContact && (
 
         <div
-          className="message-modal-overlay"
+          className="contact-modal-overlay"
           onClick={() =>
-            setSelectedMessage(null)
+            setSelectedContact(null)
           }
         >
 
           <div
-            className="message-modal"
+            className="contact-modal"
             onClick={(e) =>
               e.stopPropagation()
             }
           >
 
-            <div className="modal-header">
+            <div className="contact-modal-header">
 
               <div>
 
                 <span>
-                  USER MESSAGE
+                  CONTACT REQUEST
                 </span>
 
                 <h2>
-                  {selectedMessage.subject ||
-                    "General Query"}
+                  Contact Details
                 </h2>
 
               </div>
 
               <button
-                className="modal-close"
+                className="contact-modal-close"
                 onClick={() =>
-                  setSelectedMessage(null)
+                  setSelectedContact(null)
                 }
               >
                 ×
@@ -672,13 +675,13 @@ const AdminMessages = () => {
             </div>
 
 
-            <div className="modal-user">
+            <div className="contact-user-large">
 
-              <div className="modal-avatar">
+              <div className="contact-large-avatar">
 
                 {
                   (
-                    selectedMessage.name ||
+                    selectedContact.name ||
                     "U"
                   )
                     .charAt(0)
@@ -690,12 +693,12 @@ const AdminMessages = () => {
               <div>
 
                 <strong>
-                  {selectedMessage.name ||
+                  {selectedContact.name ||
                     "Unknown User"}
                 </strong>
 
                 <span>
-                  {selectedMessage.email ||
+                  {selectedContact.email ||
                     "No email"}
                 </span>
 
@@ -704,48 +707,62 @@ const AdminMessages = () => {
             </div>
 
 
-            <div className="modal-message-box">
+            <div className="contact-info-grid">
+
+              <div>
+
+                <span>
+                  PHONE NUMBER
+                </span>
+
+                <strong>
+                  {selectedContact.phone ||
+                    selectedContact.number ||
+                    "No phone"}
+                </strong>
+
+              </div>
+
+
+              <div>
+
+                <span>
+                  STATUS
+                </span>
+
+                <strong>
+                  {selectedContact.status ||
+                    "Pending"}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div className="contact-message-box">
 
               <span>
                 MESSAGE
               </span>
 
               <p>
-                {selectedMessage.message ||
+                {selectedContact.message ||
                   "No message provided."}
               </p>
 
             </div>
 
 
-            <div className="modal-details">
+            <div className="contact-received">
 
-              <div>
+              Received on{" "}
 
-                <span>
-                  Received
-                </span>
-
-                <strong>
-                  {formatDate(
-                    selectedMessage.createdAt
-                  )}
-                </strong>
-
-              </div>
-
-              <div>
-
-                <span>
-                  Status
-                </span>
-
-                <strong>
-                  {selectedMessage.status ||
-                    "Unread"}
-                </strong>
-
-              </div>
+              <strong>
+                {formatDate(
+                  selectedContact.createdAt
+                )}
+              </strong>
 
             </div>
 
@@ -761,4 +778,4 @@ const AdminMessages = () => {
 
 };
 
-export default AdminMessages;
+export default AdminContacts;

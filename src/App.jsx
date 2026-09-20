@@ -11,11 +11,11 @@ import AdminLogin from "./components/AdminLogin";
 import AdminNavbar from "./components/Admin_navbar";
 import AdminDashboard from "./components/Admin_dashboard";
 import AdminEvents from "./components/Admin_Events";
-
 import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
 import EventDetails from "./components/EventDetails";
 import AdminMessages from "./components/AdminMessages";
+import AdminContacts from "./components/AdminContacts";
 
 // =====================================================
 // USERS
@@ -143,7 +143,10 @@ function App() {
           />
 
         </Route>
-
+<Route
+  path="/contacts"
+  element={<AdminContacts />}
+/>
         {/* =================================================
             FIRST OPEN → LOGIN
         ================================================= */}

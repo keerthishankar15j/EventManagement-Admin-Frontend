@@ -135,6 +135,31 @@ const AdminNavbar = () => {
 
 
         </nav>
+
+        {/* =================================================
+            CONTACT REQUESTS
+        ================================================= */}
+
+        <NavLink
+          to="/contacts"
+          className={({ isActive }) =>
+            `admin-nav-link ${
+              isActive ? "active" : ""
+            }`
+          }
+        >
+
+          <span className="nav-icon">
+            ☎
+          </span>
+
+          <span>
+            Contact Requests
+          </span>
+
+        </NavLink>
+
+      
       {/* =====================================================
           BOTTOM SECTION
       ===================================================== */}
