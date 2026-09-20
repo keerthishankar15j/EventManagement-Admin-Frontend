@@ -15,7 +15,6 @@ import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
 import EventDetails from "./components/EventDetails";
 import AdminMessages from "./components/AdminMessages";
-import AdminContacts from "./components/AdminContacts";
 
 // =====================================================
 // USERS
