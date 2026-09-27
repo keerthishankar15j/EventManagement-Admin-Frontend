@@ -15,7 +15,7 @@ import EditEvent from "./components/EditEvent";
 import AddEvent from "./components/AddEvent";
 import EventDetails from "./components/EventDetails";
 import AdminMessages from "./components/AdminMessages";
-
+import AdminOrganizerRequests from "./components/AdminOrganizerRequests";
 // =====================================================
 // USERS
 // =====================================================
@@ -142,6 +142,10 @@ function App() {
           />
 
         </Route>
+        <Route
+  path="/organizer-requests"
+  element={<AdminOrganizerRequests />}
+/>
 
         {/* =================================================
             FIRST OPEN → LOGIN

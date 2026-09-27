@@ -130,7 +130,26 @@ const AdminNavbar = () => {
             Messages
           </span>
         </NavLink>
+{/* -------------------------------------------------
+    ORGANIZER REQUESTS
+------------------------------------------------- */}
 
+<NavLink
+  to="/organizer-requests"
+  className={({ isActive }) =>
+    isActive
+      ? "menu-item active"
+      : "menu-item"
+  }
+>
+  <span className="menu-icon">
+    ◈
+  </span>
+
+  <span className="menu-text">
+    Organizer Requests
+  </span>
+</NavLink>
 
         </nav>
 
