@@ -140,12 +140,12 @@ function App() {
             path="/admin-messages"
             element={<AdminMessages />}
           />
-
-        </Route>
-        <Route
+           <Route
   path="/organizer-requests"
   element={<AdminOrganizerRequests />}
 />
+        </Route>
+        
 
         {/* =================================================
             FIRST OPEN → LOGIN
