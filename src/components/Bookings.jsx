@@ -13,7 +13,7 @@ import "../styles/Bookings.css";
 // ===================================================
 
 const USER_BOOKING_API =
-  "https://user-api-iota-six.vercel.app/booking";
+  "https://user-api-iota-six.vercel.app/booking/getbookingsfix";
 
 const Bookings = () => {
   const [bookings, setBookings] =
