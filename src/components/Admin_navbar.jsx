@@ -1,3 +1,4 @@
+
 import React from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "../styles/Admin_navbar.css";
@@ -166,48 +167,50 @@ const AdminNavbar = () => {
             Messages
           </span>
         </NavLink>
-{/* BOOKINGS */}
-<NavLink
-  to="/bookings"
-  className={({ isActive }) =>
-    isActive
-      ? "menu-item active"
-      : "menu-item"
-  }
->
-  <span className="menu-icon">
-    📋
-  </span>
 
-  <span className="menu-text">
-    Bookings
-  </span>
-</NavLink>
+
+        {/* BOOKINGS */}
+        <NavLink
+          to="/bookings"
+          className={({ isActive }) =>
+            isActive
+              ? "menu-item active"
+              : "menu-item"
+          }
+        >
+          <span className="menu-icon">
+            📋
+          </span>
+
+          <span className="menu-text">
+            Bookings
+          </span>
+        </NavLink>
+
       </nav>
 
 
-      
+      {/* =====================================================
+          LOGOUT - BOTTOM
+      ===================================================== */}
 
+      <button
+        type="button"
+        className="logout"
+        onClick={handleLogout}
+      >
 
-        {/* LOGOUT */}
-        <button
-          type="button"
-          className="logout"
-          onClick={handleLogout}
-        >
+        <span className="logout-icon">
+          ↪
+        </span>
 
-          <span className="logout-icon">
-            ↪
-          </span>
+        <span>
+          Logout
+        </span>
 
-          <span>
-            Logout
-          </span>
+      </button>
 
-        </button>
-
-     </aside>
-
+    </aside>
   );
 };
 
