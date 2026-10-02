@@ -5,7 +5,7 @@ import React, {
 } from "react";
 
 import axios from "axios";
-import styles from "../styles/Bookings.css"
+import  "../styles/Bookings.css"
 const USER_API =
   "https://user-api-iota-six.vercel.app";
 
