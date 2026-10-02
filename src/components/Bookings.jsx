@@ -1,10 +1,11 @@
+
 import React, {
   useEffect,
   useState,
 } from "react";
 
 import axios from "axios";
-
+import styles from "../styles/Bookings.css"
 const USER_API =
   "https://user-api-iota-six.vercel.app";
 
