@@ -1,3 +1,4 @@
+
 import React, {
   useEffect,
   useState,
@@ -7,8 +8,12 @@ import axios from "axios";
 
 import "../styles/Bookings.css";
 
-const ADMIN_BOOKING_API =
-  "https://api-admin-rouge.vercel.app/bookings";
+// ===================================================
+// USER BOOKING API
+// ===================================================
+
+const USER_BOOKING_API =
+  "https://user-api-iota-six.vercel.app/booking";
 
 const Bookings = () => {
   const [bookings, setBookings] =
@@ -21,7 +26,7 @@ const Bookings = () => {
     useState("");
 
   // ===================================================
-  // FETCH STORED BOOKINGS
+  // FETCH BOOKINGS FROM USER API
   // ===================================================
 
   const fetchBookings = async () => {
@@ -30,19 +35,29 @@ const Bookings = () => {
       setError("");
 
       const response = await axios.get(
-        `${ADMIN_BOOKING_API}/getbookings`
+        `${USER_BOOKING_API}/getbookings`
       );
 
       console.log(
-        "ADMIN BOOKINGS RESPONSE:",
+        "USER BOOKINGS RESPONSE:",
         response.data
       );
 
+      // API response:
+      // {
+      //   success: true,
+      //   bookings: [...]
+      // }
+
       if (
         response.data &&
-        Array.isArray(response.data.data)
+        Array.isArray(
+          response.data.bookings
+        )
       ) {
-        setBookings(response.data.data);
+        setBookings(
+          response.data.bookings
+        );
       } else {
         setBookings([]);
       }
@@ -61,44 +76,7 @@ const Bookings = () => {
   };
 
   // ===================================================
-  // SYNC USER BOOKINGS
-  // ===================================================
-
-  const syncBookings = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await axios.get(
-        `${ADMIN_BOOKING_API}/sync`
-      );
-
-      console.log(
-        "BOOKINGS SYNC RESPONSE:",
-        response.data
-      );
-
-      alert(
-        `${response.data.count || 0} bookings synced successfully`
-      );
-
-      await fetchBookings();
-    } catch (error) {
-      console.error(
-        "Booking sync failed:",
-        error
-      );
-
-      setError(
-        "Failed to sync bookings."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ===================================================
-  // LOAD
+  // LOAD BOOKINGS
   // ===================================================
 
   useEffect(() => {
@@ -126,10 +104,16 @@ const Bookings = () => {
   return (
     <div className="bookings-page">
 
+      {/* ============================================= */}
+      {/* HEADER */}
+      {/* ============================================= */}
+
       <div className="bookings-header">
 
         <div>
-          <h1>Bookings</h1>
+          <h1>
+            Bookings
+          </h1>
 
           <p>
             Manage event bookings
@@ -138,12 +122,16 @@ const Bookings = () => {
 
         <button
           className="sync-button"
-          onClick={syncBookings}
+          onClick={fetchBookings}
         >
-          🔄 Sync Bookings
+          🔄 Refresh Bookings
         </button>
 
       </div>
+
+      {/* ============================================= */}
+      {/* ERROR */}
+      {/* ============================================= */}
 
       {error && (
         <div className="booking-error">
@@ -151,9 +139,16 @@ const Bookings = () => {
         </div>
       )}
 
+      {/* ============================================= */}
+      {/* STATS */}
+      {/* ============================================= */}
+
       <div className="booking-stats">
 
+        {/* TOTAL BOOKINGS */}
+
         <div className="booking-stat-card">
+
           <span>
             Total Bookings
           </span>
@@ -161,9 +156,13 @@ const Bookings = () => {
           <strong>
             {bookings.length}
           </strong>
+
         </div>
 
+        {/* CONFIRMED BOOKINGS */}
+
         <div className="booking-stat-card">
+
           <span>
             Confirmed
           </span>
@@ -172,14 +171,18 @@ const Bookings = () => {
             {
               bookings.filter(
                 (booking) =>
-                  booking.bookingStatus ===
+                  booking.status ===
                   "Confirmed"
               ).length
             }
           </strong>
+
         </div>
 
+        {/* TOTAL REVENUE */}
+
         <div className="booking-stat-card">
+
           <span>
             Total Revenue
           </span>
@@ -195,15 +198,21 @@ const Bookings = () => {
               0
             )}
           </strong>
+
         </div>
 
       </div>
+
+      {/* ============================================= */}
+      {/* BOOKING TABLE */}
+      {/* ============================================= */}
 
       <div className="booking-table-container">
 
         <table className="booking-table">
 
           <thead>
+
             <tr>
 
               <th>
@@ -239,22 +248,33 @@ const Bookings = () => {
               </th>
 
             </tr>
+
           </thead>
 
           <tbody>
 
+            {/* ======================================= */}
+            {/* NO BOOKINGS */}
+            {/* ======================================= */}
+
             {bookings.length === 0 ? (
 
               <tr>
+
                 <td
                   colSpan="8"
                   className="no-bookings"
                 >
                   No bookings found
                 </td>
+
               </tr>
 
             ) : (
+
+              /* ===================================== */
+              /* BOOKINGS */
+              /* ===================================== */
 
               bookings.map(
                 (booking, index) => (
@@ -267,34 +287,51 @@ const Bookings = () => {
                     }
                   >
 
+                    {/* NUMBER */}
+
                     <td>
                       {index + 1}
                     </td>
 
+                    {/* USER NAME */}
+
                     <td>
-                      {booking.name ||
+                      {booking.userName ||
                         "Unknown User"}
                     </td>
 
+                    {/* USER EMAIL */}
+
                     <td>
-                      {booking.email ||
+                      {booking.userEmail ||
                         "-"}
                     </td>
+
+                    {/* EVENT NAME */}
 
                     <td>
                       {booking.eventName ||
                         "Event"}
                     </td>
 
-                    <td>
-                      {booking.eventDate ||
-                        "-"}
-                    </td>
+                    {/* EVENT DATE */}
 
                     <td>
-                      {booking.quantity ||
-                        1}
+                      {booking.eventDate
+                        ? new Date(
+                            booking.eventDate
+                          ).toLocaleDateString()
+                        : "-"}
                     </td>
+
+                    {/* NUMBER OF TICKETS */}
+
+                    <td>
+                      {booking.numberOfTickets ||
+                        0}
+                    </td>
+
+                    {/* TOTAL AMOUNT */}
 
                     <td>
                       ₹
@@ -302,20 +339,22 @@ const Bookings = () => {
                         0}
                     </td>
 
+                    {/* STATUS */}
+
                     <td>
+
                       <span
                         className={`booking-status ${
-                          booking.bookingStatus ===
+                          booking.status ===
                           "Confirmed"
                             ? "confirmed"
                             : "other"
                         }`}
                       >
-                        {
-                          booking.bookingStatus ||
-                          "Confirmed"
-                        }
+                        {booking.status ||
+                          "Confirmed"}
                       </span>
+
                     </td>
 
                   </tr>
@@ -336,3 +375,4 @@ const Bookings = () => {
 };
 
 export default Bookings;
+
