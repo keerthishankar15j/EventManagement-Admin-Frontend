@@ -166,8 +166,22 @@ const AdminNavbar = () => {
             Messages
           </span>
         </NavLink>
-<NavLink to="/bookings">
-  📋 Bookings
+{/* BOOKINGS */}
+<NavLink
+  to="/bookings"
+  className={({ isActive }) =>
+    isActive
+      ? "menu-item active"
+      : "menu-item"
+  }
+>
+  <span className="menu-icon">
+    📋
+  </span>
+
+  <span className="menu-text">
+    Bookings
+  </span>
 </NavLink>
       </nav>
 
