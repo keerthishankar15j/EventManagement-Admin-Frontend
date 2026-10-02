@@ -13,7 +13,7 @@ import "../styles/Bookings.css";
 // ===================================================
 
 const USER_BOOKING_API =
-  "https://user-api-iota-six.vercel.app/booking/getbookingsfix";
+  "https://user-api-iota-six.vercel.app/booking";
 
 const Bookings = () => {
   const [bookings, setBookings] =
@@ -43,29 +43,46 @@ const Bookings = () => {
         response.data
       );
 
-      // API response:
-      // {
-      //   success: true,
-      //   bookings: [...]
-      // }
+      // =================================================
+      // HANDLE DIFFERENT API RESPONSE FORMATS
+      // =================================================
 
       if (
         response.data &&
-        Array.isArray(
-          response.data.bookings
-        )
+        Array.isArray(response.data.bookings)
       ) {
         setBookings(
           response.data.bookings
         );
+      } else if (
+        response.data &&
+        Array.isArray(response.data.data)
+      ) {
+        setBookings(
+          response.data.data
+        );
+      } else if (
+        Array.isArray(response.data)
+      ) {
+        setBookings(
+          response.data
+        );
       } else {
         setBookings([]);
       }
+
     } catch (error) {
       console.error(
         "Failed to fetch bookings:",
         error
       );
+
+      console.error(
+        "API Error Response:",
+        error.response?.data
+      );
+
+      setBookings([]);
 
       setError(
         "Unable to load bookings."
@@ -76,7 +93,7 @@ const Bookings = () => {
   };
 
   // ===================================================
-  // LOAD BOOKINGS
+  // LOAD BOOKINGS WHEN PAGE OPENS
   // ===================================================
 
   useEffect(() => {
@@ -90,12 +107,46 @@ const Bookings = () => {
   if (loading) {
     return (
       <div className="bookings-page">
+
         <div className="bookings-loading">
           Loading bookings...
         </div>
+
       </div>
     );
   }
+
+  // ===================================================
+  // CONFIRMED BOOKINGS COUNT
+  // ===================================================
+
+  const confirmedBookings =
+    bookings.filter(
+      (booking) =>
+        booking.status === "Confirmed" ||
+        booking.bookingStatus === "Confirmed"
+    ).length;
+
+  // ===================================================
+  // TOTAL REVENUE
+  // ===================================================
+
+  const totalRevenue =
+    bookings.reduce(
+      (total, booking) => {
+
+        const amount =
+          Number(
+            booking.totalAmount ||
+            booking.totalPrice ||
+            booking.amount ||
+            0
+          );
+
+        return total + amount;
+      },
+      0
+    );
 
   // ===================================================
   // PAGE
@@ -111,6 +162,7 @@ const Bookings = () => {
       <div className="bookings-header">
 
         <div>
+
           <h1>
             Bookings
           </h1>
@@ -118,6 +170,7 @@ const Bookings = () => {
           <p>
             Manage event bookings
           </p>
+
         </div>
 
         <button
@@ -168,13 +221,7 @@ const Bookings = () => {
           </span>
 
           <strong>
-            {
-              bookings.filter(
-                (booking) =>
-                  booking.status ===
-                  "Confirmed"
-              ).length
-            }
+            {confirmedBookings}
           </strong>
 
         </div>
@@ -188,15 +235,7 @@ const Bookings = () => {
           </span>
 
           <strong>
-            ₹
-            {bookings.reduce(
-              (total, booking) =>
-                total +
-                Number(
-                  booking.totalAmount || 0
-                ),
-              0
-            )}
+            ₹{totalRevenue}
           </strong>
 
         </div>
@@ -277,89 +316,155 @@ const Bookings = () => {
               /* ===================================== */
 
               bookings.map(
-                (booking, index) => (
+                (booking, index) => {
 
-                  <tr
-                    key={
-                      booking._id ||
-                      booking.bookingId ||
-                      index
-                    }
-                  >
+                  // -------------------------------
+                  // USER NAME
+                  // -------------------------------
 
-                    {/* NUMBER */}
+                  const userName =
+                    booking.userName ||
+                    booking.name ||
+                    booking.username ||
+                    booking.user?.name ||
+                    "Unknown User";
 
-                    <td>
-                      {index + 1}
-                    </td>
+                  // -------------------------------
+                  // USER EMAIL
+                  // -------------------------------
 
-                    {/* USER NAME */}
+                  const userEmail =
+                    booking.userEmail ||
+                    booking.email ||
+                    booking.user?.email ||
+                    "-";
 
-                    <td>
-                      {booking.userName ||
-                        "Unknown User"}
-                    </td>
+                  // -------------------------------
+                  // EVENT NAME
+                  // -------------------------------
 
-                    {/* USER EMAIL */}
+                  const eventName =
+                    booking.eventName ||
+                    booking.event?.name ||
+                    booking.event?.eventName ||
+                    booking.event?.title ||
+                    "Event";
 
-                    <td>
-                      {booking.userEmail ||
-                        "-"}
-                    </td>
+                  // -------------------------------
+                  // EVENT DATE
+                  // -------------------------------
 
-                    {/* EVENT NAME */}
+                  const eventDate =
+                    booking.eventDate ||
+                    booking.event?.date ||
+                    booking.date;
 
-                    <td>
-                      {booking.eventName ||
-                        "Event"}
-                    </td>
+                  // -------------------------------
+                  // NUMBER OF TICKETS
+                  // -------------------------------
 
-                    {/* EVENT DATE */}
+                  const numberOfTickets =
+                    booking.numberOfTickets ||
+                    booking.quantity ||
+                    booking.ticketQuantity ||
+                    booking.tickets ||
+                    0;
 
-                    <td>
-                      {booking.eventDate
-                        ? new Date(
-                            booking.eventDate
-                          ).toLocaleDateString()
-                        : "-"}
-                    </td>
+                  // -------------------------------
+                  // TOTAL AMOUNT
+                  // -------------------------------
 
-                    {/* NUMBER OF TICKETS */}
+                  const totalAmount =
+                    booking.totalAmount ||
+                    booking.totalPrice ||
+                    booking.amount ||
+                    0;
 
-                    <td>
-                      {booking.numberOfTickets ||
-                        0}
-                    </td>
+                  // -------------------------------
+                  // STATUS
+                  // -------------------------------
 
-                    {/* TOTAL AMOUNT */}
+                  const status =
+                    booking.status ||
+                    booking.bookingStatus ||
+                    "Confirmed";
 
-                    <td>
-                      ₹
-                      {booking.totalAmount ||
-                        0}
-                    </td>
+                  return (
+                    <tr
+                      key={
+                        booking._id ||
+                        booking.bookingId ||
+                        index
+                      }
+                    >
 
-                    {/* STATUS */}
+                      {/* NUMBER */}
 
-                    <td>
+                      <td>
+                        {index + 1}
+                      </td>
 
-                      <span
-                        className={`booking-status ${
-                          booking.status ===
-                          "Confirmed"
-                            ? "confirmed"
-                            : "other"
-                        }`}
-                      >
-                        {booking.status ||
-                          "Confirmed"}
-                      </span>
+                      {/* USER NAME */}
 
-                    </td>
+                      <td>
+                        {userName}
+                      </td>
 
-                  </tr>
+                      {/* USER EMAIL */}
 
-                )
+                      <td>
+                        {userEmail}
+                      </td>
+
+                      {/* EVENT NAME */}
+
+                      <td>
+                        {eventName}
+                      </td>
+
+                      {/* EVENT DATE */}
+
+                      <td>
+
+                        {eventDate
+                          ? new Date(
+                              eventDate
+                            ).toLocaleDateString()
+                          : "-"}
+
+                      </td>
+
+                      {/* NUMBER OF TICKETS */}
+
+                      <td>
+                        {numberOfTickets}
+                      </td>
+
+                      {/* TOTAL AMOUNT */}
+
+                      <td>
+                        ₹{totalAmount}
+                      </td>
+
+                      {/* STATUS */}
+
+                      <td>
+
+                        <span
+                          className={`booking-status ${
+                            status === "Confirmed"
+                              ? "confirmed"
+                              : "other"
+                          }`}
+                        >
+                          {status}
+                        </span>
+
+                      </td>
+
+                    </tr>
+                  );
+                }
               )
 
             )}
@@ -375,4 +480,3 @@ const Bookings = () => {
 };
 
 export default Bookings;
-
