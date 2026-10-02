@@ -186,36 +186,7 @@ const AdminNavbar = () => {
       </nav>
 
 
-      {/* =====================================================
-          BOTTOM SECTION
-      ===================================================== */}
-
-      <div className="sidebar-bottom">
-
-        {/* ADMIN PROFILE */}
-        <div className="admin-profile">
-
-          <div className="profile-avatar">
-            A
-          </div>
-
-          <div className="profile-info">
-
-            <strong>
-              Admin
-            </strong>
-
-            <small>
-              Administrator
-            </small>
-
-          </div>
-
-          <span className="profile-arrow">
-            ⌄
-          </span>
-
-        </div>
+      
 
 
         {/* LOGOUT */}
@@ -235,9 +206,8 @@ const AdminNavbar = () => {
 
         </button>
 
-      </div>
+     </aside>
 
-    </aside>
   );
 };
 
