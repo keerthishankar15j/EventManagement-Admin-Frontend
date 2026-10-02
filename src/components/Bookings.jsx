@@ -10,24 +10,32 @@ function Bookings() {
   const [loading, setLoading] = useState(true);
 
   // =====================================================
-  // STORE BOOKING IN ADMIN BACKEND
+  // STORE ONE BOOKING IN ADMIN BACKEND
   // =====================================================
 
   const storeBooking = async (booking) => {
     try {
-      console.log("SENDING BOOKING TO ADMIN:", booking);
+      console.log(
+        "SENDING BOOKING TO ADMIN:",
+        booking.sourceBookingId
+      );
 
       const response = await axios.post(
         `${ADMIN_API}/bookings/store`,
         booking
       );
 
-      console.log("ADMIN STORE RESPONSE:", response.data);
+      console.log(
+        "ADMIN STORE RESPONSE:",
+        booking.sourceBookingId,
+        response.data
+      );
 
       return response.data;
     } catch (error) {
       console.error(
         "ADMIN STORE ERROR:",
+        booking.sourceBookingId,
         error.response?.data || error.message
       );
 
@@ -43,28 +51,34 @@ function Bookings() {
     try {
       setLoading(true);
 
-      console.log("Fetching bookings from User Backend...");
+      console.log(
+        "Fetching bookings from User Backend..."
+      );
+
+      // -------------------------------------------------
+      // GET BOOKINGS
+      // -------------------------------------------------
 
       const response = await axios.get(
         `${USER_API}/booking/getbookings`
       );
 
-      console.log("USER BOOKING RESPONSE:", response.data);
+      console.log(
+        "USER BOOKING RESPONSE:",
+        response.data
+      );
 
       let bookingData = [];
 
-      // If response itself is an array
       if (Array.isArray(response.data)) {
         bookingData = response.data;
-      }
-
-      // If response is { bookings: [] }
-      else if (Array.isArray(response.data.bookings)) {
+      } else if (
+        Array.isArray(response.data.bookings)
+      ) {
         bookingData = response.data.bookings;
-      }
-
-      // If response is { data: [] }
-      else if (Array.isArray(response.data.data)) {
+      } else if (
+        Array.isArray(response.data.data)
+      ) {
         bookingData = response.data.data;
       }
 
@@ -73,88 +87,118 @@ function Bookings() {
         bookingData
       );
 
-      // =====================================================
-      // NORMALIZE BOOKING DATA
-      // =====================================================
+      // =================================================
+      // PREPARE BOOKINGS
+      // =================================================
 
-      const finalBookings = bookingData.map((booking) => {
-        let userName = booking.userName || "";
+      const finalBookings = bookingData.map(
+        (booking) => {
+          let userName = booking.userName || "";
 
-        // Old booking may not have userName
-        // So get name from first attendee
-        if (
-          !userName &&
-          Array.isArray(booking.attendees) &&
-          booking.attendees.length > 0
-        ) {
-          userName = booking.attendees[0]?.name || "";
+          // Old booking may not have userName
+          if (
+            !userName &&
+            Array.isArray(booking.attendees) &&
+            booking.attendees.length > 0
+          ) {
+            userName =
+              booking.attendees[0]?.name || "";
+          }
+
+          if (!userName) {
+            userName = "User";
+          }
+
+          return {
+            sourceBookingId: booking._id,
+
+            userId: booking.userId || null,
+
+            userName: userName,
+
+            userEmail: booking.userEmail || "",
+
+            eventId: booking.eventId || null,
+
+            eventName:
+              booking.eventName || "Event",
+
+            eventDate:
+              booking.eventDate || "",
+
+            eventTime:
+              booking.eventTime || "",
+
+            eventLocation:
+              booking.eventLocation || "",
+
+            eventCategory:
+              booking.eventCategory || "Event",
+
+            ticketPrice:
+              booking.ticketPrice ?? 0,
+
+            numberOfTickets:
+              booking.numberOfTickets || 0,
+
+            attendees:
+              Array.isArray(booking.attendees)
+                ? booking.attendees
+                : [],
+
+            totalAmount:
+              booking.totalAmount ?? 0,
+
+            bookingDate:
+              booking.bookingDate ||
+              booking.createdAt ||
+              "",
+
+            status:
+              booking.status || "Confirmed",
+          };
         }
-
-        // If still empty
-        if (!userName) {
-          userName = "User";
-        }
-
-        return {
-          sourceBookingId: booking._id,
-
-          userId: booking.userId || null,
-
-          userName: userName,
-
-          userEmail: booking.userEmail || "",
-
-          eventId: booking.eventId || null,
-
-          // EVENT DETAILS
-          eventName: booking.eventName || "Event",
-
-          eventDate: booking.eventDate || "",
-
-          eventTime: booking.eventTime || "",
-
-          eventLocation: booking.eventLocation || "",
-
-          eventCategory:
-            booking.eventCategory || "Event",
-
-          // TICKET DETAILS
-          ticketPrice: booking.ticketPrice ?? 0,
-
-          numberOfTickets:
-            booking.numberOfTickets || 0,
-
-          attendees: Array.isArray(booking.attendees)
-            ? booking.attendees
-            : [],
-
-          totalAmount: booking.totalAmount ?? 0,
-
-          bookingDate:
-            booking.bookingDate ||
-            booking.createdAt ||
-            "",
-
-          status:
-            booking.status || "Confirmed",
-        };
-      });
+      );
 
       console.log(
         "FINAL BOOKINGS:",
         finalBookings
       );
 
-      // Display bookings in Admin Frontend
+      // =================================================
+      // IMPORTANT:
+      // DISPLAY IMMEDIATELY
+      // =================================================
+
       setBookings(finalBookings);
 
-      // =====================================================
-      // STORE EACH BOOKING IN ADMIN DATABASE
-      // =====================================================
+      setLoading(false);
 
-      for (const booking of finalBookings) {
-        await storeBooking(booking);
-      }
+      // =================================================
+      // STORE IN ADMIN BACKEND
+      // DO NOT WAIT ONE BY ONE
+      // =================================================
+
+      console.log(
+        "Starting Admin DB sync..."
+      );
+
+      Promise.all(
+        finalBookings.map((booking) =>
+          storeBooking(booking)
+        )
+      )
+        .then(() => {
+          console.log(
+            "All bookings synced to Admin Backend."
+          );
+        })
+        .catch((error) => {
+          console.error(
+            "ADMIN SYNC ERROR:",
+            error
+          );
+        });
     } catch (error) {
       console.error(
         "BOOKING FETCH ERROR:",
@@ -162,13 +206,12 @@ function Bookings() {
       );
 
       setBookings([]);
-    } finally {
       setLoading(false);
     }
   };
 
   // =====================================================
-  // LOAD BOOKINGS WHEN PAGE OPENS
+  // LOAD BOOKINGS
   // =====================================================
 
   useEffect(() => {
@@ -241,112 +284,111 @@ function Bookings() {
               key={booking.sourceBookingId}
             >
 
-              {/* EVENT NAME */}
+              {/* CARD HEADER */}
 
-              <div className="booking-content">
+              <div className="booking-card-header">
 
-                <div className="booking-title-row">
+                <h3>
+                  {booking.eventName}
+                </h3>
 
-                  <h3>
-                    {booking.eventName}
-                  </h3>
+                <span
+                  className={
+                    booking.status === "Cancelled"
+                      ? "booking-status cancelled"
+                      : "booking-status confirmed"
+                  }
+                >
+                  {booking.status}
+                </span>
 
-                  <span
-                    className={
-                      booking.status === "Cancelled"
-                        ? "booking-status cancelled"
-                        : "booking-status confirmed"
-                    }
-                  >
-                    {booking.status}
-                  </span>
+              </div>
 
-                </div>
+              {/* USER DETAILS */}
 
-                {/* USER DETAILS */}
+              <div className="booking-section">
 
-                <div className="booking-section">
+                <h4>
+                  User Details
+                </h4>
 
-                  <h4>
-                    User Details
-                  </h4>
+                <p>
+                  <strong>Name:</strong>{" "}
+                  {booking.userName}
+                </p>
 
-                  <p>
-                    <strong>Name:</strong>{" "}
-                    {booking.userName}
-                  </p>
+                <p>
+                  <strong>Email:</strong>{" "}
+                  {booking.userEmail}
+                </p>
 
-                  <p>
-                    <strong>Email:</strong>{" "}
-                    {booking.userEmail}
-                  </p>
+              </div>
 
-                </div>
+              {/* EVENT DETAILS */}
 
-                {/* EVENT DETAILS */}
+              <div className="booking-section">
 
-                <div className="booking-section">
+                <h4>
+                  Event Details
+                </h4>
 
-                  <h4>
-                    Event Details
-                  </h4>
+                <p>
+                  <strong>Event:</strong>{" "}
+                  {booking.eventName}
+                </p>
 
-                  <p>
-                    <strong>Event:</strong>{" "}
-                    {booking.eventName}
-                  </p>
+                <p>
+                  <strong>Date:</strong>{" "}
+                  {booking.eventDate
+                    ? new Date(
+                        booking.eventDate
+                      ).toLocaleDateString(
+                        "en-IN"
+                      )
+                    : "N/A"}
+                </p>
 
-                  <p>
-                    <strong>Date:</strong>{" "}
-                    {booking.eventDate
-                      ? new Date(
-                          booking.eventDate
-                        ).toLocaleDateString()
-                      : "N/A"}
-                  </p>
+                <p>
+                  <strong>Time:</strong>{" "}
+                  {booking.eventTime || "N/A"}
+                </p>
 
-                  <p>
-                    <strong>Time:</strong>{" "}
-                    {booking.eventTime || "N/A"}
-                  </p>
+                <p>
+                  <strong>Location:</strong>{" "}
+                  {booking.eventLocation ||
+                    "N/A"}
+                </p>
 
-                  <p>
-                    <strong>Location:</strong>{" "}
-                    {booking.eventLocation || "N/A"}
-                  </p>
+              </div>
 
-                </div>
+              {/* TICKET DETAILS */}
 
-                {/* TICKET DETAILS */}
+              <div className="booking-section">
 
-                <div className="booking-section">
+                <h4>
+                  Ticket Details
+                </h4>
 
-                  <h4>
-                    Ticket Details
-                  </h4>
+                <p>
+                  <strong>
+                    Number of Tickets:
+                  </strong>{" "}
+                  {booking.numberOfTickets}
+                </p>
 
-                  <p>
-                    <strong>
-                      Number of Tickets:
-                    </strong>{" "}
-                    {booking.numberOfTickets}
-                  </p>
+                <p>
+                  <strong>
+                    Ticket Price:
+                  </strong>{" "}
+                  ₹{booking.ticketPrice}
+                </p>
 
-                  <p>
-                    <strong>
-                      Ticket Price:
-                    </strong>{" "}
-                    ₹{booking.ticketPrice}
-                  </p>
-
-                  <p>
-                    <strong>
-                      Total Amount:
-                    </strong>{" "}
-                    ₹{booking.totalAmount}
-                  </p>
-
-                </div>
+                <p>
+                  <strong>
+                    Total Amount:
+                  </strong>{" "}
+                  ₹{booking.totalAmount}
+                </p>
 
               </div>
 
