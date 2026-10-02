@@ -1,10 +1,14 @@
+
 /* =====================================================
    USERS PAGE
 ===================================================== */
 
 .users-page {
+  width: 100%;
   min-height: 100vh;
-  padding: 35px;
+  box-sizing: border-box;
+  padding: 32px 36px 50px;
+
   background:
     radial-gradient(
       circle at top right,
@@ -12,7 +16,10 @@
       transparent 35%
     ),
     #0b1020;
+
   color: #f7f5f0;
+
+  overflow-x: hidden;
 }
 
 
@@ -21,15 +28,18 @@
 ===================================================== */
 
 .users-header {
+  width: 100%;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 30px;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 28px;
 }
 
 .users-label {
   display: inline-block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+
   color: #9b8cff;
   font-size: 12px;
   font-weight: 700;
@@ -38,14 +48,18 @@
 
 .users-header h1 {
   margin: 0;
-  font-size: 36px;
+
+  font-size: 34px;
+  line-height: 1.2;
   font-weight: 800;
 }
 
 .users-header p {
-  margin-top: 10px;
+  margin: 9px 0 0;
+
   color: #9ca3b5;
-  font-size: 15px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 
@@ -54,13 +68,21 @@
 ===================================================== */
 
 .refresh-btn {
+  flex-shrink: 0;
+
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.07);
+
   color: white;
+
   padding: 12px 20px;
   border-radius: 12px;
+
   cursor: pointer;
+
   font-weight: 700;
+  white-space: nowrap;
+
   transition: 0.25s;
 }
 
@@ -69,24 +91,38 @@
   transform: translateY(-2px);
 }
 
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 
 /* =====================================================
    ERROR
 ===================================================== */
 
 .users-error {
+  width: 100%;
+  box-sizing: border-box;
+
   display: flex;
-  gap: 15px;
   align-items: center;
+  gap: 15px;
+
   padding: 18px 20px;
   margin-bottom: 25px;
+
   border: 1px solid rgba(255, 101, 79, 0.3);
+
   background: rgba(255, 101, 79, 0.08);
+
   border-radius: 15px;
 }
 
 .users-error > span {
   font-size: 25px;
+  flex-shrink: 0;
 }
 
 .users-error strong {
@@ -104,39 +140,58 @@
 ===================================================== */
 
 .users-stats {
+  width: 100%;
+
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 18px;
   margin-bottom: 25px;
 }
 
 .stat-card {
+  min-width: 0;
+
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 23px;
+
+  padding: 21px;
+
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
+
   background: rgba(255,255,255,0.055);
+
   backdrop-filter: blur(15px);
+
+  box-sizing: border-box;
 }
 
 .stat-icon {
   width: 48px;
   height: 48px;
+
+  flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 14px;
+
   background: rgba(108,59,255,0.18);
   color: #a996ff;
+
   font-size: 21px;
 }
 
 .stat-card span {
   display: block;
+
   color: #9299ac;
   font-size: 13px;
+
   margin-bottom: 5px;
 }
 
@@ -150,33 +205,48 @@
 ===================================================== */
 
 .users-toolbar {
+  width: 100%;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .search-box {
-  width: 450px;
+  width: 430px;
+  max-width: 100%;
+
+  box-sizing: border-box;
+
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 13px 17px;
+
+  padding: 12px 16px;
+
   border-radius: 13px;
+
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.09);
 }
 
 .search-box span {
+  flex-shrink: 0;
   color: #8f96a9;
 }
 
 .search-box input {
   width: 100%;
+  min-width: 0;
+
   border: none;
   outline: none;
+
   background: transparent;
+
   color: white;
   font-size: 14px;
 }
@@ -186,8 +256,34 @@
 }
 
 .record-count {
+  flex-shrink: 0;
+
   color: #8e95a8;
   font-size: 13px;
+}
+
+
+/* =====================================================
+   TABLE CONTAINER
+===================================================== */
+
+.users-table-container {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  border-radius: 18px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  background: rgba(255,255,255,0.045);
+
+  backdrop-filter: blur(15px);
+
+  scrollbar-width: thin;
 }
 
 
@@ -195,38 +291,109 @@
    TABLE
 ===================================================== */
 
-.users-table-container {
-  width: 100%;
-  overflow-x: auto;
-  border-radius: 18px;
-  border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.045);
-  backdrop-filter: blur(15px);
-}
-
 .users-table {
   width: 100%;
+
+  /*
+     Important:
+     Do NOT use 1300px here.
+     It was causing the Updated At column
+     to move outside the visible area.
+  */
+
+  min-width: 1050px;
+
   border-collapse: collapse;
-  min-width: 1300px;
+
+  table-layout: fixed;
 }
 
+
+/* =====================================================
+   COLUMN WIDTHS
+===================================================== */
+
+/* S NO */
+.users-table th:nth-child(1),
+.users-table td:nth-child(1) {
+  width: 65px;
+}
+
+/* USER */
+.users-table th:nth-child(2),
+.users-table td:nth-child(2) {
+  width: 245px;
+}
+
+/* EMAIL */
+.users-table th:nth-child(3),
+.users-table td:nth-child(3) {
+  width: 250px;
+}
+
+/* STATUS */
+.users-table th:nth-child(4),
+.users-table td:nth-child(4) {
+  width: 120px;
+}
+
+/* CREATED */
+.users-table th:nth-child(5),
+.users-table td:nth-child(5) {
+  width: 185px;
+}
+
+/* UPDATED */
+.users-table th:nth-child(6),
+.users-table td:nth-child(6) {
+  width: 185px;
+}
+
+
+/* =====================================================
+   TABLE HEADER
+===================================================== */
+
 .users-table th {
-  padding: 17px;
+  height: 52px;
+
+  padding: 0 16px;
+
   text-align: left;
+  vertical-align: middle;
+
   background: rgba(255,255,255,0.06);
+
   color: #a9afbf;
+
   font-size: 11px;
+  font-weight: 700;
+
   text-transform: uppercase;
   letter-spacing: 0.8px;
+
   white-space: nowrap;
 }
 
+
+/* =====================================================
+   TABLE DATA
+===================================================== */
+
 .users-table td {
-  padding: 18px 17px;
+  height: 78px;
+
+  padding: 12px 16px;
+
   border-top: 1px solid rgba(255,255,255,0.06);
+
   color: #d7dae3;
+
   font-size: 13px;
+
   vertical-align: middle;
+
+  box-sizing: border-box;
 }
 
 .users-table tbody tr {
@@ -239,58 +406,97 @@
 
 
 /* =====================================================
+   SERIAL NUMBER
+===================================================== */
+
+.users-table td:first-child {
+  color: #d5d8e2;
+  font-weight: 600;
+}
+
+
+/* =====================================================
    USER INFO
 ===================================================== */
 
 .user-info {
+  width: 100%;
+
   display: flex;
   align-items: center;
+
   gap: 12px;
-  min-width: 190px;
+
+  min-width: 0;
 }
 
 .user-avatar {
   width: 42px;
   height: 42px;
+
   flex-shrink: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   border-radius: 50%;
+
   background: linear-gradient(
     135deg,
     #6c3bff,
     #ff654f
   );
+
   color: white;
+
   font-weight: 800;
+}
+
+.user-info > div:last-child {
+  min-width: 0;
 }
 
 .user-info strong {
   display: block;
+
   color: white;
+
   margin-bottom: 4px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-info span {
+  display: block;
+
   color: #8c93a5;
+
   font-size: 12px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 
 /* =====================================================
-   IDS
+   EMAIL
 ===================================================== */
 
-.id-text {
+.users-table td:nth-child(3) {
+  overflow: hidden;
+}
+
+.users-table td:nth-child(3) .date-text {
   display: block;
-  max-width: 150px;
+
   overflow: hidden;
   text-overflow: ellipsis;
+
   white-space: nowrap;
-  color: #aaa0ff;
-  font-family: monospace;
-  font-size: 11px;
 }
 
 
@@ -299,8 +505,15 @@
 ===================================================== */
 
 .date-text {
+  display: block;
+
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   color: #c4c8d4;
+
+  font-size: 12px;
 }
 
 
@@ -311,11 +524,18 @@
 .status-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+
   gap: 7px;
+
   padding: 7px 11px;
+
   border-radius: 30px;
+
   font-size: 11px;
   font-weight: 700;
+
+  white-space: nowrap;
 }
 
 .status-badge.active {
@@ -331,7 +551,11 @@
 .status-dot {
   width: 6px;
   height: 6px;
+
+  flex-shrink: 0;
+
   border-radius: 50%;
+
   background: currentColor;
 }
 
@@ -341,7 +565,8 @@
 ===================================================== */
 
 .empty-table {
-  text-align: center;
+  text-align: center !important;
+
   padding: 70px !important;
 }
 
@@ -352,6 +577,7 @@
 
 .empty-table strong {
   display: block;
+
   color: white;
   font-size: 16px;
 }
@@ -367,8 +593,10 @@
 
 .users-loading {
   min-height: 70vh;
+
   display: flex;
   flex-direction: column;
+
   justify-content: center;
   align-items: center;
 }
@@ -384,9 +612,13 @@
 .loading-spinner {
   width: 45px;
   height: 45px;
+
   border-radius: 50%;
+
   border: 3px solid rgba(255,255,255,0.1);
+
   border-top-color: #6c3bff;
+
   animation: spin 0.8s linear infinite;
 }
 
@@ -401,6 +633,24 @@
    RESPONSIVE
 ===================================================== */
 
+@media (max-width: 1200px) {
+
+  .users-page {
+    padding: 28px 25px 45px;
+  }
+
+  .users-table {
+    min-width: 1000px;
+  }
+
+  .users-table th,
+  .users-table td {
+    padding-left: 13px;
+    padding-right: 13px;
+  }
+}
+
+
 @media (max-width: 900px) {
 
   .users-page {
@@ -409,7 +659,11 @@
 
   .users-header {
     flex-direction: column;
-    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .refresh-btn {
+    align-self: flex-start;
   }
 
   .users-stats {
@@ -422,7 +676,35 @@
   }
 
   .search-box {
-    width: auto;
+    width: 100%;
   }
 
+  .record-count {
+    text-align: right;
+  }
 }
+
+
+@media (max-width: 600px) {
+
+  .users-page {
+    padding: 16px;
+  }
+
+  .users-header h1 {
+    font-size: 28px;
+  }
+
+  .users-header p {
+    font-size: 13px;
+  }
+
+  .stat-card {
+    padding: 18px;
+  }
+
+  .users-table-container {
+    border-radius: 14px;
+  }
+}
+
