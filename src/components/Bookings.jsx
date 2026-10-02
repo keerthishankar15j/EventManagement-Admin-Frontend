@@ -1,16 +1,9 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
-
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/Bookings.css";
 
-const USER_API =
-  "https://user-api-iota-six.vercel.app";
-
-const ADMIN_API =
-  "https://api-admin-rouge.vercel.app";
+const USER_API = "https://user-api-iota-six.vercel.app";
+const ADMIN_API = "https://api-admin-rouge.vercel.app";
 
 function Bookings() {
   const [bookings, setBookings] = useState([]);
@@ -22,28 +15,20 @@ function Bookings() {
 
   const storeBooking = async (booking) => {
     try {
-      console.log(
-        "SENDING BOOKING TO ADMIN:",
-        booking
-      );
+      console.log("SENDING BOOKING TO ADMIN:", booking);
 
       const response = await axios.post(
         `${ADMIN_API}/bookings/store`,
         booking
       );
 
-      console.log(
-        "ADMIN STORE RESPONSE:",
-        response.data
-      );
+      console.log("ADMIN STORE RESPONSE:", response.data);
 
       return response.data;
-
     } catch (error) {
       console.error(
         "ADMIN STORE ERROR:",
-        error.response?.data ||
-          error.message
+        error.response?.data || error.message
       );
 
       return null;
@@ -51,54 +36,36 @@ function Bookings() {
   };
 
   // =====================================================
-  // FETCH USER BOOKINGS
+  // FETCH BOOKINGS FROM USER BACKEND
   // =====================================================
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
 
-      console.log(
-        "Fetching bookings from User Backend..."
-      );
-
-      // =================================================
-      // GET BOOKINGS
-      // =================================================
+      console.log("Fetching bookings from User Backend...");
 
       const response = await axios.get(
         `${USER_API}/booking/getbookings`
       );
 
-      console.log(
-        "USER BOOKING RESPONSE:",
-        response.data
-      );
-
-      // =================================================
-      // GET BOOKINGS ARRAY
-      // =================================================
+      console.log("USER BOOKING RESPONSE:", response.data);
 
       let bookingData = [];
 
-      if (
-        Array.isArray(response.data)
-      ) {
+      // If response itself is an array
+      if (Array.isArray(response.data)) {
         bookingData = response.data;
-      } else if (
-        Array.isArray(
-          response.data.bookings
-        )
-      ) {
-        bookingData =
-          response.data.bookings;
-      } else if (
-        Array.isArray(
-          response.data.data
-        )
-      ) {
-        bookingData =
-          response.data.data;
+      }
+
+      // If response is { bookings: [] }
+      else if (Array.isArray(response.data.bookings)) {
+        bookingData = response.data.bookings;
+      }
+
+      // If response is { data: [] }
+      else if (Array.isArray(response.data.data)) {
+        bookingData = response.data.data;
       }
 
       console.log(
@@ -106,215 +73,102 @@ function Bookings() {
         bookingData
       );
 
-      // =================================================
-      // PROCESS EACH BOOKING
-      // =================================================
+      // =====================================================
+      // NORMALIZE BOOKING DATA
+      // =====================================================
 
-      const bookingsWithImages =
-        await Promise.all(
-          bookingData.map(
-            async (booking) => {
-              let eventData = null;
-              let eventImage = "";
+      const finalBookings = bookingData.map((booking) => {
+        let userName = booking.userName || "";
 
-              // =================================================
-              // USER NAME
-              // =================================================
+        // Old booking may not have userName
+        // So get name from first attendee
+        if (
+          !userName &&
+          Array.isArray(booking.attendees) &&
+          booking.attendees.length > 0
+        ) {
+          userName = booking.attendees[0]?.name || "";
+        }
 
-              let userName =
-                booking.userName || "";
+        // If still empty
+        if (!userName) {
+          userName = "User";
+        }
 
-              // Old booking may not have userName
-              if (
-                !userName &&
-                Array.isArray(
-                  booking.attendees
-                ) &&
-                booking.attendees.length >
-                  0
-              ) {
-                userName =
-                  booking.attendees[0]
-                    ?.name || "";
-              }
+        return {
+          sourceBookingId: booking._id,
 
-              // If still empty
-              if (!userName) {
-                userName = "User";
-              }
+          userId: booking.userId || null,
 
-              // =================================================
-              // GET EVENT DETAILS
-              // =================================================
+          userName: userName,
 
-              if (booking.eventId) {
-                try {
-                  const eventResponse =
-                    await axios.get(
-                      `${USER_API}/events/get/${booking.eventId}`
-                    );
+          userEmail: booking.userEmail || "",
 
-                  console.log(
-                    "EVENT RESPONSE:",
-                    eventResponse.data
-                  );
+          eventId: booking.eventId || null,
 
-                  eventData =
-                    eventResponse.data?.data;
+          // EVENT DETAILS
+          eventName: booking.eventName || "Event",
 
-                  // Get event image
-                  eventImage =
-                    eventData?.imageUrl ||
-                    "";
+          eventDate: booking.eventDate || "",
 
-                } catch (error) {
-                  // =================================================
-                  // EVENT NO LONGER EXISTS
-                  // =================================================
+          eventTime: booking.eventTime || "",
 
-                  console.log(
-                    `Event ${booking.eventId} not found. Using booking data.`
-                  );
+          eventLocation: booking.eventLocation || "",
 
-                  eventData = null;
+          eventCategory:
+            booking.eventCategory || "Event",
 
-                  eventImage = "";
-                }
-              }
+          // TICKET DETAILS
+          ticketPrice: booking.ticketPrice ?? 0,
 
-              // =================================================
-              // FINAL BOOKING OBJECT
-              // =================================================
+          numberOfTickets:
+            booking.numberOfTickets || 0,
 
-              return {
-                // User booking ID
-                sourceBookingId:
-                  booking._id,
+          attendees: Array.isArray(booking.attendees)
+            ? booking.attendees
+            : [],
 
-                // User details
-                userId:
-                  booking.userId ||
-                  null,
+          totalAmount: booking.totalAmount ?? 0,
 
-                userName:
-                  userName,
+          bookingDate:
+            booking.bookingDate ||
+            booking.createdAt ||
+            "",
 
-                userEmail:
-                  booking.userEmail ||
-                  "",
-
-                // Event details
-                eventId:
-                  booking.eventId ||
-                  null,
-
-                eventName:
-                  booking.eventName ||
-                  eventData?.name ||
-                  "Event",
-
-                eventDate:
-                  booking.eventDate ||
-                  eventData?.date ||
-                  "",
-
-                eventTime:
-                  booking.eventTime ||
-                  eventData?.time ||
-                  "",
-
-                eventLocation:
-                  booking.eventLocation ||
-                  eventData?.location ||
-                  "",
-
-                eventCategory:
-                  booking.eventCategory ||
-                  eventData?.category ||
-                  "Event",
-
-                // Event image
-                eventImage:
-                  eventImage,
-
-                // Ticket details
-                ticketPrice:
-                  booking.ticketPrice ??
-                  eventData?.ticketPrice ??
-                  0,
-
-                numberOfTickets:
-                  booking.numberOfTickets ||
-                  0,
-
-                // Attendees
-                attendees:
-                  Array.isArray(
-                    booking.attendees
-                  )
-                    ? booking.attendees
-                    : [],
-
-                // Amount
-                totalAmount:
-                  booking.totalAmount ??
-                  0,
-
-                // Booking details
-                bookingDate:
-                  booking.bookingDate ||
-                  booking.createdAt ||
-                  "",
-
-                status:
-                  booking.status ||
-                  "Confirmed",
-              };
-            }
-          )
-        );
+          status:
+            booking.status || "Confirmed",
+        };
+      });
 
       console.log(
         "FINAL BOOKINGS:",
-        bookingsWithImages
+        finalBookings
       );
 
-      // =================================================
-      // DISPLAY BOOKINGS
-      // =================================================
+      // Display bookings in Admin Frontend
+      setBookings(finalBookings);
 
-      setBookings(
-        bookingsWithImages
-      );
+      // =====================================================
+      // STORE EACH BOOKING IN ADMIN DATABASE
+      // =====================================================
 
-      // =================================================
-      // STORE IN ADMIN BACKEND
-      // =================================================
-
-      for (
-        const booking of bookingsWithImages
-      ) {
-        await storeBooking(
-          booking
-        );
+      for (const booking of finalBookings) {
+        await storeBooking(booking);
       }
-
     } catch (error) {
       console.error(
         "BOOKING FETCH ERROR:",
-        error.response?.data ||
-          error.message
+        error.response?.data || error.message
       );
 
       setBookings([]);
-
     } finally {
       setLoading(false);
     }
   };
 
   // =====================================================
-  // LOAD BOOKINGS
+  // LOAD BOOKINGS WHEN PAGE OPENS
   // =====================================================
 
   useEffect(() => {
@@ -336,36 +190,35 @@ function Bookings() {
   }
 
   // =====================================================
-  // MAIN UI
+  // PAGE
   // =====================================================
 
   return (
     <div className="bookings-page">
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+      {/* HEADER */}
 
       <div className="bookings-header">
+
         <div>
           <h1>Bookings</h1>
 
           <p>
-            Manage all event bookings
+            View all event bookings
           </p>
         </div>
 
         <div className="booking-count">
           {bookings.length} Bookings
         </div>
+
       </div>
 
-      {/* =================================================
-          NO BOOKINGS
-      ================================================= */}
+      {/* NO BOOKINGS */}
 
       {bookings.length === 0 ? (
         <div className="no-bookings">
+
           <h3>
             No bookings found
           </h3>
@@ -373,70 +226,34 @@ function Bookings() {
           <p>
             There are no bookings available.
           </p>
+
         </div>
       ) : (
 
-        /* =================================================
-           BOOKING GRID
-        ================================================= */
+        /* BOOKINGS */
 
         <div className="bookings-grid">
 
-          {bookings.map(
-            (booking) => (
+          {bookings.map((booking) => (
 
-              <div
-                className="booking-card"
-                key={
-                  booking.sourceBookingId
-                }
-              >
+            <div
+              className="booking-card"
+              key={booking.sourceBookingId}
+            >
 
-                {/* =========================================
-                    EVENT IMAGE
-                ========================================= */}
+              {/* EVENT NAME */}
 
-                <div className="booking-image">
+              <div className="booking-content">
 
-                  {booking.eventImage ? (
-
-                    <img
-                      src={
-                        booking.eventImage
-                      }
-                      alt={
-                        booking.eventName
-                      }
-                    />
-
-                  ) : (
-
-                    <div className="no-image">
-                      No Image
-                    </div>
-
-                  )}
-
-                </div>
-
-                {/* =========================================
-                    BOOKING CONTENT
-                ========================================= */}
-
-                <div className="booking-content">
-
-                  {/* EVENT NAME */}
+                <div className="booking-title-row">
 
                   <h3>
                     {booking.eventName}
                   </h3>
 
-                  {/* STATUS */}
-
                   <span
                     className={
-                      booking.status ===
-                      "Cancelled"
+                      booking.status === "Cancelled"
                         ? "booking-status cancelled"
                         : "booking-status confirmed"
                     }
@@ -444,127 +261,101 @@ function Bookings() {
                     {booking.status}
                   </span>
 
-                  {/* =====================================
-                      USER DETAILS
-                  ===================================== */}
+                </div>
 
-                  <div className="booking-section">
+                {/* USER DETAILS */}
 
-                    <h4>
-                      User Details
-                    </h4>
+                <div className="booking-section">
 
-                    <p>
-                      <strong>
-                        Name:
-                      </strong>{" "}
-                      {booking.userName}
-                    </p>
+                  <h4>
+                    User Details
+                  </h4>
 
-                    <p>
-                      <strong>
-                        Email:
-                      </strong>{" "}
-                      {booking.userEmail}
-                    </p>
+                  <p>
+                    <strong>Name:</strong>{" "}
+                    {booking.userName}
+                  </p>
 
-                  </div>
+                  <p>
+                    <strong>Email:</strong>{" "}
+                    {booking.userEmail}
+                  </p>
 
-                  {/* =====================================
-                      EVENT DETAILS
-                  ===================================== */}
+                </div>
 
-                  <div className="booking-section">
+                {/* EVENT DETAILS */}
 
-                    <h4>
-                      Event Details
-                    </h4>
+                <div className="booking-section">
 
-                    <p>
-                      <strong>
-                        Date:
-                      </strong>{" "}
-                      {booking.eventDate
-                        ? new Date(
-                            booking.eventDate
-                          ).toLocaleDateString()
-                        : "N/A"}
-                    </p>
+                  <h4>
+                    Event Details
+                  </h4>
 
-                    <p>
-                      <strong>
-                        Time:
-                      </strong>{" "}
-                      {booking.eventTime ||
-                        "N/A"}
-                    </p>
+                  <p>
+                    <strong>Event:</strong>{" "}
+                    {booking.eventName}
+                  </p>
 
-                    <p>
-                      <strong>
-                        Location:
-                      </strong>{" "}
-                      {booking.eventLocation ||
-                        "N/A"}
-                    </p>
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {booking.eventDate
+                      ? new Date(
+                          booking.eventDate
+                        ).toLocaleDateString()
+                      : "N/A"}
+                  </p>
 
-                    <p>
-                      <strong>
-                        Category:
-                      </strong>{" "}
-                      {booking.eventCategory ||
-                        "Event"}
-                    </p>
+                  <p>
+                    <strong>Time:</strong>{" "}
+                    {booking.eventTime || "N/A"}
+                  </p>
 
-                  </div>
+                  <p>
+                    <strong>Location:</strong>{" "}
+                    {booking.eventLocation || "N/A"}
+                  </p>
 
-                  {/* =====================================
-                      TICKET DETAILS
-                  ===================================== */}
+                </div>
 
-                  <div className="booking-section">
+                {/* TICKET DETAILS */}
 
-                    <h4>
-                      Ticket Details
-                    </h4>
+                <div className="booking-section">
 
-                    <p>
-                      <strong>
-                        Tickets:
-                      </strong>{" "}
-                      {
-                        booking.numberOfTickets
-                      }
-                    </p>
+                  <h4>
+                    Ticket Details
+                  </h4>
 
-                    <p>
-                      <strong>
-                        Ticket Price:
-                      </strong>{" "}
-                      ₹
-                      {
-                        booking.ticketPrice
-                      }
-                    </p>
+                  <p>
+                    <strong>
+                      Number of Tickets:
+                    </strong>{" "}
+                    {booking.numberOfTickets}
+                  </p>
 
-                    <p>
-                      <strong>
-                        Total Amount:
-                      </strong>{" "}
-                      ₹
-                      {
-                        booking.totalAmount
-                      }
-                    </p>
+                  <p>
+                    <strong>
+                      Ticket Price:
+                    </strong>{" "}
+                    ₹{booking.ticketPrice}
+                  </p>
 
-                  </div>
+                  <p>
+                    <strong>
+                      Total Amount:
+                    </strong>{" "}
+                    ₹{booking.totalAmount}
+                  </p>
 
                 </div>
 
               </div>
-            )
-          )}
+
+            </div>
+
+          ))}
 
         </div>
+
       )}
 
     </div>
