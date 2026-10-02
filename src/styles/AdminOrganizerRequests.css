@@ -1,6 +1,6 @@
 .organizer-page {
-  min-height: 100vh;
   padding: 30px;
+  min-height: 100vh;
   background: #f7f5f0;
 }
 
@@ -8,62 +8,41 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
 }
 
 .organizer-header h1 {
   margin: 0;
-  font-size: 30px;
   color: #0b1020;
+  font-size: 30px;
 }
 
 .organizer-header p {
-  margin-top: 8px;
   color: #777;
 }
 
-.request-count {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  background: #6c3bff;
-  color: white;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.request-count span {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.request-table-wrapper {
-  width: 100%;
-  overflow-x: auto;
+.organizer-table-container {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.07);
+  border-radius: 12px;
+  overflow-x: auto;
 }
 
-.request-table {
+.organizer-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.request-table th {
-  padding: 18px;
-  text-align: left;
+.organizer-table th {
   background: #0b1020;
   color: white;
+  padding: 15px;
+  text-align: left;
   font-size: 13px;
 }
 
-.request-table td {
-  padding: 18px;
-  border-bottom: 1px solid #eeeeee;
-  font-size: 14px;
+.organizer-table td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
 }
 
 .user-info {
@@ -78,113 +57,86 @@
 
 .user-info span {
   color: #777;
-  font-size: 12px;
+  font-size: 13px;
 }
 
-.status {
-  display: inline-block;
+.status-badge {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
 }
 
-.status.pending {
+.status-badge.pending {
   background: #fff3cd;
   color: #856404;
 }
 
-.status.accepted {
+.status-badge.approved {
   background: #d4edda;
   color: #155724;
 }
 
-.status.rejected {
+.status-badge.rejected {
   background: #f8d7da;
   color: #721c24;
 }
 
 .view-btn {
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
   background: #6c3bff;
   color: white;
+  padding: 8px 15px;
+  border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
 }
 
 .view-btn:hover {
-  opacity: 0.85;
+  background: #5730d6;
 }
 
-.no-requests {
-  padding: 80px 20px;
+.empty-message {
   text-align: center;
-  background: white;
-  border-radius: 16px;
-}
-
-.no-requests h2 {
-  color: #0b1020;
-}
-
-.no-requests p {
+  padding: 40px !important;
   color: #777;
 }
 
-.organizer-loading {
+.loading-box {
+  text-align: center;
   padding: 80px;
-  text-align: center;
+  font-size: 18px;
 }
 
-.organizer-error {
-  padding: 60px;
-  text-align: center;
-  background: white;
-  border-radius: 16px;
-}
-
-.organizer-error button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background: #6c3bff;
-  color: white;
-  cursor: pointer;
-}
-
-/* =====================================================
+/* ==============================
    MODAL
-===================================================== */
+================================ */
 
-.organizer-modal-overlay {
+.modal-overlay {
   position: fixed;
   inset: 0;
+  background: rgba(0, 0, 0, 0.55);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
   padding: 20px;
-  background: rgba(0, 0, 0, 0.55);
-  z-index: 9999;
 }
 
 .organizer-modal {
-  width: 100%;
-  max-width: 750px;
+  width: 700px;
+  max-width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   background: white;
-  border-radius: 18px;
+  border-radius: 15px;
+  padding: 25px;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 25px;
-  border-bottom: 1px solid #eeeeee;
+  margin-bottom: 25px;
 }
 
 .modal-header h2 {
@@ -193,41 +145,131 @@
 }
 
 .modal-header p {
-  margin-top: 6px;
   color: #777;
 }
 
 .close-btn {
+  border: none;
+  background: #f1f1f1;
   width: 35px;
   height: 35px;
-  border: none;
   border-radius: 50%;
-  background: #f1f1f1;
   font-size: 24px;
   cursor: pointer;
 }
 
-.modal-content {
-  padding: 25px;
-}
-
 .detail-section {
-  margin-bottom: 25px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eeeeee;
-}
-
-.detail-section:last-child {
-  border-bottom: none;
+  margin-bottom: 22px;
 }
 
 .detail-section h3 {
-  margin-bottom: 15px;
-  color: #6c3bff;
+  margin-bottom: 12px;
+  color: #0b1020;
 }
 
-.detail-section p {
-  margin: 8px 0;
-  color: #444;
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.detail-grid label {
+  color: #777;
+  font-size: 12px;
+}
+
+.detail-grid p {
+  margin-top: 5px;
+  font-weight: 600;
+}
+
+.description-box {
+  background: #f7f5f0;
+  padding: 15px;
+  border-radius: 8px;
   line-height: 1.6;
+}
+
+.admin-message-section {
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.admin-message-section h3 {
+  color: #0b1020;
+}
+
+.admin-message-section textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  resize: vertical;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+}
+
+.admin-message-section textarea:focus {
+  border-color: #6c3bff;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.reject-btn,
+.approve-btn {
+  border: none;
+  padding: 11px 22px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.reject-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.approve-btn {
+  background: #28a745;
+  color: white;
+}
+
+.reject-btn:disabled,
+.approve-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+
+  .organizer-page {
+    padding: 15px;
+  }
+
+  .organizer-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .reject-btn,
+  .approve-btn {
+    width: 100%;
+  }
 }

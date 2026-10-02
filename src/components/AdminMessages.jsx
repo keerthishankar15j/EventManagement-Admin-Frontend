@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "../styles/AdminMessages.css";
+import "./AdminMessages.css";
 
-const API_URL = (
-  import.meta.env.VITE_API_URL ||
-  "https://api-admin-rouge.vercel.app"
-).replace(/\/+$/, "");
+const API_URL =
+  import.meta.env.VITE_API_URL || "https://api-admin-rouge.vercel.app";
 
 const AdminMessages = () => {
-
   const [messages, setMessages] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -17,608 +14,316 @@ const AdminMessages = () => {
 
   const [selectedMessage, setSelectedMessage] = useState(null);
 
+  const [reply, setReply] = useState("");
+  const [replyLoading, setReplyLoading] = useState(false);
 
   // =====================================================
   // FETCH MESSAGES
   // =====================================================
 
-  const fetchMessages = async (isRefresh = false) => {
-
+  const fetchMessages = async () => {
     try {
-
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
       setError("");
-
-      console.log("MESSAGES PAGE: API CALL");
 
       const response = await axios.get(
         `${API_URL}/user-contact/messages`
       );
 
-      console.log(
-        "Messages API Response:",
-        response.data
-      );
-
-
-      const receivedMessages =
-        Array.isArray(response.data?.data)
-          ? response.data.data
-          : [];
-
-
-      setMessages(receivedMessages);
-
+      if (response.data.success) {
+        setMessages(response.data.data || []);
+      } else {
+        setMessages([]);
+      }
     } catch (error) {
-
-      console.error(
-        "Messages Error:",
-        error
-      );
-
-      console.error(
-        "Server response:",
-        error.response?.data
-      );
-
-      setError(
-        error.response?.data?.message ||
-        "Unable to fetch messages"
-      );
-
-      setMessages([]);
-
+      console.error("Fetch messages error:", error);
+      setError("Failed to load messages");
     } finally {
-
       setLoading(false);
       setRefreshing(false);
-
     }
-
   };
 
-
-  // =====================================================
-  // INITIAL LOAD
-  // =====================================================
-
   useEffect(() => {
-
     fetchMessages();
-
   }, []);
 
+  // =====================================================
+  // REFRESH
+  // =====================================================
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchMessages();
+  };
+
+  // =====================================================
+  // VIEW MESSAGE
+  // =====================================================
+
+  const handleView = async (id) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/user-contact/messages/${id}`
+      );
+
+      if (response.data.success) {
+        setSelectedMessage(response.data.data);
+        setReply("");
+      }
+    } catch (error) {
+      console.error("Get message error:", error);
+      alert("Failed to load message");
+    }
+  };
+
+  // =====================================================
+  // SEND REPLY
+  // =====================================================
+
+  const sendReply = async () => {
+    if (!reply.trim()) {
+      alert("Please enter your reply");
+      return;
+    }
+
+    if (!selectedMessage?._id) {
+      alert("Message ID not found");
+      return;
+    }
+
+    try {
+      setReplyLoading(true);
+
+      const response = await axios.post(
+        `${API_URL}/user-contact/reply/${selectedMessage._id}`,
+        {
+          reply: reply.trim(),
+        }
+      );
+
+      if (response.data.success) {
+        alert("Reply sent successfully");
+
+        setReply("");
+        setSelectedMessage(null);
+
+        fetchMessages();
+      } else {
+        alert(response.data.message || "Failed to send reply");
+      }
+    } catch (error) {
+      console.error("Send reply error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to send reply"
+      );
+    } finally {
+      setReplyLoading(false);
+    }
+  };
 
   // =====================================================
   // SEARCH
   // =====================================================
 
   const filteredMessages = messages.filter((item) => {
-
-    const searchText =
-      search.toLowerCase().trim();
-
-    if (!searchText) {
-      return true;
-    }
+    const searchText = search.toLowerCase();
 
     return (
-
-      String(item.name || "")
-        .toLowerCase()
-        .includes(searchText)
-
-      ||
-
-      String(item.email || "")
-        .toLowerCase()
-        .includes(searchText)
-
-      ||
-
-      String(item.subject || "")
-        .toLowerCase()
-        .includes(searchText)
-
-      ||
-
-      String(item.message || "")
-        .toLowerCase()
-        .includes(searchText)
-
+      item.name?.toLowerCase().includes(searchText) ||
+      item.email?.toLowerCase().includes(searchText) ||
+      item.subject?.toLowerCase().includes(searchText) ||
+      item.message?.toLowerCase().includes(searchText)
     );
-
   });
 
-
   // =====================================================
-  // DATE FORMAT
+  // LOADING
   // =====================================================
 
-  const formatDate = (date) => {
-
-    if (!date) {
-      return "—";
-    }
-
-    const newDate = new Date(date);
-
-    if (isNaN(newDate.getTime())) {
-      return "—";
-    }
-
-    return newDate.toLocaleDateString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
+  if (loading) {
+    return (
+      <div className="messages-page">
+        <div className="loading-box">
+          Loading messages...
+        </div>
+      </div>
     );
-
-  };
-
-
-  // =====================================================
-  // MESSAGE PREVIEW
-  // =====================================================
-
-  const getMessagePreview = (message) => {
-
-    if (!message) {
-      return "No message";
-    }
-
-    if (message.length <= 70) {
-      return message;
-    }
-
-    return message.substring(0, 70) + "...";
-
-  };
-
+  }
 
   return (
     <div className="messages-page">
 
-
-      {/* =================================================
+      {/* =====================================================
           HEADER
-      ================================================= */}
+      ===================================================== */}
 
       <div className="messages-header">
 
         <div>
-
-          <div className="page-badge">
-            <span>✉</span>
-            INBOX
-          </div>
-
-          <h1>
-            User Messages
-          </h1>
+          <h1>Messages</h1>
 
           <p>
-            View and manage messages received
-            from your users.
+            Manage user queries and send replies
           </p>
-
         </div>
-
 
         <button
           className="refresh-btn"
-          onClick={() => fetchMessages(true)}
+          onClick={handleRefresh}
           disabled={refreshing}
         >
-
-          <span className={refreshing ? "spin" : ""}>
-            ↻
-          </span>
-
-          {refreshing
-            ? "Refreshing..."
-            : "Refresh"
-          }
-
+          {refreshing ? "Refreshing..." : "↻ Refresh"}
         </button>
 
       </div>
 
-
-      {/* =================================================
-          STATS
-      ================================================= */}
-
-      <div className="message-stats">
-
-        <div className="stat-card">
-
-          <div className="stat-icon purple">
-            ✉
-          </div>
-
-          <div>
-
-            <span>
-              Total Messages
-            </span>
-
-            <strong>
-              {messages.length}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <div className="stat-card">
-
-          <div className="stat-icon orange">
-            ●
-          </div>
-
-          <div>
-
-            <span>
-              Unread
-            </span>
-
-            <strong>
-              {messages.filter(
-                (item) =>
-                  !item.status ||
-                  item.status === "Unread"
-              ).length}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <div className="stat-card">
-
-          <div className="stat-icon blue">
-            ?
-          </div>
-
-          <div>
-
-            <span>
-              Queries
-            </span>
-
-            <strong>
-              {messages.filter(
-                (item) =>
-                  item.subject
-              ).length}
-            </strong>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      {/* =================================================
+      {/* =====================================================
           SEARCH
-      ================================================= */}
+      ===================================================== */}
 
       <div className="messages-toolbar">
 
-        <div className="search-box">
+        <input
+          type="text"
+          placeholder="Search by name, email, subject or message..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-          <span>
-            ⌕
-          </span>
-
-          <input
-            type="text"
-            placeholder="Search by name, email, subject or message..."
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-          />
-
-          {search && (
-            <button
-              onClick={() => setSearch("")}
-              className="clear-search"
-            >
-              ×
-            </button>
-          )}
-
-        </div>
-
-        <div className="result-count">
-          {filteredMessages.length} message
-          {filteredMessages.length !== 1
-            ? "s"
-            : ""
-          }
-        </div>
+        <span className="message-count">
+          {filteredMessages.length} Messages
+        </span>
 
       </div>
 
-
-      {/* =================================================
+      {/* =====================================================
           ERROR
-      ================================================= */}
+      ===================================================== */}
 
       {error && (
-
-        <div className="message-error">
-
-          <span>⚠</span>
-
-          <div>
-
-            <strong>
-              Unable to load messages
-            </strong>
-
-            <p>
-              {error}
-            </p>
-
-          </div>
-
-          <button
-            onClick={() => fetchMessages()}
-          >
-            Try Again
-          </button>
-
+        <div className="error-box">
+          {error}
         </div>
-
       )}
 
+      {/* =====================================================
+          TABLE
+      ===================================================== */}
 
-      {/* =================================================
-          LOADING
-      ================================================= */}
+      <div className="messages-table-container">
 
-      {loading ? (
+        <table className="messages-table">
 
-        <div className="message-loading">
+          <thead>
+            <tr>
+              <th>USER</th>
+              <th>SUBJECT</th>
+              <th>MESSAGE</th>
+              <th>STATUS</th>
+              <th>DATE</th>
+              <th>ACTION</th>
+            </tr>
+          </thead>
 
-          <div className="loader"></div>
+          <tbody>
 
-          <p>
-            Loading messages...
-          </p>
-
-        </div>
-
-      ) : filteredMessages.length === 0 ? (
-
-        /* ===============================================
-           EMPTY
-        =============================================== */
-
-        <div className="empty-messages">
-
-          <div className="empty-icon">
-            ✉
-          </div>
-
-          <h2>
-            No Messages Found
-          </h2>
-
-          <p>
-            {search
-              ? "No messages match your search."
-              : "No user messages have been received yet."
-            }
-          </p>
-
-        </div>
-
-      ) : (
-
-        /* ===============================================
-           TABLE
-        =============================================== */
-
-        <div className="messages-table-wrapper">
-
-          <table className="messages-table">
-
-            <thead>
+            {filteredMessages.length === 0 ? (
 
               <tr>
-
-                <th>
-                  USER
-                </th>
-
-                <th>
-                  SUBJECT
-                </th>
-
-                <th>
-                  MESSAGE
-                </th>
-
-                <th>
-                  STATUS
-                </th>
-
-                <th>
-                  DATE
-                </th>
-
-                <th>
-                  ACTION
-                </th>
-
+                <td colSpan="6" className="empty-message">
+                  No messages found
+                </td>
               </tr>
 
-            </thead>
+            ) : (
 
+              filteredMessages.map((item) => (
 
-            <tbody>
+                <tr key={item._id}>
 
-              {filteredMessages.map(
-                (item, index) => (
+                  <td>
+                    <div className="user-info">
 
-                  <tr
-                    key={
-                      item._id ||
-                      item.id ||
-                      index
-                    }
-                  >
+                      <strong>
+                        {item.name || "Unknown User"}
+                      </strong>
 
-                    {/* USER */}
-
-                    <td>
-
-                      <div className="user-cell">
-
-                        <div className="user-avatar">
-                          {(
-                            item.name ||
-                            "U"
-                          )
-                            .charAt(0)
-                            .toUpperCase()}
-                        </div>
-
-                        <div>
-
-                          <strong>
-                            {item.name ||
-                              "Unknown User"}
-                          </strong>
-
-                          <small>
-                            {item.email ||
-                              "No email"}
-                          </small>
-
-                        </div>
-
-                      </div>
-
-                    </td>
-
-
-                    {/* SUBJECT */}
-
-                    <td>
-
-                      <span className="subject-text">
-                        {item.subject ||
-                          "General Query"}
+                      <span>
+                        {item.email || "-"}
                       </span>
 
-                    </td>
+                    </div>
+                  </td>
 
+                  <td>
+                    {item.subject || "No Subject"}
+                  </td>
 
-                    {/* MESSAGE */}
+                  <td>
+                    <div className="message-preview">
+                      {item.message || "-"}
+                    </div>
+                  </td>
 
-                    <td>
+                  <td>
 
-                      <div className="message-preview">
-                        {getMessagePreview(
-                          item.message
-                        )}
-                      </div>
+                    <span
+                      className={`status-badge ${
+                        item.replied
+                          ? "replied"
+                          : "pending"
+                      }`}
+                    >
+                      {item.replied
+                        ? "Replied"
+                        : item.status || "Pending"}
+                    </span>
 
-                    </td>
+                  </td>
 
-
-                    {/* STATUS */}
-
-                    <td>
-
-                      <span
-                        className={
-                          item.status ===
-                          "Read"
-                            ? "status-badge read"
-                            : "status-badge unread"
-                        }
-                      >
-
-                        <span>
-                          ●
-                        </span>
-
-                        {item.status ||
-                          "Unread"}
-
-                      </span>
-
-                    </td>
-
-
-                    {/* DATE */}
-
-                    <td>
-
-                      <span className="date-text">
-                        {formatDate(
+                  <td>
+                    {item.createdAt
+                      ? new Date(
                           item.createdAt
-                        )}
-                      </span>
+                        ).toLocaleDateString()
+                      : "-"}
+                  </td>
 
-                    </td>
+                  <td>
 
+                    <button
+                      className="view-btn"
+                      onClick={() =>
+                        handleView(item._id)
+                      }
+                    >
+                      View
+                    </button>
 
-                    {/* ACTION */}
+                  </td>
 
-                    <td>
+                </tr>
 
-                      <button
-                        className="view-btn"
-                        onClick={() =>
-                          setSelectedMessage(
-                            item
-                          )
-                        }
-                      >
-                        View
-                      </button>
+              ))
 
-                    </td>
+            )}
 
-                  </tr>
+          </tbody>
 
-                )
-              )}
+        </table>
 
-            </tbody>
+      </div>
 
-          </table>
-
-        </div>
-
-      )}
-
-
-      {/* =================================================
-          VIEW MESSAGE MODAL
-      ================================================= */}
+      {/* =====================================================
+          MESSAGE MODAL
+      ===================================================== */}
 
       {selectedMessage && (
 
         <div
-          className="message-modal-overlay"
+          className="modal-overlay"
           onClick={() =>
             setSelectedMessage(null)
           }
@@ -634,20 +339,18 @@ const AdminMessages = () => {
             <div className="modal-header">
 
               <div>
-
-                <span className="modal-label">
-                  USER MESSAGE
-                </span>
-
                 <h2>
                   {selectedMessage.subject ||
-                    "Message Details"}
+                    "User Message"}
                 </h2>
 
+                <p>
+                  Message details
+                </p>
               </div>
 
               <button
-                className="modal-close"
+                className="close-btn"
                 onClick={() =>
                   setSelectedMessage(null)
                 }
@@ -657,90 +360,102 @@ const AdminMessages = () => {
 
             </div>
 
+            {/* USER */}
 
-            <div className="modal-user">
+            <div className="detail-section">
 
-              <div className="modal-avatar">
-                {(
-                  selectedMessage.name ||
-                  "U"
-                )
-                  .charAt(0)
-                  .toUpperCase()}
-              </div>
+              <h3>User Details</h3>
 
-              <div>
+              <div className="detail-grid">
 
-                <strong>
-                  {selectedMessage.name ||
-                    "Unknown User"}
-                </strong>
+                <div>
+                  <label>Name</label>
+                  <p>
+                    {selectedMessage.name ||
+                      "-"}
+                  </p>
+                </div>
 
-                <span>
-                  {selectedMessage.email ||
-                    "No email"}
-                </span>
+                <div>
+                  <label>Email</label>
+                  <p>
+                    {selectedMessage.email ||
+                      "-"}
+                  </p>
+                </div>
 
               </div>
 
             </div>
 
+            {/* MESSAGE */}
 
-            <div className="modal-message">
+            <div className="detail-section">
 
-              <label>
-                MESSAGE
-              </label>
+              <h3>User Message</h3>
 
-              <p>
+              <div className="original-message">
                 {selectedMessage.message ||
-                  "No message available."}
-              </p>
-
-            </div>
-
-
-            <div className="modal-details">
-
-              <div>
-
-                <span>
-                  Received
-                </span>
-
-                <strong>
-                  {formatDate(
-                    selectedMessage.createdAt
-                  )}
-                </strong>
-
-              </div>
-
-
-              <div>
-
-                <span>
-                  Status
-                </span>
-
-                <strong>
-                  {selectedMessage.status ||
-                    "Unread"}
-                </strong>
-
+                  "No message"}
               </div>
 
             </div>
 
+            {/* EXISTING REPLY */}
 
-            <button
-              className="modal-done"
-              onClick={() =>
-                setSelectedMessage(null)
-              }
-            >
-              Close
-            </button>
+            {selectedMessage.adminReply && (
+
+              <div className="detail-section">
+
+                <h3>Previous Admin Reply</h3>
+
+                <div className="previous-reply">
+                  {selectedMessage.adminReply}
+                </div>
+
+              </div>
+
+            )}
+
+            {/* REPLY */}
+
+            <div className="reply-section">
+
+              <h3>Reply to User</h3>
+
+              <textarea
+                placeholder="Type your reply here..."
+                value={reply}
+                onChange={(e) =>
+                  setReply(e.target.value)
+                }
+                rows="5"
+              />
+
+              <div className="reply-actions">
+
+                <button
+                  className="cancel-btn"
+                  onClick={() =>
+                    setSelectedMessage(null)
+                  }
+                >
+                  Close
+                </button>
+
+                <button
+                  className="send-reply-btn"
+                  onClick={sendReply}
+                  disabled={replyLoading}
+                >
+                  {replyLoading
+                    ? "Sending..."
+                    : "Send Reply"}
+                </button>
+
+              </div>
+
+            </div>
 
           </div>
 

@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from "react";
-import "../styles/AdminOrganizerRequests.css";
+import axios from "axios";
+import "./AdminOrganizerRequests.css";
+
 const API_URL =
-  "https://api-admin-rouge.vercel.app";
+  import.meta.env.VITE_API_URL || "https://api-admin-rouge.vercel.app";
 
 const AdminOrganizerRequests = () => {
 
   const [requests, setRequests] = useState([]);
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
+  const [loading, setLoading] = useState(true);
 
   const [selectedRequest, setSelectedRequest] =
     useState(null);
 
-  const [detailsLoading, setDetailsLoading] =
+  const [adminMessage, setAdminMessage] =
+    useState("");
+
+  const [actionLoading, setActionLoading] =
     useState(false);
 
   // =====================================================
-  // GET ALL REQUESTS
+  // FETCH REQUESTS
   // =====================================================
 
   const fetchRequests = async () => {
@@ -28,111 +29,182 @@ const AdminOrganizerRequests = () => {
     try {
 
       setLoading(true);
-      setError("");
 
-      const response = await fetch(
+      const response = await axios.get(
         `${API_URL}/organization/requests`
       );
 
-      const result =
-        await response.json();
+      if (response.data.success) {
 
-      console.log(
-        "ORGANIZER REQUESTS:",
-        result
-      );
-
-      if (!response.ok) {
-
-        throw new Error(
-          result.message ||
-          "Failed to fetch organizer requests"
+        setRequests(
+          response.data.data || []
         );
-      }
 
-      setRequests(
-        Array.isArray(result.data)
-          ? result.data
-          : []
-      );
+      } else {
+
+        setRequests([]);
+
+      }
 
     } catch (error) {
 
       console.error(
-        "Organizer request error:",
+        "Fetch organizer requests error:",
         error
       );
 
-      setError(
-        error.message
-      );
+      alert("Failed to load organizer requests");
 
     } finally {
 
       setLoading(false);
+
     }
+
   };
-
-  // =====================================================
-  // GET SINGLE REQUEST
-  // =====================================================
-
-  const viewRequest = async (id) => {
-
-    try {
-
-      setDetailsLoading(true);
-
-      const response = await fetch(
-        `${API_URL}/organization/requests/${id}`
-      );
-
-      const result =
-        await response.json();
-
-      console.log(
-        "SINGLE ORGANIZER REQUEST:",
-        result
-      );
-
-      if (!response.ok) {
-
-        throw new Error(
-          result.message ||
-          "Failed to fetch request"
-        );
-      }
-
-      setSelectedRequest(
-        result.data
-      );
-
-    } catch (error) {
-
-      console.error(
-        "Single request error:",
-        error
-      );
-
-      alert(
-        error.message
-      );
-
-    } finally {
-
-      setDetailsLoading(false);
-    }
-  };
-
-  // =====================================================
-  // LOAD REQUESTS
-  // =====================================================
 
   useEffect(() => {
 
     fetchRequests();
 
   }, []);
+
+  // =====================================================
+  // VIEW REQUEST
+  // =====================================================
+
+  const handleView = async (id) => {
+
+    try {
+
+      const response = await axios.get(
+        `${API_URL}/organization/requests/${id}`
+      );
+
+      if (response.data.success) {
+
+        setSelectedRequest(
+          response.data.data
+        );
+
+        setAdminMessage(
+          response.data.data.adminMessage || ""
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Get organizer request error:",
+        error
+      );
+
+      alert("Failed to load request");
+
+    }
+
+  };
+
+  // =====================================================
+  // APPROVE / REJECT
+  // =====================================================
+
+  const updateRequestStatus = async (
+    status
+  ) => {
+
+    if (!selectedRequest?._id) {
+
+      alert("Request ID not found");
+
+      return;
+
+    }
+
+    const confirmMessage =
+      status === "Approved"
+        ? "Are you sure you want to approve this request?"
+        : "Are you sure you want to reject this request?";
+
+    if (!window.confirm(confirmMessage)) {
+
+      return;
+
+    }
+
+    try {
+
+      setActionLoading(true);
+
+      const response = await axios.put(
+        `${API_URL}/organization/requests/${selectedRequest._id}/status`,
+        {
+          status: status,
+          adminMessage: adminMessage.trim(),
+        }
+      );
+
+      if (response.data.success) {
+
+        alert(
+          status === "Approved"
+            ? "Request approved and email sent"
+            : "Request rejected and email sent"
+        );
+
+        setSelectedRequest(null);
+
+        setAdminMessage("");
+
+        fetchRequests();
+
+      } else {
+
+        alert(
+          response.data.message ||
+            "Failed to update request"
+        );
+
+      }
+
+    } catch (error) {
+
+      console.error(
+        "Update organizer request error:",
+        error
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to update request"
+      );
+
+    } finally {
+
+      setActionLoading(false);
+
+    }
+
+  };
+
+  // =====================================================
+  // STATUS CLASS
+  // =====================================================
+
+  const getStatusClass = (status) => {
+
+    if (status === "Approved") {
+      return "approved";
+    }
+
+    if (status === "Rejected") {
+      return "rejected";
+    }
+
+    return "pending";
+
+  };
 
   // =====================================================
   // LOADING
@@ -143,59 +215,24 @@ const AdminOrganizerRequests = () => {
     return (
       <div className="organizer-page">
 
-        <div className="organizer-loading">
-
-          <h2>
-            Loading Organizer Requests...
-          </h2>
-
+        <div className="loading-box">
+          Loading organizer requests...
         </div>
 
       </div>
     );
+
   }
 
   // =====================================================
-  // ERROR
-  // =====================================================
-
-  if (error) {
-
-    return (
-      <div className="organizer-page">
-
-        <div className="organizer-error">
-
-          <h2>
-            Unable to Load Requests
-          </h2>
-
-          <p>
-            {error}
-          </p>
-
-          <button
-            onClick={fetchRequests}
-          >
-            Try Again
-          </button>
-
-        </div>
-
-      </div>
-    );
-  }
-
-  // =====================================================
-  // PAGE
+  // UI
   // =====================================================
 
   return (
+
     <div className="organizer-page">
 
-      {/* =================================================
-          HEADER
-      ================================================= */}
+      {/* HEADER */}
 
       <div className="organizer-header">
 
@@ -206,207 +243,187 @@ const AdminOrganizerRequests = () => {
           </h1>
 
           <p>
-            Review event organization
-            requests submitted by users.
+            Review and manage event organization requests
           </p>
 
         </div>
 
-        <div className="request-count">
-
-          {requests.length}
-
-          <span>
-            Requests
-          </span>
-
-        </div>
+        <button
+          className="refresh-btn"
+          onClick={fetchRequests}
+        >
+          ↻ Refresh
+        </button>
 
       </div>
 
-      {/* =================================================
-          REQUEST TABLE
-      ================================================= */}
+      {/* TABLE */}
 
-      {requests.length === 0 ? (
+      <div className="organizer-table-container">
 
-        <div className="no-requests">
+        <table className="organizer-table">
 
-          <h2>
-            No Organizer Requests
-          </h2>
+          <thead>
 
-          <p>
-            There are no organizer requests
-            at the moment.
-          </p>
+            <tr>
 
-        </div>
+              <th>USER</th>
+              <th>EVENT</th>
+              <th>CATEGORY</th>
+              <th>DATE</th>
+              <th>LOCATION</th>
+              <th>STATUS</th>
+              <th>ACTION</th>
 
-      ) : (
+            </tr>
 
-        <div className="request-table-wrapper">
+          </thead>
 
-          <table className="request-table">
+          <tbody>
 
-            <thead>
+            {requests.length === 0 ? (
 
               <tr>
 
-                <th>
-                  User
-                </th>
-
-                <th>
-                  Event
-                </th>
-
-                <th>
-                  Category
-                </th>
-
-                <th>
-                  Date
-                </th>
-
-                <th>
-                  Location
-                </th>
-
-                <th>
-                  Status
-                </th>
-
-                <th>
-                  Action
-                </th>
+                <td
+                  colSpan="7"
+                  className="empty-message"
+                >
+                  No organizer requests found
+                </td>
 
               </tr>
 
-            </thead>
+            ) : (
 
-            <tbody>
+              requests.map((item) => (
 
-              {requests.map(
-                (request) => {
+                <tr key={item._id}>
 
-                  const id =
-                    request._id ||
-                    request.id;
+                  {/* USER */}
 
-                  return (
-                    <tr key={id}>
+                  <td>
 
-                      {/* USER */}
+                    <div className="user-info">
 
-                      <td>
+                      <strong>
+                        {item.name ||
+                          "Unknown"}
+                      </strong>
 
-                        <div className="user-info">
+                      <span>
+                        {item.email ||
+                          "-"}
+                      </span>
 
-                          <strong>
-                            {request.name ||
-                              request.userName ||
-                              "Unknown"}
-                          </strong>
+                    </div>
 
-                          <span>
-                            {request.email ||
-                              "No email"}
-                          </span>
+                  </td>
 
-                        </div>
+                  {/* EVENT */}
 
-                      </td>
+                  <td>
 
-                      {/* EVENT */}
+                    <strong>
+                      {item.eventName ||
+                        "-"}
+                    </strong>
 
-                      <td>
-                        {request.eventName ||
-                          request.event ||
-                          "N/A"}
-                      </td>
+                  </td>
 
-                      {/* CATEGORY */}
+                  {/* CATEGORY */}
 
-                      <td>
-                        {request.eventCategory ||
-                          request.category ||
-                          "N/A"}
-                      </td>
+                  <td>
 
-                      {/* DATE */}
+                    {item.eventCategory ||
+                      "-"}
 
-                      <td>
-                        {request.eventDate ||
-                          request.date ||
-                          "N/A"}
-                      </td>
+                  </td>
 
-                      {/* LOCATION */}
+                  {/* DATE */}
 
-                      <td>
-                        {request.location ||
-                          "N/A"}
-                      </td>
+                  <td>
 
-                      {/* STATUS */}
+                    {item.eventDate
+                      ? new Date(
+                          item.eventDate
+                        ).toLocaleDateString()
+                      : "-"}
 
-                      <td>
+                  </td>
 
-                        <span
-                          className={
-                            `status ${
-                              (
-                                request.status ||
-                                "Pending"
-                              ).toLowerCase()
-                            }`
-                          }
-                        >
+                  {/* LOCATION */}
 
-                          {request.status ||
-                            "Pending"}
+                  <td>
 
-                        </span>
+                    {item.location ||
+                      "-"}
 
-                      </td>
+                  </td>
 
-                      {/* ACTION */}
+                  {/* STATUS */}
 
-                      <td>
+                  <td>
 
-                        <button
-                          className="view-btn"
-                          onClick={() =>
-                            viewRequest(id)
-                          }
-                        >
-                          View
-                        </button>
+                    <span
+                      className={`status-badge ${getStatusClass(
+                        item.status
+                      )}`}
+                    >
+                      {item.status ||
+                        "Pending"}
+                    </span>
 
-                      </td>
+                  </td>
 
-                    </tr>
-                  );
-                }
-              )}
+                  {/* ACTION */}
 
-            </tbody>
+                  <td>
 
-          </table>
+                    <button
+                      className="view-btn"
+                      onClick={() =>
+                        handleView(item._id)
+                      }
+                    >
+                      View
+                    </button>
 
-        </div>
-      )}
+                  </td>
 
-      {/* =================================================
-          DETAILS MODAL
-      ================================================= */}
+                </tr>
+
+              ))
+
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      {/* =====================================================
+          MODAL
+      ===================================================== */}
 
       {selectedRequest && (
 
-        <div className="organizer-modal-overlay">
+        <div
+          className="modal-overlay"
+          onClick={() =>
+            setSelectedRequest(null)
+          }
+        >
 
-          <div className="organizer-modal">
+          <div
+            className="organizer-modal"
+            onClick={(e) =>
+              e.stopPropagation()
+            }
+          >
+
+            {/* MODAL HEADER */}
 
             <div className="modal-header">
 
@@ -417,7 +434,7 @@ const AdminOrganizerRequests = () => {
                 </h2>
 
                 <p>
-                  Complete request details
+                  Review event details
                 </p>
 
               </div>
@@ -433,130 +450,237 @@ const AdminOrganizerRequests = () => {
 
             </div>
 
-            <div className="modal-content">
+            {/* USER DETAILS */}
 
-              <div className="detail-section">
+            <div className="detail-section">
 
-                <h3>
-                  User Details
-                </h3>
+              <h3>
+                Organizer Details
+              </h3>
 
-                <p>
-                  <strong>Name:</strong>{" "}
-                  {selectedRequest.name ||
-                    selectedRequest.userName ||
-                    "N/A"}
-                </p>
+              <div className="detail-grid">
 
-                <p>
-                  <strong>Email:</strong>{" "}
-                  {selectedRequest.email ||
-                    "N/A"}
-                </p>
+                <div>
 
-                <p>
-                  <strong>Phone:</strong>{" "}
-                  {selectedRequest.phone ||
-                    "N/A"}
-                </p>
+                  <label>Name</label>
 
-              </div>
+                  <p>
+                    {selectedRequest.name ||
+                      "-"}
+                  </p>
 
-              <div className="detail-section">
+                </div>
 
-                <h3>
-                  Event Details
-                </h3>
+                <div>
 
-                <p>
-                  <strong>Event:</strong>{" "}
-                  {selectedRequest.eventName ||
-                    selectedRequest.event ||
-                    "N/A"}
-                </p>
+                  <label>Email</label>
 
-                <p>
-                  <strong>Category:</strong>{" "}
-                  {selectedRequest.eventCategory ||
-                    selectedRequest.category ||
-                    "N/A"}
-                </p>
+                  <p>
+                    {selectedRequest.email ||
+                      "-"}
+                  </p>
 
-                <p>
-                  <strong>Date:</strong>{" "}
-                  {selectedRequest.eventDate ||
-                    selectedRequest.date ||
-                    "N/A"}
-                </p>
+                </div>
 
-                <p>
-                  <strong>Time:</strong>{" "}
-                  {selectedRequest.eventTime ||
-                    selectedRequest.time ||
-                    "N/A"}
-                </p>
+                <div>
 
-                <p>
-                  <strong>Location:</strong>{" "}
-                  {selectedRequest.location ||
-                    "N/A"}
-                </p>
+                  <label>Phone</label>
 
-                <p>
-                  <strong>Participants:</strong>{" "}
-                  {selectedRequest.expectedParticipants ||
-                    selectedRequest.participants ||
-                    "N/A"}
-                </p>
+                  <p>
+                    {selectedRequest.phone ||
+                      "-"}
+                  </p>
+
+                </div>
 
               </div>
 
-              <div className="detail-section">
+            </div>
 
-                <h3>
-                  Description
-                </h3>
+            {/* EVENT DETAILS */}
 
-                <p>
-                  {selectedRequest.description ||
-                    "No description provided."}
-                </p>
+            <div className="detail-section">
+
+              <h3>
+                Event Details
+              </h3>
+
+              <div className="detail-grid">
+
+                <div>
+
+                  <label>Event Name</label>
+
+                  <p>
+                    {selectedRequest.eventName ||
+                      "-"}
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <label>Category</label>
+
+                  <p>
+                    {selectedRequest.eventCategory ||
+                      "-"}
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <label>Date</label>
+
+                  <p>
+                    {selectedRequest.eventDate
+                      ? new Date(
+                          selectedRequest.eventDate
+                        ).toLocaleDateString()
+                      : "-"}
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <label>Time</label>
+
+                  <p>
+                    {selectedRequest.eventTime ||
+                      "-"}
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <label>Location</label>
+
+                  <p>
+                    {selectedRequest.location ||
+                      "-"}
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <label>Expected Participants</label>
+
+                  <p>
+                    {selectedRequest.expectedParticipants ||
+                      "-"}
+                  </p>
+
+                </div>
 
               </div>
 
-              <div className="detail-section">
+            </div>
 
-                <h3>
-                  Status
-                </h3>
+            {/* DESCRIPTION */}
 
-                <span
-                  className={
-                    `status ${
-                      (
-                        selectedRequest.status ||
-                        "Pending"
-                      ).toLowerCase()
-                    }`
-                  }
-                >
+            <div className="detail-section">
 
-                  {selectedRequest.status ||
-                    "Pending"}
+              <h3>
+                Description
+              </h3>
 
-                </span>
+              <div className="description-box">
+
+                {selectedRequest.description ||
+                  "No description provided"}
 
               </div>
+
+            </div>
+
+            {/* STATUS */}
+
+            <div className="detail-section">
+
+              <h3>
+                Current Status
+              </h3>
+
+              <span
+                className={`status-badge ${getStatusClass(
+                  selectedRequest.status
+                )}`}
+              >
+                {selectedRequest.status ||
+                  "Pending"}
+              </span>
+
+            </div>
+
+            {/* ADMIN MESSAGE */}
+
+            <div className="admin-message-section">
+
+              <h3>
+                Message to Organizer
+              </h3>
+
+              <textarea
+                rows="5"
+                placeholder="Enter a message for the organizer..."
+                value={adminMessage}
+                onChange={(e) =>
+                  setAdminMessage(
+                    e.target.value
+                  )
+                }
+              />
+
+            </div>
+
+            {/* ACTION BUTTONS */}
+
+            <div className="modal-actions">
+
+              <button
+                className="reject-btn"
+                onClick={() =>
+                  updateRequestStatus(
+                    "Rejected"
+                  )
+                }
+                disabled={actionLoading}
+              >
+                {actionLoading
+                  ? "Processing..."
+                  : "Reject"}
+              </button>
+
+              <button
+                className="approve-btn"
+                onClick={() =>
+                  updateRequestStatus(
+                    "Approved"
+                  )
+                }
+                disabled={actionLoading}
+              >
+                {actionLoading
+                  ? "Processing..."
+                  : "Approve"}
+              </button>
 
             </div>
 
           </div>
 
         </div>
+
       )}
 
     </div>
+
   );
+
 };
 
 export default AdminOrganizerRequests;
