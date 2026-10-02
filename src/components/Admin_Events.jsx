@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -150,30 +151,56 @@ const AdminEvents = () => {
   // IMAGE URL
   // =====================================================
 
-  const getImageUrl = (image) => {
-    if (!image) {
+  const getImageUrl = (item) => {
+    if (!item) {
       return "";
     }
 
-    // Base64 image
-    if (image.startsWith("data:image/")) {
-      return image;
+    // ===================================================
+    // NEW API IMAGE URL
+    // Backend sends imageUrl
+    // ===================================================
+
+    if (item.imageUrl) {
+      return item.imageUrl.replace(
+        "http://",
+        "https://"
+      );
     }
 
-    // Full URL
-    if (
-      image.startsWith("http://") ||
-      image.startsWith("https://")
-    ) {
-      return image;
+    // ===================================================
+    // OLD IMAGE SUPPORT
+    // ===================================================
+
+    if (item.image) {
+
+      // Base64 image
+      if (
+        item.image.startsWith("data:image/")
+      ) {
+        return item.image;
+      }
+
+      // Full URL
+      if (
+        item.image.startsWith("http://") ||
+        item.image.startsWith("https://")
+      ) {
+        return item.image.replace(
+          "http://",
+          "https://"
+        );
+      }
+
+      // Relative URL
+      if (item.image.startsWith("/")) {
+        return `${API_URL}${item.image}`;
+      }
+
+      return `${API_URL}/${item.image}`;
     }
 
-    // Relative URL
-    if (image.startsWith("/")) {
-      return `${API_URL}${image}`;
-    }
-
-    return `${API_URL}/${image}`;
+    return "";
   };
 
   // =====================================================
@@ -192,410 +219,11 @@ const AdminEvents = () => {
   if (loading) {
     return (
       <main className="main-content">
+
         <div className="page-header">
+
           <div>
+
             <h1 className="page-title">
               Events
-            </h1>
 
-            <p className="page-description">
-              Manage and organize all your events
-            </p>
-          </div>
-
-          <button
-            type="button"
-            className="add-event-btn"
-            onClick={handleAddEvent}
-          >
-            <span>+</span>
-            Add Event
-          </button>
-        </div>
-
-        <section className="events-card">
-          <div className="events-loading">
-            Loading events...
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  // =====================================================
-  // PAGE
-  // =====================================================
-
-  return (
-    <main className="main-content">
-
-      {/* =================================================
-          PAGE HEADER
-      ================================================= */}
-
-      <div className="page-header">
-
-        <div className="page-title-area">
-
-          <h1 className="page-title">
-            Events
-          </h1>
-
-          <p className="page-description">
-            Manage and organize all your events
-          </p>
-
-        </div>
-
-        <button
-          type="button"
-          className="add-event-btn"
-          onClick={handleAddEvent}
-        >
-          <span className="add-icon">
-            +
-          </span>
-
-          Add Event
-
-          <span className="arrow-icon">
-            →
-          </span>
-        </button>
-
-      </div>
-
-
-      {/* =================================================
-          EVENTS CONTAINER
-      ================================================= */}
-
-      <section className="events-card">
-
-        {/* =================================================
-            TOOLBAR
-        ================================================= */}
-
-        <div className="event-toolbar">
-
-          <div className="event-count">
-
-            <h2 className="event-count-title">
-              All Events
-            </h2>
-
-            <span className="event-count-number">
-              {events.length} Events
-            </span>
-
-          </div>
-
-        </div>
-
-
-        {/* =================================================
-            EVENT GRID
-        ================================================= */}
-
-        <div className="events-card-grid">
-
-          {events.length === 0 ? (
-
-            <div className="no-events">
-
-              <div className="no-events-icon">
-                📅
-              </div>
-
-              <h3>
-                No Events Found
-              </h3>
-
-              <p>
-                Add your first event to get started.
-              </p>
-
-            </div>
-
-          ) : (
-
-            events.map((item) => (
-
-              <div
-                className="event-card"
-                key={item._id}
-              >
-
-                {/* =================================================
-                    IMAGE
-                ================================================= */}
-
-                <div className="event-card-image">
-
-                  {item.image ? (
-
-                    <img
-                      src={getImageUrl(item.image)}
-                      alt={item.name || "Event"}
-                      onError={(e) => {
-                        e.currentTarget.style.display =
-                          "none";
-                      }}
-                    />
-
-                  ) : (
-
-                    <div className="no-image">
-
-                      <span>
-                        📷
-                      </span>
-
-                      <p>
-                        No Image
-                      </p>
-
-                    </div>
-
-                  )}
-
-                  {/* CATEGORY */}
-
-                  <span className="card-status">
-                    {item.category || "Other"}
-                  </span>
-
-                </div>
-
-
-                {/* =================================================
-                    CARD CONTENT
-                ================================================= */}
-
-                <div className="event-card-content">
-
-                  {/* EVENT NAME */}
-
-                  <h2 className="event-card-title">
-                    {item.name || "Untitled Event"}
-                  </h2>
-
-
-                  {/* ORGANIZER */}
-
-                  <p className="event-organizer">
-
-                    Organized by{" "}
-
-                    <strong>
-                      {item.organizer || "Not specified"}
-                    </strong>
-
-                  </p>
-
-
-                  {/* DESCRIPTION */}
-
-                  <p className="event-description">
-
-                    {item.description
-                      ? item.description.length > 100
-                        ? item.description.substring(
-                            0,
-                            100
-                          ) + "..."
-                        : item.description
-                      : "No description available."}
-
-                  </p>
-
-
-                  {/* =================================================
-                      EVENT DETAILS
-                  ================================================= */}
-
-                  <div className="event-details">
-
-                    {/* DATE */}
-
-                    <div className="event-detail">
-
-                      <span className="detail-icon">
-                        📅
-                      </span>
-
-                      <div>
-
-                        <small>
-                          Date
-                        </small>
-
-                        <strong>
-                          {item.date ||
-                            "Not specified"}
-                        </strong>
-
-                      </div>
-
-                    </div>
-
-
-                    {/* TIME */}
-
-                    <div className="event-detail">
-
-                      <span className="detail-icon">
-                        ⏰
-                      </span>
-
-                      <div>
-
-                        <small>
-                          Time
-                        </small>
-
-                        <strong>
-                          {item.time ||
-                            "Not specified"}
-                        </strong>
-
-                      </div>
-
-                    </div>
-
-
-                    {/* LOCATION */}
-
-                    <div className="event-detail">
-
-                      <span className="detail-icon">
-                        📍
-                      </span>
-
-                      <div>
-
-                        <small>
-                          Location
-                        </small>
-
-                        <strong>
-                          {item.location ||
-                            "Not specified"}
-                        </strong>
-
-                      </div>
-
-                    </div>
-
-
-                    {/* TICKETS */}
-
-                    <div className="event-detail">
-
-                      <span className="detail-icon">
-                        🎟
-                      </span>
-
-                      <div>
-
-                        <small>
-                          Tickets
-                        </small>
-
-                        <strong>
-                          {item.tickets ?? 0}
-                        </strong>
-
-                      </div>
-
-                    </div>
-
-
-                    {/* PRICE */}
-
-                    <div className="event-detail">
-
-                      <span className="detail-icon">
-                        💰
-                      </span>
-
-                      <div>
-
-                        <small>
-                          Price
-                        </small>
-
-                        <strong>
-                          ₹{item.ticketPrice ?? 0}
-                        </strong>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-
-                  {/* =================================================
-                      ACTION BUTTONS
-                  ================================================= */}
-
-                  <div className="event-card-actions">
-
-                    {/* VIEW */}
-
-                    <button
-                      type="button"
-                      className="view-details-btn"
-                      onClick={() =>
-                        handleViewDetails(item)
-                      }
-                    >
-                      👁 View Details
-                    </button>
-
-
-                    {/* EDIT */}
-
-                    <button
-                      type="button"
-                      className="edit-event-btn"
-                      onClick={() =>
-                        handleEdit(item._id)
-                      }
-                    >
-                      ✏ Edit
-                    </button>
-
-
-                    {/* DELETE */}
-
-                    <button
-                      type="button"
-                      className="delete-event-btn"
-                      onClick={() =>
-                        handleDelete(item._id)
-                      }
-                    >
-                      🗑 Delete
-                    </button>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            ))
-
-          )}
-
-        </div>
-
-      </section>
-
-    </main>
-  );
-};
-
-export default AdminEvents;
