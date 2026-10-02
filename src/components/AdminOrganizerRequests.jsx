@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./AdminOrganizerRequests.css";
+import "../styles/AdminOrganizerRequests.css";
 
 const API_URL =
   import.meta.env.VITE_API_URL || "https://api-admin-rouge.vercel.app";
