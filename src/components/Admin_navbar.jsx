@@ -166,7 +166,9 @@ const AdminNavbar = () => {
             Messages
           </span>
         </NavLink>
-
+<NavLink to="/bookings">
+  📋 Bookings
+</NavLink>
       </nav>
 
 
