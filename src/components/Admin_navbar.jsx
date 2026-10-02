@@ -1,8 +1,37 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import "../styles/Admin_navbar.css";
 
 const AdminNavbar = () => {
+
+  const navigate = useNavigate();
+
+  // =====================================================
+  // LOGOUT FUNCTION
+  // =====================================================
+  const handleLogout = () => {
+
+    const confirmLogout = window.confirm(
+      "If you are sure you want to log out?"
+    );
+
+    if (confirmLogout) {
+
+      // Logout success
+      // If you stored login data in localStorage,
+      // remove it here.
+
+      localStorage.removeItem("adminToken");
+      localStorage.removeItem("admin");
+
+      // Go to admin login page
+      navigate("/admin-login");
+    }
+
+    // If Cancel / No → nothing happens
+  };
+
+
   return (
     <aside className="admin-sidebar">
 
@@ -44,10 +73,7 @@ const AdminNavbar = () => {
 
       <nav className="admin-menu">
 
-        {/* -------------------------------------------------
-            DASHBOARD
-        ------------------------------------------------- */}
-
+        {/* DASHBOARD */}
         <NavLink
           to="/admin-dashboard"
           className={({ isActive }) =>
@@ -66,10 +92,7 @@ const AdminNavbar = () => {
         </NavLink>
 
 
-        {/* -------------------------------------------------
-            EVENTS
-        ------------------------------------------------- */}
-
+        {/* EVENTS */}
         <NavLink
           to="/events"
           className={({ isActive }) =>
@@ -88,10 +111,7 @@ const AdminNavbar = () => {
         </NavLink>
 
 
-        {/* -------------------------------------------------
-            USERS
-        ------------------------------------------------- */}
-
+        {/* USERS */}
         <NavLink
           to="/users"
           className={({ isActive }) =>
@@ -110,10 +130,7 @@ const AdminNavbar = () => {
         </NavLink>
 
 
-        {/* -------------------------------------------------
-            ORGANIZER REQUESTS
-        ------------------------------------------------- */}
-
+        {/* ORGANIZER REQUESTS */}
         <NavLink
           to="/organizer-requests"
           className={({ isActive }) =>
@@ -132,10 +149,7 @@ const AdminNavbar = () => {
         </NavLink>
 
 
-        {/* -------------------------------------------------
-            MESSAGES
-        ------------------------------------------------- */}
-
+        {/* MESSAGES */}
         <NavLink
           to="/admin-messages"
           className={({ isActive }) =>
@@ -162,10 +176,7 @@ const AdminNavbar = () => {
 
       <div className="sidebar-bottom">
 
-        {/* -------------------------------------------------
-            ADMIN PROFILE
-        ------------------------------------------------- */}
-
+        {/* ADMIN PROFILE */}
         <div className="admin-profile">
 
           <div className="profile-avatar">
@@ -191,13 +202,11 @@ const AdminNavbar = () => {
         </div>
 
 
-        {/* -------------------------------------------------
-            LOGOUT
-        ------------------------------------------------- */}
-
+        {/* LOGOUT */}
         <button
           type="button"
           className="logout"
+          onClick={handleLogout}
         >
 
           <span className="logout-icon">
