@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -9,176 +10,307 @@ import {
   FiClock,
   FiBarChart2,
   FiZap,
-  FiMapPin,
 } from "react-icons/fi";
 
 import "../styles/Admin_Dashboard.css";
 
+// =====================================================
+// ADMIN API
+// =====================================================
 
 const API_URL = (
   import.meta.env.VITE_API_URL ||
   "https://api-admin-rouge.vercel.app"
 ).replace(/\/+$/, "");
 
+// =====================================================
+// USER BOOKING API
+// =====================================================
+
+const USER_API =
+  "https://user-api-iota-six.vercel.app";
+
+// =====================================================
+// DASHBOARD
+// =====================================================
 
 const Dashboard = () => {
-
   const [events, setEvents] = useState([]);
+  const [bookings, setBookings] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const [bookingLoading, setBookingLoading] =
+    useState(true);
 
-
-  // =========================================
+  // =====================================================
   // GET ALL EVENTS
-  // =========================================
+  // =====================================================
 
   const getEvents = async () => {
-
     try {
-
       setLoading(true);
 
       const response = await axios.get(
         `${API_URL}/events/getevents`
       );
 
-      console.log("DASHBOARD EVENTS:", response.data);
+      console.log(
+        "DASHBOARD EVENTS:",
+        response.data
+      );
 
-
-      const eventData = response.data?.data;
-
+      const eventData =
+        response.data?.data;
 
       if (Array.isArray(eventData)) {
-
         setEvents(eventData);
-
       } else {
-
         setEvents([]);
-
       }
-
     } catch (error) {
-
       console.error(
         "DASHBOARD EVENTS ERROR:",
-        error.response?.data || error.message
+        error.response?.data ||
+          error.message
       );
 
       setEvents([]);
-
     } finally {
-
       setLoading(false);
-
     }
   };
 
+  // =====================================================
+  // GET ALL BOOKINGS
+  // =====================================================
 
-  // =========================================
-  // LOAD EVENTS
-  // =========================================
+  const getBookings = async () => {
+    try {
+      setBookingLoading(true);
+
+      console.log(
+        "FETCHING BOOKINGS FOR REVENUE..."
+      );
+
+      const response = await axios.get(
+        `${USER_API}/booking/getbookings`
+      );
+
+      console.log(
+        "DASHBOARD BOOKINGS:",
+        response.data
+      );
+
+      let bookingData = [];
+
+      // -------------------------------------------------
+      // RESPONSE IS ARRAY
+      // -------------------------------------------------
+
+      if (Array.isArray(response.data)) {
+        bookingData = response.data;
+      }
+
+      // -------------------------------------------------
+      // RESPONSE { bookings: [] }
+      // -------------------------------------------------
+
+      else if (
+        Array.isArray(
+          response.data?.bookings
+        )
+      ) {
+        bookingData =
+          response.data.bookings;
+      }
+
+      // -------------------------------------------------
+      // RESPONSE { data: [] }
+      // -------------------------------------------------
+
+      else if (
+        Array.isArray(
+          response.data?.data
+        )
+      ) {
+        bookingData =
+          response.data.data;
+      }
+
+      console.log(
+        "BOOKINGS USED FOR REVENUE:",
+        bookingData
+      );
+
+      setBookings(bookingData);
+    } catch (error) {
+      console.error(
+        "DASHBOARD BOOKINGS ERROR:",
+        error.response?.data ||
+          error.message
+      );
+
+      setBookings([]);
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  // =====================================================
+  // LOAD DASHBOARD DATA
+  // =====================================================
 
   useEffect(() => {
-
     getEvents();
-
+    getBookings();
   }, []);
 
-
-  // =========================================
+  // =====================================================
   // TOTAL EVENTS
-  // =========================================
+  // =====================================================
 
   const totalEvents = events.length;
 
-
-  // =========================================
-  // UPCOMING EVENTS
-  // =========================================
+  // =====================================================
+  // TODAY
+  // =====================================================
 
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
+  today.setHours(
+    0,
+    0,
+    0,
+    0
+  );
+
+  // =====================================================
+  // UPCOMING EVENTS
+  // =====================================================
 
   const upcomingEvents = events
     .filter((event) => {
-
       if (!event.date) {
         return false;
       }
 
-      const eventDate = new Date(event.date);
+      const eventDate =
+        new Date(event.date);
 
-      return !isNaN(eventDate.getTime()) &&
-        eventDate >= today;
-
+      return (
+        !isNaN(
+          eventDate.getTime()
+        ) &&
+        eventDate >= today
+      );
     })
     .sort((a, b) => {
-
-      return new Date(a.date) - new Date(b.date);
-
+      return (
+        new Date(a.date) -
+        new Date(b.date)
+      );
     })
     .slice(0, 3);
 
+  // =====================================================
+  // TOTAL REVENUE
+  // =====================================================
+  //
+  // Only Confirmed bookings are counted.
+  //
+  // Cancelled booking amount is NOT counted.
+  //
+  // Example:
+  //
+  // Confirmed  ₹500
+  // Confirmed  ₹1000
+  // Cancelled  ₹750
+  //
+  // Revenue = ₹1500
+  //
+  // =====================================================
 
-  // =========================================
-  // REVENUE
-  // =========================================
+  const totalRevenue = bookings
+    .filter(
+      (booking) =>
+        booking.status !== "Cancelled"
+    )
+    .reduce(
+      (total, booking) => {
+        return (
+          total +
+          Number(
+            booking.totalAmount || 0
+          )
+        );
+      },
+      0
+    );
 
-  const totalRevenue = 0;
+  // =====================================================
+  // FORMAT REVENUE
+  // =====================================================
 
+  const formattedRevenue =
+    totalRevenue.toLocaleString(
+      "en-IN"
+    );
 
-  // =========================================
+  // =====================================================
   // IMAGE URL
-  // Same logic as your Events page
-  // =========================================
+  // =====================================================
 
   const getImageUrl = (image) => {
-
     if (!image) {
       return "";
     }
 
-
-    // Base64
-    if (image.startsWith("data:image/")) {
-      return image;
-    }
-
-
-    // Full URL
+    // Base64 image
     if (
-      image.startsWith("http://") ||
-      image.startsWith("https://")
+      image.startsWith(
+        "data:image/"
+      )
     ) {
       return image;
     }
 
+    // Full URL
+    if (
+      image.startsWith(
+        "http://"
+      ) ||
+      image.startsWith(
+        "https://"
+      )
+    ) {
+      return image;
+    }
 
     // Relative URL
     if (image.startsWith("/")) {
       return `${API_URL}${image}`;
     }
 
-
     return `${API_URL}/${image}`;
-
   };
 
-
-  // =========================================
+  // =====================================================
   // DATE FORMAT
-  // =========================================
+  // =====================================================
 
   const formatDate = (date) => {
-
     if (!date) {
       return "Date not available";
     }
 
-    const parsedDate = new Date(date);
+    const parsedDate =
+      new Date(date);
 
-    if (isNaN(parsedDate.getTime())) {
+    if (
+      isNaN(
+        parsedDate.getTime()
+      )
+    ) {
       return date;
     }
 
@@ -190,39 +322,39 @@ const Dashboard = () => {
         year: "numeric",
       }
     );
-
   };
 
-
-  // =========================================
+  // =====================================================
   // LOADING
-  // =========================================
+  // =====================================================
 
-  if (loading) {
-
+  if (
+    loading &&
+    bookingLoading
+  ) {
     return (
-
       <main className="dashboard-page">
 
         <div className="dashboard-loading">
 
           <div className="loading-spinner"></div>
 
-          <p>Loading dashboard...</p>
+          <p>
+            Loading dashboard...
+          </p>
 
         </div>
 
       </main>
-
     );
-
   }
 
+  // =====================================================
+  // DASHBOARD PAGE
+  // =====================================================
 
   return (
-
     <main className="dashboard-page">
-
 
       {/* =====================================
           HEADER
@@ -270,22 +402,21 @@ const Dashboard = () => {
       </div>
 
 
-
       {/* =====================================
           STAT CARDS
       ====================================== */}
 
       <div className="stats-grid">
 
-
-        {/* TOTAL EVENTS */}
+        {/* =================================
+            TOTAL EVENTS
+        ================================== */}
 
         <div className="stat-card purple-card">
 
           <div className="stat-icon purple-icon">
             <FiCalendar />
           </div>
-
 
           <div className="stat-content">
 
@@ -316,15 +447,15 @@ const Dashboard = () => {
         </div>
 
 
-
-        {/* TOTAL REVENUE */}
+        {/* =================================
+            TOTAL REVENUE
+        ================================== */}
 
         <div className="stat-card green-card">
 
           <div className="stat-icon green-icon">
             <FiDollarSign />
           </div>
-
 
           <div className="stat-content">
 
@@ -333,7 +464,11 @@ const Dashboard = () => {
             </span>
 
             <h2>
-              ₹{totalRevenue}
+
+              {bookingLoading
+                ? "Loading..."
+                : `₹${formattedRevenue}`}
+
             </h2>
 
             <div className="stat-growth">
@@ -345,7 +480,7 @@ const Dashboard = () => {
               </b>
 
               <small>
-                vs. last month
+                from bookings
               </small>
 
             </div>
@@ -357,15 +492,15 @@ const Dashboard = () => {
       </div>
 
 
-
       {/* =====================================
           DASHBOARD OVERVIEW
       ====================================== */}
 
       <section className="overview-section">
 
-
-        {/* OVERVIEW HEADER */}
+        {/* =================================
+            OVERVIEW HEADER
+        ================================== */}
 
         <div className="overview-header">
 
@@ -397,13 +532,12 @@ const Dashboard = () => {
             Last 7 Days
 
             <span>
-             ⌄
+              ⌄
             </span>
 
           </button>
 
         </div>
-
 
 
         {/* =================================
@@ -412,13 +546,11 @@ const Dashboard = () => {
 
         <div className="overview-grid">
 
-
           {/* =================================
               UPCOMING EVENTS
           ================================== */}
 
           <div className="overview-card upcoming-card">
-
 
             <div className="card-heading">
 
@@ -444,105 +576,25 @@ const Dashboard = () => {
 
 
               <button className="view-all-btn">
+
                 View All
+
                 <FiArrowRight />
+
               </button>
 
             </div>
 
 
+            {/* =================================
+                EVENT LIST
+            ================================== */}
 
             <div className="event-list">
 
+              {upcomingEvents.length === 0 ? (
 
-              {upcomingEvents.length > 0 ? (
-
-                upcomingEvents.map((event, index) => (
-
-                  <div
-                    className="event-item"
-                    key={event._id || index}
-                  >
-
-
-                    {/* EVENT IMAGE */}
-
-                    <div className="event-image">
-
-                      {event.image ? (
-
-                        <img
-                          src={getImageUrl(event.image)}
-                          alt={event.name || "Event"}
-                          onError={(e) => {
-                            e.currentTarget.style.display =
-                              "none";
-                          }}
-                        />
-
-                      ) : (
-
-                        <FiCalendar />
-
-                      )}
-
-                    </div>
-
-
-
-                    {/* EVENT INFO */}
-
-                    <div className="event-info">
-
-                      <h4>
-                        {event.name || "Untitled Event"}
-                      </h4>
-
-
-                      <div className="event-meta">
-
-                        <FiCalendar />
-
-                        <span>
-                          {formatDate(event.date)}
-                        </span>
-
-
-                        {event.time && (
-
-                          <>
-
-                            <span className="separator">
-                              |
-                            </span>
-
-                            <FiClock />
-
-                            <span>
-                              {event.time}
-                            </span>
-
-                          </>
-
-                        )}
-
-                      </div>
-
-
-                      <span className="upcoming-badge">
-                        Upcoming
-                      </span>
-
-                    </div>
-
-
-                    <FiArrowRight className="event-arrow" />
-
-                  </div>
-
-                ))
-
-              ) : (
+                /* NO EVENTS */
 
                 <div className="empty-events">
 
@@ -560,6 +612,102 @@ const Dashboard = () => {
 
                 </div>
 
+              ) : (
+
+                /* EVENTS */
+
+                upcomingEvents.map(
+                  (event, index) => (
+
+                    <div
+                      className="event-item"
+                      key={
+                        event._id ||
+                        index
+                      }
+                    >
+
+                      {/* EVENT IMAGE */}
+
+                      <div className="event-image">
+
+                        {event.image ? (
+
+                          <img
+                            src={getImageUrl(
+                              event.image
+                            )}
+                            alt={
+                              event.name ||
+                              "Event"
+                            }
+                            onError={(e) => {
+                              e.currentTarget.style.display =
+                                "none";
+                            }}
+                          />
+
+                        ) : (
+
+                          <FiCalendar />
+
+                        )}
+
+                      </div>
+
+
+                      {/* EVENT INFO */}
+
+                      <div className="event-info">
+
+                        <h4>
+                          {event.name ||
+                            "Untitled Event"}
+                        </h4>
+
+
+                        <div className="event-meta">
+
+                          <FiCalendar />
+
+                          <span>
+                            {formatDate(
+                              event.date
+                            )}
+                          </span>
+
+
+                          {event.time && (
+                            <>
+                              <span className="separator">
+                                |
+                              </span>
+
+                              <FiClock />
+
+                              <span>
+                                {event.time}
+                              </span>
+                            </>
+                          )}
+
+                        </div>
+
+
+                        <span className="upcoming-badge">
+                          Upcoming
+                        </span>
+
+                      </div>
+
+
+                      <FiArrowRight className="event-arrow" />
+
+                    </div>
+
+                  )
+                )
+
               )}
 
             </div>
@@ -567,13 +715,11 @@ const Dashboard = () => {
           </div>
 
 
-
           {/* =================================
               REVENUE TREND
           ================================== */}
 
           <div className="overview-card revenue-card">
-
 
             <div className="card-heading">
 
@@ -590,7 +736,7 @@ const Dashboard = () => {
                   </h3>
 
                   <p>
-                    Total revenue from events
+                    Total revenue from bookings
                   </p>
 
                 </div>
@@ -600,29 +746,36 @@ const Dashboard = () => {
             </div>
 
 
+            {/* REVENUE TOTAL */}
 
             <div className="revenue-top">
 
               <h2>
-                ₹0
+
+                {bookingLoading
+                  ? "Loading..."
+                  : `₹${formattedRevenue}`}
+
               </h2>
 
 
               <div className="revenue-growth">
 
                 <span>
+
                   <FiTrendingUp />
+
                   +0%
+
                 </span>
 
                 <small>
-                  vs. last 7 days
+                  Total booking revenue
                 </small>
 
               </div>
 
             </div>
-
 
 
             {/* CHART */}
@@ -631,20 +784,34 @@ const Dashboard = () => {
 
               <div className="chart-y-axis">
 
-                <span>₹8K</span>
-                <span>₹6K</span>
-                <span>₹4K</span>
-                <span>₹2K</span>
-                <span>₹0</span>
+                <span>
+                  ₹8K
+                </span>
+
+                <span>
+                  ₹6K
+                </span>
+
+                <span>
+                  ₹4K
+                </span>
+
+                <span>
+                  ₹2K
+                </span>
+
+                <span>
+                  ₹0
+                </span>
 
               </div>
 
 
               <div className="chart-area">
 
-
                 <div className="chart-lines">
 
+                  <span></span>
                   <span></span>
                   <span></span>
                   <span></span>
@@ -669,13 +836,33 @@ const Dashboard = () => {
 
                 <div className="chart-dates">
 
-                  <span>Mon</span>
-                  <span>Tue</span>
-                  <span>Wed</span>
-                  <span>Thu</span>
-                  <span>Fri</span>
-                  <span>Sat</span>
-                  <span>Sun</span>
+                  <span>
+                    Mon
+                  </span>
+
+                  <span>
+                    Tue
+                  </span>
+
+                  <span>
+                    Wed
+                  </span>
+
+                  <span>
+                    Thu
+                  </span>
+
+                  <span>
+                    Fri
+                  </span>
+
+                  <span>
+                    Sat
+                  </span>
+
+                  <span>
+                    Sun
+                  </span>
 
                 </div>
 
@@ -686,13 +873,11 @@ const Dashboard = () => {
           </div>
 
 
-
           {/* =================================
               QUICK INSIGHTS
           ================================== */}
 
           <div className="overview-card insights-card">
-
 
             <div className="card-heading">
 
@@ -719,8 +904,9 @@ const Dashboard = () => {
             </div>
 
 
-
-            {/* TOTAL EVENTS */}
+            {/* =================================
+                TOTAL EVENTS
+            ================================== */}
 
             <div className="insight-item">
 
@@ -757,8 +943,9 @@ const Dashboard = () => {
             </div>
 
 
-
-            {/* TOTAL REVENUE */}
+            {/* =================================
+                TOTAL REVENUE
+            ================================== */}
 
             <div className="insight-item">
 
@@ -774,7 +961,7 @@ const Dashboard = () => {
                 </strong>
 
                 <span>
-                  From events
+                  From bookings
                 </span>
 
               </div>
@@ -783,7 +970,11 @@ const Dashboard = () => {
               <div className="insight-value">
 
                 <b>
-                  ₹0
+
+                  {bookingLoading
+                    ? "Loading..."
+                    : `₹${formattedRevenue}`}
+
                 </b>
 
                 <small>
@@ -795,8 +986,9 @@ const Dashboard = () => {
             </div>
 
 
-
-            {/* REGISTRATION */}
+            {/* =================================
+                REGISTRATION
+            ================================== */}
 
             <div className="insight-item">
 
@@ -839,10 +1031,8 @@ const Dashboard = () => {
       </section>
 
     </main>
-
   );
-
 };
 
-
 export default Dashboard;
+
